@@ -1,0 +1,61 @@
+<project name="xpeter" default="jar">
+
+  <property name="version" value="0.0.1"/>
+
+  <property name="src.dir" value="src"/>
+  <property name="bin.dir" value="bin"/>
+  <property name="doc.dir" value="doc"/>
+  <property name="lib.dir" value="lib"/>
+
+  <property name="main.class" value="erki.xpeter.xpeter"/>
+
+  <property name="jar.file" value="${ant.project.name}-${version}.jar"/>
+  <property name="tar.file" value="${ant.project.name}-${version}.tar.bz2"/>
+
+  <path id="classpath">
+    <fileset dir="${lib.dir}">
+      <include name="*.jar" />
+    </fileset>
+  </path>
+
+  <target name="all" depends="jar, doc"/>
+
+  <target name="tar" depends="clean">
+    <tar destfile="${tar.file}" compression="bzip2">
+      <tarfileset prefix="${ant.project.name}-${version}" dir="."
+                  excludes="**/.git **/.git/**"/>
+    </tar>
+  </target>
+
+  <target name="jar" depends="make">
+    <manifestclasspath property="manifest.classpath"
+                       jarfile="${jar.file}">
+      <classpath refid="classpath" />
+    </manifestclasspath>
+    <jar destfile="${jar.file}" basedir="${bin.dir}">
+      <manifest>
+        <attribute name="Main-Class" value="${main.class}"/>
+        <attribute name="Class-Path" value="${manifest.classpath}" />
+      </manifest>
+    </jar>
+  </target>
+
+  <target name="make">
+    <mkdir dir="${bin.dir}"/>
+    <javac srcdir="${src.dir}" destdir="${bin.dir}" classpathref="classpath"
+           debuglevel="lines,vars,source" debug="true"/>
+  </target>
+
+  <target name="clean">
+    <delete dir="${bin.dir}"/>
+    <delete dir="${doc.dir}"/>
+    <delete file="${jar.file}"/>
+    <delete file="${tar.file}"/>
+  </target>
+
+  <target name="doc">
+    <delete dir="${doc.dir}"/>
+    <javadoc sourcepath="${src.dir}" destdir="${doc.dir}"/>
+  </target>
+
+</project>
