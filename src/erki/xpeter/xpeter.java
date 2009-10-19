@@ -34,7 +34,7 @@ import erki.api.util.CommandLineParser;
 import erki.api.util.Log;
 
 /**
- * This class parses the command line or a config file if supplied. It then initializes the correct
+ * This class parses the command line or a config file if present. It then initializes the correct
  * {@link Parser}s and a correct subclass of {@link Bot} . So this class has to know which protocols
  * are supported whilst no other class relies on this information.
  * 
@@ -62,19 +62,25 @@ public class xpeter {
         System.out.println("                 parser classes the bot shall use. If this parameter");
         System.out.println("                 equals “*” all found parsers will be used.");
         System.out.println("  -v, --version  Print version information and exit.");
+        System.out.println("  -c, --con, --connection  Specify one or more chats to connect to.");
+        System.out.println("                 the parameter of this option must be of the form");
+        System.out.println("                 <protocol>://[<channel>@]<server>:<port> where");
+        System.out.println("                   – protocol is one of “erkitalk”, “irc”, “xmpp” or");
+        System.out.println("                     “jabber”,");
+        System.out.println("                   – channel is the name of the channel to join,");
+        System.out.println("                   – server is the hostname of the server to connect");
+        System.out.println("                     to and");
+        System.out.println("                   – port is the port number.");
+        System.out.println("                 <channel> is optional as e.g. ErkiTalk has no");
+        System.out.println("                 channels. You should specify at least one connection");
+        System.out.println("                 on the command line or in your .botrc file. Use one");
+        System.out.println("                 -c switch for each connection you want the bot to");
+        System.out.println("                 establish.");
         System.out.println();
-        System.out.println("The following parameters describe the connections to chat servers the");
-        System.out.println("bot shall establish. It is recommended that at least one connection");
-        System.out.println("is specified either in a .botrc file in the main directory or on the");
-        System.out.println("command line.");
-        System.out.println();
-        System.out.println("  -c, --channel  The channel to join on the server. As ErkiTalk ");
-        System.out.println("                 supports no channels this option is not necessary");
-        System.out.println("                 for that protocol.");
-        System.out.println("  -p, --port     The port to connect to on the server.");
-        System.out.println("  --protocol     The protocol to use. IRC, Jabber (XMPP) and ErkiTalk");
-        System.out.println("                 are supported at the moment.");
-        System.out.println("  -s, --server, --host  The hostname of the server to connect to.");
+        System.out.println("All command line options can also be specified in a file called");
+        System.out.println(".botrc located in the directory where the bot is executed. Beware");
+        System.out.println("however that command line options supersede (and thus replace)");
+        System.out.println("options specified in the config file!");
         System.out.println();
         System.out.println("© 2008–2009 by Edgar Kalkowski <eMail@edgar-kalkowski.de>");
     }
@@ -111,7 +117,7 @@ public class xpeter {
             return;
         }
         
-        String server = null, port = null, name = "xpeter", protocol = null, channel = null;
+        String name = "xpeter";
         String parsers = null, logfile = null;
         LinkedList<Class<? extends Parser>> chosenParsers = new LinkedList<Class<? extends Parser>>();
         LinkedList<Con> cons = new LinkedList<Con>();
@@ -128,16 +134,12 @@ public class xpeter {
                         continue;
                     }
                     
-                    if (line.toLowerCase().startsWith("server=")) {
-                        server = line.substring("server=".length());
-                    } else if (line.toLowerCase().startsWith("port=")) {
-                        port = line.substring("port=".length());
-                    } else if (line.toLowerCase().startsWith("name=")) {
+                    if (line.toLowerCase().startsWith("name=")) {
                         name = line.substring("name=".length());
-                    } else if (line.toLowerCase().startsWith("protocol=")) {
-                        protocol = line.substring("protocol=".length());
-                    } else if (line.toLowerCase().startsWith("channel=")) {
-                        channel = line.substring("channel=".length());
+                    } else if (line.toLowerCase().startsWith("nick=")) {
+                        name = line.substring("nick=".length());
+                    } else if (line.toLowerCase().startsWith("connection=")) {
+                        parseCon(cons, line.substring("connection=".length()));
                     } else if (line.toLowerCase().startsWith("parsers=")) {
                         parsers = line.substring("parsers=".length());
                     } else if (line.toLowerCase().startsWith("logfile=")) {
@@ -145,47 +147,20 @@ public class xpeter {
                     } else {
                         System.err.println("WARNING: Invalid line in config file: " + line);
                     }
-                    
-                    if (server != null && port != null && protocol != null) {
-                        
-                    }
                 }
                 
                 fileIn.close();
             } catch (FileNotFoundException e) {
-                Log.error(e);
-                Log.warning("Though checked for existence the config file could not be found!");
-                Log.info("This could mean serious trouble but we try to continue anyway.");
+                e.printStackTrace();
+                System.err.println("Though checked for existence the config file could not be "
+                        + "found!");
+                System.err.println("This could mean serious trouble but we try to continue "
+                        + "anyway.");
             } catch (IOException e) {
-                Log.error(e);
-                Log.warning("The config file could not be read.");
-                Log.info("Perhaps we can continue with command line params only?");
+                e.printStackTrace();
+                System.err.println("The config file could not be read.");
+                System.err.println("Perhaps we can continue with command line params only?");
             }
-        }
-        
-        if (args.containsKey("-s")) {
-            server = args.get("-s");
-            args.remove("-s");
-        }
-        
-        if (args.containsKey("--server")) {
-            server = args.get("--server");
-            args.remove("--server");
-        }
-        
-        if (args.containsKey("--host")) {
-            server = args.get("--host");
-            args.remove("--host");
-        }
-        
-        if (args.containsKey("-p")) {
-            port = args.get("-p");
-            args.remove("-p");
-        }
-        
-        if (args.containsKey("--port")) {
-            port = args.get("--port");
-            args.remove("--port");
         }
         
         if (args.containsKey("--debug")) {
@@ -208,29 +183,6 @@ public class xpeter {
             args.remove("--nick");
         }
         
-        if (args.containsKey("--protocol")) {
-            protocol = args.get("--protocol");
-            args.remove("--protocol");
-        }
-        
-        if (args.containsKey("-c")) {
-            
-            for (String channel : args.get("-c").split(",")) {
-                channels.add(channel.trim());
-            }
-            
-            args.remove("-c");
-        }
-        
-        if (args.containsKey("--channel")) {
-            
-            for (String channel : args.get("--channel").split(",")) {
-                channels.add(channel.trim());
-            }
-            
-            args.remove("--channel");
-        }
-        
         if (args.containsKey("--parsers")) {
             parsers = args.get("--parsers");
             args.remove("--parsers");
@@ -241,63 +193,6 @@ public class xpeter {
             args.remove("--logfile");
         }
         
-        boolean correct = true;
-        
-        if (server == null) {
-            System.err.println("You have to specify at least one server to connect to!");
-            correct = false;
-        }
-        
-        if (port == null) {
-            System.err.println("You have to specify a port to connect to on the server!");
-            correct = false;
-        } else {
-            
-            try {
-                
-                if (Integer.parseInt(port) <= 0) {
-                    System.err.println("The port you specified is not valid! "
-                            + "It must be greater 0!");
-                    correct = false;
-                }
-                
-            } catch (NumberFormatException e) {
-                System.err.println("The port you specified is not a number!");
-                correct = false;
-            }
-        }
-        
-        if (protocol == null) {
-            System.err.println("You have to specify a protocol that the bot shall speak!");
-            correct = false;
-        } else {
-            
-            if (!protocol.toLowerCase().equals("irc") && !protocol.toLowerCase().startsWith("erki")
-                    && !protocol.toLowerCase().equals("jabber")
-                    && !protocol.toLowerCase().equals("xmpp")) {
-                System.err.println("The protocol you specified is not valid!");
-                correct = false;
-            }
-        }
-        
-        if (protocol != null
-                && (protocol.toLowerCase().equals("irc") || protocol.toLowerCase().equals("jabber") || protocol
-                        .toLowerCase().equals("xmpp")) && channels.isEmpty()) {
-            System.err.println("If your bot shall speak IRC or XMPP you have to "
-                    + "provide at least one channel that the bot shall join!");
-            correct = false;
-        }
-        
-        if (parsers == null) {
-            System.err.println("You have to specify at least one parser the bot shall use!");
-            correct = false;
-        }
-        
-        if (!correct) {
-            System.err.println("Start this program with “--help” for more information.");
-            return;
-        }
-        
         // Redirect log from stdout to specified logfile.
         if (logfile != null) {
             
@@ -306,24 +201,39 @@ public class xpeter {
                         .setHandler(new PrintStream(new FileOutputStream(logfile, false), true,
                                 "UTF-8"));
             } catch (FileNotFoundException e) {
-                System.err.println("FATAL: Could not open logfile " + logfile + "!");
                 e.printStackTrace();
+                System.err.println("FATAL: Could not open logfile " + logfile + "!");
                 System.exit(-1);
             } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
                 System.err.println("FATAL: Your system does not support the "
                         + "UTF-8 which is needed by this program!");
-                e.printStackTrace();
                 System.exit(-1);
             }
+        }
+        
+        if (args.containsKey("-c")) {
+            parseCon(cons, args.get("-c"));
+            args.remove("-c");
+        }
+        
+        if (args.containsKey("--con")) {
+            parseCon(cons, args.get("--con"));
+            args.remove("--con");
+        }
+        
+        if (args.containsKey("--connection")) {
+            parseCon(cons, args.get("--connection"));
+            args.remove("--connection");
         }
         
         Log.info("This is xpeter v" + VERSION + ".");
         TreeSet<Class<? extends Parser>> foundParsers = ParserFinder.findParsers(new File(".")
                 .getAbsoluteFile());
         
-        if (parsers.equals("*")) {
+        if (parsers != null && parsers.equals("*")) {
             chosenParsers.addAll(foundParsers);
-        } else {
+        } else if (parsers != null) {
             
             for (String p : parsers.split(",")) {
                 boolean foundMatching = false;
@@ -337,27 +247,29 @@ public class xpeter {
                 }
                 
                 if (!foundMatching) {
-                    Log.warning("Parser " + p + " could not be found!");
+                    Log.warning("Parser “" + p + "” could not be found!");
                 }
             }
         }
         
-        if (chosenParsers.isEmpty()) {
+        if (parsers == null || chosenParsers.isEmpty()) {
             Log.warning("No parsers loaded! This bot will do nothing except being online!");
         }
         
         try {
             
-            if (protocol.toLowerCase().equals("irc")) {
-                Log.info("Creating new IRC bot " + name + " for channels " + channels + ".");
-                throw new IllegalStateException("Not yet implemented!");
-            } else if (protocol.toLowerCase().startsWith("erki")) {
-                Log.info("Creating new ErkiTalk bot " + name + ".");
-                throw new IllegalStateException("Not yet implemented!");
-            } else if (protocol.toLowerCase().equals("jabber")
-                    || protocol.toLowerCase().equals("xmpp")) {
-                Log.info("Creating new XMPP bot " + name + ".");
-                throw new IllegalStateException("Not yet implemented!");
+            for (Con con : cons) {
+                
+                if (con.protocol.equals("irc")) {
+                    Log.info("Creating new IRC bot " + name + ".");
+                    throw new IllegalStateException("Not yet implemented!");
+                } else if (con.protocol.equals("erki") || con.protocol.equals("erkitalk")) {
+                    Log.info("Creating new ErkiTalk bot " + name + ".");
+                    throw new IllegalStateException("Not yet implemented!");
+                } else if (con.protocol.equals("jabber") || con.protocol.equals("xmpp")) {
+                    Log.info("Creating new XMPP bot " + name + ".");
+                    throw new IllegalStateException("Not yet implemented!");
+                }
             }
             
         } catch (Throwable e) {
@@ -367,17 +279,97 @@ public class xpeter {
     }
     
     /**
-     * Container class that is used to parse command line options and config file options into
-     * Connection instances.
+     * Parses a line that matches {@code <protocol>://[<channel>@]<server>:<port>} into an instance
+     * of {@link Con} and checks that all connection parameters are valid. If something is invalid a
+     * fatal error message is printed and the program aborted.
      * 
-     * @author Edgar Kalkowski
+     * @param cons
+     *        The list of connections to which the new connection is appended if it is valid.
+     * @param line
+     *        A line of text that specifies a connection (see above).
      */
-    private class Con {
+    private static void parseCon(LinkedList<Con> cons, String line) {
         
-        public String host;
-        public int port;
-        public String protocol;
-        public String channel;
+        if (!line.contains(":")) {
+            System.err.println("FATAL ERROR!");
+            System.err.println("Invalid connection specification: " + line);
+            System.err.println("It does not match <protocol>://[<channel>@]<server>:<port>!");
+            System.exit(1);
+        }
         
+        String protocol = line.substring(0, line.indexOf(':')).toLowerCase();
+        
+        if (!protocol.equals("xmpp") && !protocol.equals("jabber") && !protocol.equals("irc")
+                && !protocol.equals("erkitalk") && !protocol.equals("erki")) {
+            System.err.println("FATAL ERROR!");
+            System.err.println("The protocol you specified (" + protocol
+                    + ") is not known to this bot!");
+            System.exit(5);
+        }
+        
+        if (line.indexOf(':') == line.length() - 1) {
+            System.err.println("FATAL ERROR!");
+            System.err.println("Invalid connection specification: " + line);
+            System.err.println("The connection specification must end in the port number!");
+            System.exit(2);
+        }
+        
+        String sPort = line.substring(line.lastIndexOf(':') + 1, line.length());
+        int port = -1;
+        
+        try {
+            port = Integer.parseInt(sPort);
+        } catch (NumberFormatException e) {
+            System.err.println("FATAL ERROR!");
+            System.err.println("The port you specified (" + sPort
+                    + ") could not be parsed into a number!");
+            System.exit(4);
+        }
+        
+        String server, channel;
+        
+        if (line.contains("@")) {
+            
+            if (line.indexOf('@') > line.lastIndexOf(':')) {
+                System.err.println("FATAL ERROR!");
+                System.err.println("Invalid connection specification: " + line);
+                System.err.println("The channel must be noted before the server!");
+                System.exit(3);
+            }
+            
+            channel = line.substring(line.indexOf(':') + 3, line.lastIndexOf('@'));
+            server = line.substring(line.lastIndexOf('@') + 1, line.lastIndexOf(':'));
+        } else {
+            channel = null;
+            server = line.substring(line.indexOf(':') + 3, line.lastIndexOf(':'));
+        }
+        
+        cons.add(new Con(server, port, protocol, channel));
+    }
+}
+
+/**
+ * Container class that is used to parse command line options and config file options into
+ * Connection instances.
+ * 
+ * @author Edgar Kalkowski
+ */
+class Con {
+    
+    public String host;
+    public int port;
+    public String protocol;
+    public String channel;
+    
+    public Con(String host, int port, String protocol, String channel) {
+        this.host = host;
+        this.port = port;
+        this.protocol = protocol;
+        this.channel = channel;
+        
+        if (protocol != "irc" && protocol != "jabber" && protocol != "xmpp"
+                && protocol != "erkitalk") {
+            throw new IllegalArgumentException("Invalid protocol: " + protocol + "!");
+        }
     }
 }
