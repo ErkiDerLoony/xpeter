@@ -18,12 +18,19 @@
 package erki.xpeter;
 
 /**
- * Implemented by all classes that want to parse messages received from the chats the bot is
- * connected to. If you want to add functionality to the bot you want to implement this one.
+ * Interface implemented by all connection supported by xpeter.
  * 
  * @author Edgar Kalkowski
  */
-public interface Parser extends Runnable {
+public interface Connection extends Runnable {
     
-    
+    /**
+     * Associates this connection to an instance of {@link Bot} that will be used to process
+     * messages received via this connection. <b>This has to be done before this connection is
+     * started (and respective the {@link #run()} method is called)!</b>
+     * 
+     * @param bot
+     *        The associated bot instance for this connection.
+     */
+    public void setBot(Bot bot);
 }

@@ -32,6 +32,7 @@ import java.util.logging.Level;
 
 import erki.api.util.CommandLineParser;
 import erki.api.util.Log;
+import erki.xpeter.con.XmppConnection;
 
 /**
  * This class parses the command line or a config file if present. It then initializes the correct
@@ -256,22 +257,26 @@ public class xpeter {
             Log.warning("No parsers loaded! This bot will do nothing except being online!");
         }
         
-        try {
+        LinkedList<Connection> connections = new LinkedList<Connection>();
+        
+        for (Con con : cons) {
             
-            for (Con con : cons) {
-                
-                if (con.protocol.equals("irc")) {
-                    Log.info("Creating new IRC bot " + name + ".");
-                    throw new IllegalStateException("Not yet implemented!");
-                } else if (con.protocol.equals("erki") || con.protocol.equals("erkitalk")) {
-                    Log.info("Creating new ErkiTalk bot " + name + ".");
-                    throw new IllegalStateException("Not yet implemented!");
-                } else if (con.protocol.equals("jabber") || con.protocol.equals("xmpp")) {
-                    Log.info("Creating new XMPP bot " + name + ".");
-                    throw new IllegalStateException("Not yet implemented!");
-                }
+            if (con.protocol.equals("irc")) {
+                Log.info("Creating an IRC connection to " + con.channel + "@" + con.host + ":"
+                        + con.port + ".");
+                throw new IllegalStateException("Not yet implemented!");
+            } else if (con.protocol.equals("erki") || con.protocol.equals("erkitalk")) {
+                Log.info("Creating an ErkiTalk connection to " + con.host + ":" + con.port + ".");
+                throw new IllegalStateException("Not yet implemented!");
+            } else if (con.protocol.equals("jabber") || con.protocol.equals("xmpp")) {
+                Log.info("Creating an XMPP connection to " + con.channel + "@" + con.host + ":"
+                        + con.port + ".");
+                connections.add(new XmppConnection(con.host, con.port, con.channel, name));
             }
-            
+        }
+        
+        try {
+            new Bot(connections, chosenParsers).start();
         } catch (Throwable e) {
             Log.error(e);
             System.exit(-1);
