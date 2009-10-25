@@ -17,7 +17,7 @@
 
 package erki.xpeter.msg;
 
-import erki.xpeter.Connection;
+import erki.xpeter.con.Connection;
 
 /**
  * Extends {@link Message} to represent some text that someone said on a chat. It contains the
@@ -51,5 +51,10 @@ public class TextMessage extends Message {
      */
     public String getNick() {
         return nick;
+    }
+    
+    @Override
+    public String toString() {
+        return "TextMessage(" + getNick() + ": “" + getText() + "”)";
     }
 }

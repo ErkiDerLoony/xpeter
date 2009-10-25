@@ -15,7 +15,11 @@
  * not, see <http://www.gnu.org/licenses/>.
  */
 
-package erki.xpeter;
+package erki.xpeter.parsers;
+
+import erki.xpeter.Bot;
+import erki.xpeter.con.Connection;
+import erki.xpeter.msg.Message;
 
 /**
  * Implemented by all classes that want to parse messages received from the chats the bot is
@@ -23,7 +27,27 @@ package erki.xpeter;
  * 
  * @author Edgar Kalkowski
  */
-public interface Parser extends Runnable {
+public interface Parser {
     
+    /**
+     * As the parser classes are instanciated using reflection (and thus no constructor can be used)
+     * this method is used for initializing this parser and associating it to the instance of
+     * {@link Bot} it belongs to.
+     * 
+     * @param bot
+     *        The instance of {@link Bot} this parser object belongs to and through which e.g. all
+     *        the connections to the different chats may be accessed.
+     */
+    public void init(Bot bot);
     
+    /**
+     * Process a message that was received over some {@link Connection}. Response messages to the
+     * same connection may be sent directly through the connection instance that may be obtained
+     * from the message object. If a response shall be sent to a different or all connections the
+     * whole list of connections may be accessed via the associated instance of {@link Bot}.
+     * 
+     * @param msg
+     *        The message to process.
+     */
+    public void parse(Message msg);
 }

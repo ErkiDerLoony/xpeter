@@ -32,7 +32,9 @@ import java.util.logging.Level;
 
 import erki.api.util.CommandLineParser;
 import erki.api.util.Log;
+import erki.xpeter.con.Connection;
 import erki.xpeter.con.XmppConnection;
+import erki.xpeter.parsers.Parser;
 
 /**
  * This class parses the command line or a config file if present. It then initializes the correct
@@ -47,6 +49,8 @@ public class xpeter {
     public static final String VERSION = "0.0.1";
     
     private static final String CONFIG_FILE = ".botrc";
+    
+    private static final String CONFIG_DIR = "config";
     
     /** Prints the "--help" message to stdout. */
     private static void printHelp() {
@@ -233,6 +237,7 @@ public class xpeter {
                 .getAbsoluteFile());
         
         if (parsers != null && parsers.equals("*")) {
+            Log.debug("Using all found parsers.");
             chosenParsers.addAll(foundParsers);
         } else if (parsers != null) {
             
@@ -257,6 +262,12 @@ public class xpeter {
             Log.warning("No parsers loaded! This bot will do nothing except being online!");
         }
         
+        if (cons == null || cons.isEmpty()) {
+            Log.error("There was no connection specified!");
+            Log.warning("The bot will exit now as it seems to be useless without any connection.");
+            System.exit(17);
+        }
+        
         LinkedList<Connection> connections = new LinkedList<Connection>();
         
         for (Con con : cons) {
@@ -272,6 +283,18 @@ public class xpeter {
                 Log.info("Creating an XMPP connection to " + con.channel + "@" + con.host + ":"
                         + con.port + ".");
                 connections.add(new XmppConnection(con.host, con.port, con.channel, name));
+            }
+        }
+        
+        /*
+         * Before we start make sure the config directory exists because it is needed by some
+         * connections and/or parsers.
+         */
+        if (!new File(CONFIG_DIR).isDirectory()) {
+            
+            if (!new File(CONFIG_DIR).mkdir()) {
+                Log.error("Could not create config dir!");
+                Log.info("Trying to continue but this is likely not to work!");
             }
         }
         
@@ -372,9 +395,9 @@ class Con {
         this.protocol = protocol;
         this.channel = channel;
         
-        if (protocol != "irc" && protocol != "jabber" && protocol != "xmpp"
-                && protocol != "erkitalk") {
-            throw new IllegalArgumentException("Invalid protocol: " + protocol + "!");
+        if (!protocol.equals("irc") && !protocol.equals("jabber") && !protocol.equals("xmpp")
+                && !protocol.equals("erkitalk")) {
+            throw new IllegalArgumentException("Invalid protocol: " + protocol);
         }
     }
 }

@@ -27,6 +27,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import erki.api.util.Log;
+import erki.xpeter.parsers.Parser;
 
 /**
  * This class searches the current directory for classes implementing the {@link Parser} interface.
@@ -37,7 +38,7 @@ public class ParserFinder {
     
     private static final String CLASS_ENDING = ".class";
     private static final String JAR_ENDING = ".jar";
-    private static final String INTERFACE = "erki.xpeter.Parser";
+    private static final String INTERFACE = "erki.xpeter.parsers.Parser";
     private static final String PACKAGE = "erki.xpeter.parsers";
     
     private ParserFinder() {

@@ -21,7 +21,9 @@ import java.util.Collection;
 import java.util.LinkedList;
 
 import erki.api.util.Log;
+import erki.xpeter.con.Connection;
 import erki.xpeter.msg.Message;
+import erki.xpeter.parsers.Parser;
 
 public class Bot extends Thread {
     
@@ -40,6 +42,7 @@ public class Bot extends Thread {
             con.setBot(this);
         }
         
+        // Try to instanicate all the parser classes.
         for (Class<? extends Parser> clazz : parsers) {
             
             try {
@@ -55,14 +58,32 @@ public class Bot extends Thread {
                 Log.info("Trying to continue without this parser.");
             }
         }
+        
+        /*
+         * Initialize all the parsers. This is, too, not very elegant but as above I can not think
+         * of an elegant solution for this at the moment. Also ensure maximum crash-prevention for
+         * the considered unsafe parser code by catching all possible exceptions.
+         */
+        for (Parser p : this.parsers) {
+            
+            try {
+                p.init(this);
+            } catch (Throwable e) {
+                Log.error(e);
+                Log.warning("Could not initialize the parser " + p.getClass().getCanonicalName()
+                        + ".");
+                Log.info("Trying to continue without this one.");
+            }
+        }
     }
     
     @Override
     public void run() {
         super.run();
+        Log.info("Starting up the bot.");
         
         for (Connection con : cons) {
-            new Thread(con).start();
+            new Thread(con, "ConnectionThread").start();
         }
     }
     
@@ -75,5 +96,22 @@ public class Bot extends Thread {
      */
     public void process(Message msg) {
         
+        for (Parser p : parsers) {
+            
+            /*
+             * Be careful with the parsers as they may contain “unsafe” code and thus crash. Prevent
+             * the whole bot from crashing!
+             */
+            try {
+                p.parse(msg);
+            } catch (Throwable e) {
+                Log.error(e);
+                Log.warning("Parser " + p.getClass().getCanonicalName() + " crashed!");
+                Log.info("Continuing anyway.");
+                msg.getConnection().send(
+                        new Message("Mumble mumble ... " + e.getLocalizedMessage(), msg
+                                .getConnection()));
+            }
+        }
     }
 }

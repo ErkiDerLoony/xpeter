@@ -17,8 +17,8 @@
 
 package erki.xpeter.msg;
 
-import erki.xpeter.Connection;
-import erki.xpeter.Parser;
+import erki.xpeter.con.Connection;
+import erki.xpeter.parsers.Parser;
 
 /**
  * Superclass for all messages that can be processed by xpeter. It assumes that every message at
@@ -66,5 +66,10 @@ public class Message {
      */
     public Connection getConnection() {
         return connection;
+    }
+    
+    @Override
+    public String toString() {
+        return "Message(“" + text + "”)";
     }
 }

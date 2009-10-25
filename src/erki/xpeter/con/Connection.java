@@ -15,10 +15,17 @@
  * not, see <http://www.gnu.org/licenses/>.
  */
 
-package erki.xpeter;
+package erki.xpeter.con;
+
+import erki.xpeter.Bot;
+import erki.xpeter.msg.Message;
 
 /**
- * Interface implemented by all connection supported by xpeter.
+ * Interface implemented by all connection supported by xpeter. Every instance of Connection shall
+ * connect to a single chat (so multiple connections are required if xpeter shall join multiple
+ * channels on one server) and see to it that the connection is re-established if it breaks. In case
+ * the connection is not ready to send outgoing messages at one point those messages shall be
+ * buffered until the connection becomes ready again.
  * 
  * @author Edgar Kalkowski
  */
@@ -33,4 +40,20 @@ public interface Connection extends Runnable {
      *        The associated bot instance for this connection.
      */
     public void setBot(Bot bot);
+    
+    /**
+     * Send some message over this connection. If the connection is not ready to send messages at
+     * one point the messages will be buffered and sent when the connection becomes ready again.
+     * 
+     * @param msg
+     *        The message to send.
+     */
+    public void send(Message msg);
+    
+    /**
+     * Access the nickname the bot uses with this connection.
+     * 
+     * @return The nickname of the bot.
+     */
+    public String getNick();
 }
