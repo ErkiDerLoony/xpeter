@@ -15,7 +15,7 @@
  * not, see <http://www.gnu.org/licenses/>.
  */
 
-package erki.xpeter.con;
+package erki.xpeter.con.xmpp;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -28,19 +28,17 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 import org.jivesoftware.smack.ConnectionConfiguration;
-import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.SASLAuthentication;
 import org.jivesoftware.smack.SmackConfiguration;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
-import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smackx.muc.DiscussionHistory;
 import org.jivesoftware.smackx.muc.MultiUserChat;
 
 import erki.api.util.Log;
 import erki.xpeter.Bot;
+import erki.xpeter.con.Connection;
 import erki.xpeter.msg.Message;
-import erki.xpeter.msg.TextMessage;
 
 /**
  * Establishes a connection to an XMPP server. If the connection is lost it tries to reconnect from
@@ -65,6 +63,20 @@ public class XmppConnection implements Connection {
     
     private Bot bot;
     
+    private XMPPConnection con;
+    
+    /**
+     * Create a new XmppConnection to an XMPP server.
+     * 
+     * @param host
+     *        The hostname of the XMPP server to connect to.
+     * @param port
+     *        The port to connect to.
+     * @param channel
+     *        The channel to join once connected.
+     * @param nick
+     *        The nickname to use when joining the channel.
+     */
     public XmppConnection(String host, int port, String channel, String nick) {
         this.host = host;
         this.port = port;
@@ -77,9 +89,9 @@ public class XmppConnection implements Connection {
     
     @Override
     public void run() {
+        boolean pause = false;
         
         while (true) {
-            XMPPConnection con = null;
             
             try {
                 Log.info("Connecting to " + channel + "@" + host + ":" + port + ".");
@@ -96,23 +108,15 @@ public class XmppConnection implements Connection {
                 System.gc();
                 
                 MultiUserChat chat = new MultiUserChat(con, channel);
-                
-                chat.addMessageListener(new PacketListener() {
-                    
-                    @Override
-                    public void processPacket(Packet packet) {
-                        
-                        if (packet instanceof org.jivesoftware.smack.packet.Message) {
-                            org.jivesoftware.smack.packet.Message message = (org.jivesoftware.smack.packet.Message) packet;
-                            String from = message.getFrom().substring(
-                                    message.getFrom().lastIndexOf('/') + 1);
-                            TextMessage msg = new TextMessage(from, message.getBody(),
-                                    XmppConnection.this);
-                            Log.info("Received " + msg + ".");
-                            bot.process(msg);
-                        }
-                    }
-                });
+                PacketListener packetListener = new PacketListener(this, bot);
+                chat.addInvitationRejectionListener(new InvitationRejectionListener());
+                chat.addMessageListener(packetListener);
+                chat.addParticipantListener(packetListener);
+                chat.addParticipantStatusListener(new ParticipantStatusListener());
+                chat.addPresenceInterceptor(new PresenceInterceptor());
+                chat.addSubjectUpdatedListener(new SubjectUpdatedListener());
+                chat.addUserStatusListener(new UserStatusListener(this));
+                MultiUserChat.addInvitationListener(con, new InvitationListener());
                 
                 // We don’t want the bot to react on old stuff when he joins.
                 DiscussionHistory history = new DiscussionHistory();
@@ -120,6 +124,7 @@ public class XmppConnection implements Connection {
                 
                 Log.info("Logged in. Joining chat.");
                 chat.join(nick, null, history, SmackConfiguration.getPacketReplyTimeout());
+                pause = false;
                 
                 // Wait for messages to send.
                 while (con.isConnected()) {
@@ -129,6 +134,11 @@ public class XmppConnection implements Connection {
                         while (!sendQueue.isEmpty()) {
                             Message msg = sendQueue.poll();
                             chat.sendMessage(msg.getText());
+                        }
+                        
+                        try {
+                            sendQueue.wait();
+                        } catch (InterruptedException e) {
                         }
                     }
                 }
@@ -141,13 +151,34 @@ public class XmppConnection implements Connection {
                     con.disconnect();
                 }
                 
-                Log.info("Lost connection to the xmpp server. Trying to reconnect in 5 min.");
-                
-                try {
-                    Thread.sleep(300000);
-                } catch (InterruptedException e) {
+                if (pause) {
+                    Log.info("Lost connection to XMPP server. Trying to reconnect in 5 min.");
+                    
+                    try {
+                        Thread.sleep(300000);
+                    } catch (InterruptedException e) {
+                    }
+                } else {
+                    pause = true;
+                    Log.info("Lost connection to XMPP server. Trying to reconnect.");
                 }
             }
+        }
+    }
+    
+    /**
+     * Used by {@link UserStatusListener} to trigger a reconnect if re-joining the chat room after a
+     * kick resulted in some XMPP error (see there for more info).
+     */
+    public void reconnect() {
+        
+        synchronized (sendQueue) {
+            
+            if (con != null) {
+                con.disconnect();
+            }
+            
+            sendQueue.notify();
         }
     }
     

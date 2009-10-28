@@ -33,7 +33,7 @@ import java.util.logging.Level;
 import erki.api.util.CommandLineParser;
 import erki.api.util.Log;
 import erki.xpeter.con.Connection;
-import erki.xpeter.con.XmppConnection;
+import erki.xpeter.con.xmpp.XmppConnection;
 import erki.xpeter.parsers.Parser;
 
 /**
