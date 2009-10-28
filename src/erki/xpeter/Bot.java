@@ -18,9 +18,12 @@
 package erki.xpeter;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.LinkedList;
+import java.util.TreeMap;
 
 import erki.api.util.Log;
+import erki.api.util.Observer;
 import erki.xpeter.con.Connection;
 import erki.xpeter.msg.Message;
 import erki.xpeter.parsers.Parser;
@@ -37,7 +40,15 @@ public class Bot {
     
     private Collection<Connection> cons = new LinkedList<Connection>();
     
-    private Collection<Parser> parsers = new LinkedList<Parser>();
+    private TreeMap<Class<? extends Message>, LinkedList<Observer<? extends Message>>> parserMapping = new TreeMap<Class<? extends Message>, LinkedList<Observer<? extends Message>>>(
+            new Comparator<Class<? extends Message>>() {
+                
+                @Override
+                public int compare(Class<? extends Message> o1, Class<? extends Message> o2) {
+                    return o1.getClass().getCanonicalName().compareTo(
+                            o2.getClass().getCanonicalName());
+                }
+            });
     
     public Bot(Iterable<Class<? extends Parser>> parsers) {
         
@@ -45,7 +56,8 @@ public class Bot {
         for (Class<? extends Parser> clazz : parsers) {
             
             try {
-                this.parsers.add(clazz.newInstance());
+                Parser parser = clazz.newInstance();
+                parser.init(this);
             } catch (InstantiationException e) {
                 Log.error(e);
                 Log.warning("Parser " + clazz.getCanonicalName() + " could not be loaded!");
@@ -55,21 +67,9 @@ public class Bot {
                 Log.warning("You are not allowed to instanciate the parser class "
                         + clazz.getCanonicalName() + ". Please check your security settings!");
                 Log.info("Trying to continue without this parser.");
-            }
-        }
-        
-        /*
-         * Initialize all the parsers. Also ensure maximum crash-prevention for the considered
-         * unsafe parser code by catching all possible exceptions.
-         */
-        for (Parser p : this.parsers) {
-            
-            try {
-                p.init(this);
             } catch (Throwable e) {
                 Log.error(e);
-                Log.warning("Could not initialize the parser " + p.getClass().getCanonicalName()
-                        + ".");
+                Log.warning("Could not initialize the parser " + clazz.getCanonicalName() + ".");
                 Log.info("Trying to continue without this one.");
             }
         }
@@ -130,30 +130,44 @@ public class Bot {
     }
     
     /**
+     * Parsers can register themself via this method to be informed if a certain type of message was
+     * received.
+     * 
+     * @param <MessageType>
+     *        The type of message the parser wants to be informed about.
+     * @param messageType
+     *        The class of the message type the parser wants to be informed about (this is needed
+     *        for implementation issues).
+     * @param observer
+     *        The observer instance that will be informed.
+     */
+    public <MessageType extends Message> void register(Class<MessageType> messageType,
+            Observer<MessageType> observer) {
+        
+        if (!parserMapping.containsKey(messageType)) {
+            parserMapping.put(messageType, new LinkedList<Observer<? extends Message>>());
+        }
+        
+        parserMapping.get(messageType).add(observer);
+    }
+    
+    /**
      * Processes a message that was received from some connection. This method just delegates the
      * message to all available parsers and lets them do the work.
      * 
      * @param msg
      *        The message to process.
      */
-    public void process(Message msg) {
+    /*
+     * The unchecked casts here are safe because the types are actually forced to be correct when
+     * registering observers (see #register).
+     */
+    @SuppressWarnings("unchecked")
+    public <MessageType> void process(MessageType msg) {
+        LinkedList<Observer<? extends Message>> parsers = parserMapping.get(msg.getClass());
         
-        for (Parser p : parsers) {
-            
-            /*
-             * Be careful with the parsers as they may contain “unsafe” code and thus crash. Prevent
-             * the whole bot from crashing!
-             */
-            try {
-                p.parse(msg);
-            } catch (Throwable e) {
-                Log.error(e);
-                Log.warning("Parser " + p.getClass().getCanonicalName() + " crashed!");
-                Log.info("Continuing anyway.");
-                msg.getConnection().send(
-                        new Message("Mumble mumble ... " + e.getLocalizedMessage(), msg
-                                .getConnection()));
-            }
+        for (Observer parser : parsers) {
+            parser.inform(msg);
         }
     }
 }

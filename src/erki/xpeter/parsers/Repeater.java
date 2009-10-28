@@ -18,16 +18,18 @@
 package erki.xpeter.parsers;
 
 import erki.api.util.Log;
+import erki.api.util.Observer;
 import erki.xpeter.Bot;
-import erki.xpeter.msg.Message;
+import erki.xpeter.BotApi;
+import erki.xpeter.con.Connection;
 import erki.xpeter.msg.TextMessage;
 
 /**
- * A dumb parser for testing purposes that repeats everything someone else says.
+ * A dumb parser for testing purposes that repeats everything someone says to the bot.
  * 
  * @author Edgar Kalkowski
  */
-public class Repeater implements Parser {
+public class Repeater implements Parser, Observer<TextMessage> {
     
     @Override
     public void init(Bot bot) {
@@ -35,16 +37,14 @@ public class Repeater implements Parser {
     }
     
     @Override
-    public void parse(Message msg) {
-        Log.debug("Parsing message: " + msg);
+    public void inform(TextMessage msg) {
+        Connection con = msg.getConnection();
+        String nick = con.getNick();
+        String text = msg.getText();
         
-        if (msg instanceof TextMessage) {
-            TextMessage txt = (TextMessage) msg;
-            
-            // Repeat everything except own babble.
-            if (!txt.getNick().equals(msg.getConnection().getNick())) {
-                msg.getConnection().send(new Message(msg.getText(), msg.getConnection()));
-            }
+        if (BotApi.addresses(text, nick)) {
+            text = BotApi.trimNick(text, nick);
+            con.send(text);
         }
     }
 }

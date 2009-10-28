@@ -223,6 +223,11 @@ public class XmppConnection implements Connection {
     }
     
     @Override
+    public void send(String msg) {
+        send(new Message(msg, this));
+    }
+    
+    @Override
     public String getNick() {
         return nick;
     }

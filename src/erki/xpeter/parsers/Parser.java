@@ -18,8 +18,6 @@
 package erki.xpeter.parsers;
 
 import erki.xpeter.Bot;
-import erki.xpeter.con.Connection;
-import erki.xpeter.msg.Message;
 
 /**
  * Implemented by all classes that want to parse messages received from the chats the bot is
@@ -35,21 +33,13 @@ public interface Parser {
      * {@link Bot} it belongs to. Through this Bot instance the parsers can access all connections
      * the bot is currently connected to. This is useful to interconnect channels on different
      * servers with the bot.
+     * <p>
+     * <b>The parser also must register itself with the bot instance to receive notifications if
+     * certain types of message are received.</b>
      * 
      * @param bot
      *        The instance of {@link Bot} this parser object belongs to and through which e.g. all
      *        the connections to the different chats may be accessed.
      */
     public void init(Bot bot);
-    
-    /**
-     * Process a message that was received over some {@link Connection}. Response messages to the
-     * same connection may be sent directly through the connection instance that may be obtained
-     * from the message object. If a response shall be sent to a different or all connections the
-     * whole list of connections may be accessed via the associated instance of {@link Bot}.
-     * 
-     * @param msg
-     *        The message to process.
-     */
-    public void parse(Message msg);
 }

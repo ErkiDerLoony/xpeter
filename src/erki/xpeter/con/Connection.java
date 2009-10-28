@@ -18,6 +18,7 @@
 package erki.xpeter.con;
 
 import erki.xpeter.msg.Message;
+import erki.xpeter.msg.TextMessage;
 
 /**
  * Interface implemented by all connection supported by xpeter. Every instance of Connection shall
@@ -38,6 +39,15 @@ public interface Connection extends Runnable {
      *        The message to send.
      */
     public void send(Message msg);
+    
+    /**
+     * Send a simple text to the chat. This is a convenience method that saves the wrapping of the
+     * string in a {@link Message} or {@link TextMessage} object.
+     * 
+     * @param msg
+     *        The text to send to the chat.
+     */
+    public void send(String msg);
     
     /**
      * Access the nickname the bot uses with this connection.
