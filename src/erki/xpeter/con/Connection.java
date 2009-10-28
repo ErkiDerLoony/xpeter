@@ -19,6 +19,7 @@ package erki.xpeter.con;
 
 import erki.xpeter.msg.Message;
 import erki.xpeter.msg.TextMessage;
+import erki.xpeter.parsers.Interconnector;
 
 /**
  * Interface implemented by all connection supported by xpeter. Every instance of Connection shall
@@ -55,4 +56,16 @@ public interface Connection extends Runnable {
      * @return The nickname of the bot.
      */
     public String getNick();
+    
+    /**
+     * The {@link Interconnector} parser forwards messages received from one connection to all other
+     * connections. In the other chats the bot says something like {@code Rolf@#linux: Linux rulz!}.
+     * In that example “#linux” would be the short id of an IRC connection to the channel {@code
+     * #linux} on some IRC network. The returned identifier needs not be unique among the bot’s
+     * connections (but if it is not one may not be able to distinguish things people say in
+     * different chats when using the Interconnector parser).
+     * 
+     * @return A short identifier for this connection.
+     */
+    public String getShortId();
 }

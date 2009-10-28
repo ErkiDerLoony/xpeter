@@ -50,6 +50,19 @@ public class Message {
     }
     
     /**
+     * Create a new Message without an associated {@link Connection}. This can be useful if creating
+     * response messages in some parser but it may also be harmful if a connection accidentally
+     * creates messages using this constructor that are later processed by parsers that rely on the
+     * connection information.
+     * 
+     * @param text
+     *        The text of the new message.
+     */
+    public Message(String text) {
+        this(text, null);
+    }
+    
+    /**
      * Access the wrapped text of the message.
      * 
      * @return The text of the message.

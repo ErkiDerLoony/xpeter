@@ -52,26 +52,40 @@ public class Bot {
     
     public Bot(Iterable<Class<? extends Parser>> parsers) {
         
-        // Try to instanicate all the parser classes.
         for (Class<? extends Parser> clazz : parsers) {
-            
-            try {
-                Parser parser = clazz.newInstance();
-                parser.init(this);
-            } catch (InstantiationException e) {
-                Log.error(e);
-                Log.warning("Parser " + clazz.getCanonicalName() + " could not be loaded!");
-                Log.info("Trying to continue without this parser.");
-            } catch (IllegalAccessException e) {
-                Log.error(e);
-                Log.warning("You are not allowed to instanciate the parser class "
-                        + clazz.getCanonicalName() + ". Please check your security settings!");
-                Log.info("Trying to continue without this parser.");
-            } catch (Throwable e) {
-                Log.error(e);
-                Log.warning("Could not initialize the parser " + clazz.getCanonicalName() + ".");
-                Log.info("Trying to continue without this one.");
-            }
+            add(clazz);
+        }
+    }
+    
+    /**
+     * Add new parsers to this bot.
+     * 
+     * @param clazz
+     *        The class object describing the new parser.
+     */
+    public void add(Class<? extends Parser> clazz) {
+        Log.debug("Loading parser " + clazz.getSimpleName() + ".");
+        
+        /*
+         * Try to instanicate all the parser classes and be sure to catch all exceptions if some
+         * parser goes mad because we do not want to crash the whole bot.
+         */
+        try {
+            Parser parser = clazz.newInstance();
+            parser.init(this);
+        } catch (InstantiationException e) {
+            Log.error(e);
+            Log.warning("Parser " + clazz.getCanonicalName() + " could not be loaded!");
+            Log.info("Trying to continue without this parser.");
+        } catch (IllegalAccessException e) {
+            Log.error(e);
+            Log.warning("You are not allowed to instanciate the parser class "
+                    + clazz.getCanonicalName() + ". Please check your security settings!");
+            Log.info("Trying to continue without this parser.");
+        } catch (Throwable e) {
+            Log.error(e);
+            Log.warning("Could not initialize the parser " + clazz.getCanonicalName() + ".");
+            Log.info("Trying to continue without this one.");
         }
     }
     
@@ -143,6 +157,7 @@ public class Bot {
      */
     public <MessageType extends Message> void register(Class<MessageType> messageType,
             Observer<MessageType> observer) {
+        Log.debug("Registered new listener for " + messageType.getSimpleName() + "s.");
         
         if (!parserMapping.containsKey(messageType)) {
             parserMapping.put(messageType, new LinkedList<Observer<? extends Message>>());
@@ -164,6 +179,7 @@ public class Bot {
      */
     @SuppressWarnings("unchecked")
     public <MessageType> void process(MessageType msg) {
+        Log.debug("Processing " + msg.toString() + ".");
         LinkedList<Observer<? extends Message>> parsers = parserMapping.get(msg.getClass());
         
         for (Observer parser : parsers) {

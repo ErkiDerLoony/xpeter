@@ -102,7 +102,7 @@ public class XmppConnection implements Connection {
                 
                 Log.info("Connection established. Logging in.");
                 load();
-                con.login(loginName, password);
+                con.login(loginName, password, "Daheim");
                 // Get the password out of memory asap.
                 loginName = null;
                 password = null;
@@ -110,14 +110,14 @@ public class XmppConnection implements Connection {
                 
                 MultiUserChat chat = new MultiUserChat(con, channel);
                 PacketListener packetListener = new PacketListener(this, bot);
-                chat.addInvitationRejectionListener(new InvitationRejectionListener());
+                // chat.addInvitationRejectionListener(new InvitationRejectionListener());
                 chat.addMessageListener(packetListener);
-                chat.addParticipantListener(packetListener);
-                chat.addParticipantStatusListener(new ParticipantStatusListener());
-                chat.addPresenceInterceptor(new PresenceInterceptor());
-                chat.addSubjectUpdatedListener(new SubjectUpdatedListener());
+                // chat.addParticipantListener(packetListener);
+                // chat.addParticipantStatusListener(new ParticipantStatusListener());
+                // chat.addPresenceInterceptor(new PresenceInterceptor());
+                // chat.addSubjectUpdatedListener(new SubjectUpdatedListener());
                 chat.addUserStatusListener(new UserStatusListener(this));
-                MultiUserChat.addInvitationListener(con, new InvitationListener());
+                // MultiUserChat.addInvitationListener(con, new InvitationListener());
                 
                 // We don’t want the bot to react on old stuff when he joins.
                 DiscussionHistory history = new DiscussionHistory();
@@ -230,6 +230,11 @@ public class XmppConnection implements Connection {
     @Override
     public String getNick() {
         return nick;
+    }
+    
+    @Override
+    public String getShortId() {
+        return channel.substring(0, channel.lastIndexOf('@'));
     }
     
     @Override
