@@ -3,7 +3,7 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="lib" path="lib/ErkiAPI-0.0.3.jar"/>
-	<classpathentry kind="lib" path="lib/smack-3.1.0.jar"/>
-	<classpathentry kind="lib" path="lib/smackx-3.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/smack-3.1.0.jar" sourcepath="lib/smack-3.1.0-src.jar"/>
+	<classpathentry kind="lib" path="lib/smackx-3.1.0.jar" sourcepath="lib/smackx-3.1.0-src.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
