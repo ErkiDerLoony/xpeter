@@ -32,7 +32,9 @@ public interface Parser {
     /**
      * As the parser classes are instanciated using reflection (and thus no constructor can be used)
      * this method is used for initializing this parser and associating it to the instance of
-     * {@link Bot} it belongs to.
+     * {@link Bot} it belongs to. Through this Bot instance the parsers can access all connections
+     * the bot is currently connected to. This is useful to interconnect channels on different
+     * servers with the bot.
      * 
      * @param bot
      *        The instance of {@link Bot} this parser object belongs to and through which e.g. all

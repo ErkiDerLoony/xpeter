@@ -25,22 +25,21 @@ import erki.xpeter.con.Connection;
 import erki.xpeter.msg.Message;
 import erki.xpeter.parsers.Parser;
 
-public class Bot extends Thread {
+/**
+ * This class connects the different connections the bot handles. If a new connection is added (via
+ * {@link #add(Connection)}) the new connection is immediately started. This class also contains all
+ * the parsers and {@link #process(Message)} is called by the connections to delegate incoming
+ * messages to all available parsers.
+ * 
+ * @author Edgar Kalkowski
+ */
+public class Bot {
     
-    private Iterable<? extends Connection> cons;
+    private Collection<Connection> cons = new LinkedList<Connection>();
     
     private Collection<Parser> parsers = new LinkedList<Parser>();
     
-    public Bot(Iterable<? extends Connection> cons, Iterable<Class<? extends Parser>> parsers) {
-        this.cons = cons;
-        
-        /*
-         * Connect all connections to this bot. This is somewhat ugly but I can’t think of an
-         * elegant other way to do it.
-         */
-        for (Connection con : cons) {
-            con.setBot(this);
-        }
+    public Bot(Iterable<Class<? extends Parser>> parsers) {
         
         // Try to instanicate all the parser classes.
         for (Class<? extends Parser> clazz : parsers) {
@@ -60,9 +59,8 @@ public class Bot extends Thread {
         }
         
         /*
-         * Initialize all the parsers. This is, too, not very elegant but as above I can not think
-         * of an elegant solution for this at the moment. Also ensure maximum crash-prevention for
-         * the considered unsafe parser code by catching all possible exceptions.
+         * Initialize all the parsers. Also ensure maximum crash-prevention for the considered
+         * unsafe parser code by catching all possible exceptions.
          */
         for (Parser p : this.parsers) {
             
@@ -77,13 +75,57 @@ public class Bot extends Thread {
         }
     }
     
-    @Override
-    public void run() {
-        super.run();
-        Log.info("Starting up the bot.");
+    /**
+     * Add a new connection to this bot. For each connection a separate {@link Thread} is started
+     * immediately.
+     * 
+     * @param con
+     *        The connection to add.
+     */
+    public void add(Connection con) {
         
-        for (Connection con : cons) {
-            new Thread(con, "ConnectionThread").start();
+        synchronized (cons) {
+            cons.add(con);
+            new Thread(con, con.toString()).start();
+        }
+    }
+    
+    /**
+     * Broadcast a message to all connections currently available to this bot.
+     * 
+     * @param msg
+     *        The message to broadcast.
+     */
+    public void broadcast(Message msg) {
+        
+        synchronized (cons) {
+            
+            for (Connection con : cons) {
+                con.send(msg);
+            }
+        }
+    }
+    
+    /**
+     * Broadcast a message to all connection currently available to this bot with the exception of
+     * {@code con}.
+     * 
+     * @param msg
+     *        The message to broadcast.
+     * @param con
+     *        The Connection instance that will not receive {@code msg}. The connections are
+     *        compared using the “==” operator.
+     */
+    public void broadcast(Message msg, Connection con) {
+        
+        synchronized (cons) {
+            
+            for (Connection conn : cons) {
+                
+                if (conn != con) {
+                    conn.send(msg);
+                }
+            }
         }
     }
     

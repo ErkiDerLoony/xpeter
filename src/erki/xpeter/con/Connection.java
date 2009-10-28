@@ -17,7 +17,6 @@
 
 package erki.xpeter.con;
 
-import erki.xpeter.Bot;
 import erki.xpeter.msg.Message;
 
 /**
@@ -30,16 +29,6 @@ import erki.xpeter.msg.Message;
  * @author Edgar Kalkowski
  */
 public interface Connection extends Runnable {
-    
-    /**
-     * Associates this connection to an instance of {@link Bot} that will be used to process
-     * messages received via this connection. <b>This has to be done before this connection is
-     * started (and respective the {@link #run()} method is called)!</b>
-     * 
-     * @param bot
-     *        The associated bot instance for this connection.
-     */
-    public void setBot(Bot bot);
     
     /**
      * Send some message over this connection. If the connection is not ready to send messages at

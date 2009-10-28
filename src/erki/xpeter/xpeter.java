@@ -32,7 +32,6 @@ import java.util.logging.Level;
 
 import erki.api.util.CommandLineParser;
 import erki.api.util.Log;
-import erki.xpeter.con.Connection;
 import erki.xpeter.con.xmpp.XmppConnection;
 import erki.xpeter.parsers.Parser;
 
@@ -268,7 +267,7 @@ public class xpeter {
             System.exit(17);
         }
         
-        LinkedList<Connection> connections = new LinkedList<Connection>();
+        Bot bot = new Bot(chosenParsers);
         
         for (Con con : cons) {
             
@@ -282,7 +281,7 @@ public class xpeter {
             } else if (con.protocol.equals("jabber") || con.protocol.equals("xmpp")) {
                 Log.info("Creating an XMPP connection to " + con.channel + "@" + con.host + ":"
                         + con.port + ".");
-                connections.add(new XmppConnection(con.host, con.port, con.channel, name));
+                bot.add(new XmppConnection(bot, con.host, con.port, con.channel, name));
             }
         }
         
@@ -296,13 +295,6 @@ public class xpeter {
                 Log.error("Could not create config dir!");
                 Log.info("Trying to continue but this is likely not to work!");
             }
-        }
-        
-        try {
-            new Bot(connections, chosenParsers).start();
-        } catch (Throwable e) {
-            Log.error(e);
-            System.exit(-1);
         }
     }
     

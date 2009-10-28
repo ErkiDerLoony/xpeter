@@ -77,7 +77,8 @@ public class XmppConnection implements Connection {
      * @param nick
      *        The nickname to use when joining the channel.
      */
-    public XmppConnection(String host, int port, String channel, String nick) {
+    public XmppConnection(Bot bot, String host, int port, String channel, String nick) {
+        this.bot = bot;
         this.host = host;
         this.port = port;
         this.channel = channel;
@@ -213,11 +214,6 @@ public class XmppConnection implements Connection {
     }
     
     @Override
-    public void setBot(Bot bot) {
-        this.bot = bot;
-    }
-    
-    @Override
     public void send(Message msg) {
         
         synchronized (sendQueue) {
@@ -229,5 +225,10 @@ public class XmppConnection implements Connection {
     @Override
     public String getNick() {
         return nick;
+    }
+    
+    @Override
+    public String toString() {
+        return "Connection(xmpp://" + channel + "@" + host + ":" + port + ")";
     }
 }
