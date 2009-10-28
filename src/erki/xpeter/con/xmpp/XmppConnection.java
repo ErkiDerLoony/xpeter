@@ -134,6 +134,7 @@ public class XmppConnection implements Connection {
                         
                         while (!sendQueue.isEmpty()) {
                             Message msg = sendQueue.poll();
+                            Log.debug("Sending " + msg + " to the server.");
                             chat.sendMessage(msg.getText());
                         }
                         
@@ -215,9 +216,11 @@ public class XmppConnection implements Connection {
     
     @Override
     public void send(Message msg) {
+        Log.debug("Waiting to put " + msg + " into the queue.");
         
         synchronized (sendQueue) {
             sendQueue.offer(msg);
+            Log.debug("Added " + msg + " to the outgoing queue.");
             sendQueue.notify();
         }
     }

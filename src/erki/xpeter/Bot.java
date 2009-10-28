@@ -281,7 +281,9 @@ public class Bot {
                     Log.error(e);
                     Log.warning("Parser " + parser.getClass().getSimpleName() + " crashed!");
                     Log.info("Continuing anyway.");
-                    msg.getConnection().send("Mumble mumble ... " + e.getLocalizedMessage());
+                    msg.getConnection().send(
+                            "Mumble mumble in " + parser.getClass().getSimpleName() + ": "
+                                    + e.getLocalizedMessage());
                 }
             }
         }
