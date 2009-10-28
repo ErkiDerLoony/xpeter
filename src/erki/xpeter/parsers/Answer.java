@@ -17,6 +17,7 @@
 
 package erki.xpeter.parsers;
 
+import erki.api.util.Log;
 import erki.api.util.Observer;
 import erki.xpeter.Bot;
 import erki.xpeter.BotApi;
@@ -32,16 +33,19 @@ public class Answer implements Parser, Observer<TextMessage> {
     
     @Override
     public void init(Bot bot) {
+        Log.finest("Initializing.");
         bot.register(TextMessage.class, this);
     }
     
     @Override
     public void destroy(Bot bot) {
+        Log.finest("Destroying.");
         bot.deregister(TextMessage.class, this);
     }
     
     @Override
     public void inform(TextMessage msg) {
+        Log.debug("Informed of " + msg + ".");
         String text = msg.getText();
         Connection con = msg.getConnection();
         String nick = con.getNick();
@@ -51,11 +55,10 @@ public class Answer implements Parser, Observer<TextMessage> {
         }
         
         text = BotApi.trimNick(text, nick);
-        
         String question = "\\[ \\](.*?)\\[ \\](.*?)";
-        String response = "";
         
         if (text.matches(question)) {
+            String response = "";
             String[] split = text.split("\\[ \\]");
             int rnd = (int) (Math.random() * (split.length - 1));
             
@@ -67,8 +70,8 @@ public class Answer implements Parser, Observer<TextMessage> {
                     response += split[i] + "[x]";
                 }
             }
+            
+            con.send(response.substring(0, response.length() - 3));
         }
-        
-        con.send(response.substring(0, response.length() - 3));
     }
 }

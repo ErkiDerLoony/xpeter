@@ -264,14 +264,25 @@ public class Bot {
      * registering observers (see #register).
      */
     @SuppressWarnings("unchecked")
-    public <MessageType> void process(MessageType msg) {
+    public <MessageType extends Message> void process(MessageType msg) {
         
         synchronized (parserMapping) {
             Log.debug("Processing " + msg.toString() + ".");
             LinkedList<Observer<? extends Message>> parsers = parserMapping.get(msg.getClass());
+            Log.debug("Registered observers for " + msg.getClass().getSimpleName() + " are "
+                    + parsers + ".");
             
             for (Observer parser : parsers) {
-                parser.inform(msg);
+                Log.debug("Informing " + parser.getClass().getSimpleName() + ".");
+                
+                try {
+                    parser.inform(msg);
+                } catch (Throwable e) {
+                    Log.error(e);
+                    Log.warning("Parser " + parser.getClass().getSimpleName() + " crashed!");
+                    Log.info("Continuing anyway.");
+                    msg.getConnection().send("Mumble mumble ... " + e.getLocalizedMessage());
+                }
             }
         }
     }
