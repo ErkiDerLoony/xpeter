@@ -20,7 +20,9 @@ package erki.xpeter;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedList;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import erki.api.util.Log;
 import erki.api.util.Observer;
@@ -40,6 +42,13 @@ public class Bot {
     
     private Collection<Connection> cons = new LinkedList<Connection>();
     
+    private Set<Parser> parsers = new TreeSet<Parser>(new Comparator<Parser>() {
+        
+        public int compare(Parser o1, Parser o2) {
+            return (o1.getClass().getCanonicalName().compareTo(o2.getClass().getCanonicalName()));
+        }
+    });
+    
     private TreeMap<Class<? extends Message>, LinkedList<Observer<? extends Message>>> parserMapping = new TreeMap<Class<? extends Message>, LinkedList<Observer<? extends Message>>>(
             new Comparator<Class<? extends Message>>() {
                 
@@ -50,6 +59,12 @@ public class Bot {
                 }
             });
     
+    /**
+     * Create a new Bot with an initial set of some parsers.
+     * 
+     * @param parsers
+     *        The initially used parsers of this Bot.
+     */
     public Bot(Iterable<Class<? extends Parser>> parsers) {
         
         for (Class<? extends Parser> clazz : parsers) {
@@ -58,7 +73,8 @@ public class Bot {
     }
     
     /**
-     * Add new parsers to this bot.
+     * Add new parsers to this bot. There can only be one instance of every parser class active at
+     * one time.
      * 
      * @param clazz
      *        The class object describing the new parser.
@@ -72,7 +88,19 @@ public class Bot {
          */
         try {
             Parser parser = clazz.newInstance();
+            Parser[] pArray = parsers.toArray(new Parser[0]);
+            
+            for (Parser p : pArray) {
+                
+                if (p.getClass().getCanonicalName().equals(parser.getClass().getCanonicalName())) {
+                    Log.debug("Parser " + clazz.getSimpleName() + " is already loaded. Reloading.");
+                    remove(p.getClass());
+                    break;
+                }
+            }
+            
             parser.init(this);
+            parsers.add(parser);
         } catch (InstantiationException e) {
             Log.error(e);
             Log.warning("Parser " + clazz.getCanonicalName() + " could not be loaded!");
@@ -86,6 +114,50 @@ public class Bot {
             Log.error(e);
             Log.warning("Could not initialize the parser " + clazz.getCanonicalName() + ".");
             Log.info("Trying to continue without this one.");
+        }
+    }
+    
+    /**
+     * Access the set of parsers currently loaded by this bot. The returned set only contains the
+     * class names of the active parsers thus no modification can do any harm.
+     * 
+     * @return The active set of parsers.
+     */
+    public TreeSet<Class<? extends Parser>> getParsers() {
+        TreeSet<Class<? extends Parser>> parsers = new TreeSet<Class<? extends Parser>>(
+                new Comparator<Class<? extends Parser>>() {
+                    
+                    @Override
+                    public int compare(Class<? extends Parser> o1, Class<? extends Parser> o2) {
+                        return o1.getCanonicalName().compareTo(o2.getCanonicalName());
+                    }
+                });
+        
+        for (Parser p : this.parsers) {
+            parsers.add(p.getClass());
+        }
+        
+        return parsers;
+    }
+    
+    /**
+     * Remove parsers from this bot. The corresponding {@link Parser#destroy(Bot)} method is called
+     * in which the parser itself must deregister all its listeners and finish all threads it may
+     * have started.
+     * 
+     * @param clazz
+     *        A class object describing the parser to remove.
+     */
+    public void remove(Class<? extends Parser> clazz) {
+        Parser[] pArray = parsers.toArray(new Parser[0]);
+        
+        for (Parser p : pArray) {
+            
+            if (p.getClass().getCanonicalName().equals(clazz.getCanonicalName())) {
+                Log.debug("Removing parser " + p.getClass().getSimpleName() + ".");
+                p.destroy(this);
+                parsers.remove(p);
+            }
         }
     }
     
@@ -157,13 +229,27 @@ public class Bot {
      */
     public <MessageType extends Message> void register(Class<MessageType> messageType,
             Observer<MessageType> observer) {
-        Log.debug("Registered new listener for " + messageType.getSimpleName() + "s.");
         
-        if (!parserMapping.containsKey(messageType)) {
-            parserMapping.put(messageType, new LinkedList<Observer<? extends Message>>());
+        synchronized (parserMapping) {
+            Log.debug("Registered new listener for " + messageType.getSimpleName() + "s.");
+            
+            if (!parserMapping.containsKey(messageType)) {
+                parserMapping.put(messageType, new LinkedList<Observer<? extends Message>>());
+            }
+            
+            parserMapping.get(messageType).add(observer);
         }
+    }
+    
+    public <MessageType extends Message> void deregister(Class<MessageType> messageType,
+            Observer<MessageType> observer) {
         
-        parserMapping.get(messageType).add(observer);
+        synchronized (parserMapping) {
+            
+            if (parserMapping.containsKey(messageType)) {
+                parserMapping.get(messageType).remove(observer);
+            }
+        }
     }
     
     /**
@@ -179,11 +265,14 @@ public class Bot {
      */
     @SuppressWarnings("unchecked")
     public <MessageType> void process(MessageType msg) {
-        Log.debug("Processing " + msg.toString() + ".");
-        LinkedList<Observer<? extends Message>> parsers = parserMapping.get(msg.getClass());
         
-        for (Observer parser : parsers) {
-            parser.inform(msg);
+        synchronized (parserMapping) {
+            Log.debug("Processing " + msg.toString() + ".");
+            LinkedList<Observer<? extends Message>> parsers = parserMapping.get(msg.getClass());
+            
+            for (Observer parser : parsers) {
+                parser.inform(msg);
+            }
         }
     }
 }

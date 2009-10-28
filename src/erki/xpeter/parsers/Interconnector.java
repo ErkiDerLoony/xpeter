@@ -23,6 +23,11 @@ public class Interconnector implements Parser, Observer<TextMessage> {
     }
     
     @Override
+    public void destroy(Bot bot) {
+        bot.deregister(TextMessage.class, this);
+    }
+    
+    @Override
     public void inform(TextMessage msg) {
         Log.debug("Parsing " + msg + ".");
         

@@ -22,6 +22,10 @@ import erki.xpeter.Bot;
 /**
  * Implemented by all classes that want to parse messages received from the chats the bot is
  * connected to. If you want to add functionality to the bot you want to implement this one.
+ * <p>
+ * It is strongly recommended that every parser has a unique {@link Class#getSimpleName()} although
+ * this is not an absolute requirement (see how {@link ParserLoader} works to understand the
+ * details).
  * 
  * @author Edgar Kalkowski
  */
@@ -42,4 +46,13 @@ public interface Parser {
      *        the connections to the different chats may be accessed.
      */
     public void init(Bot bot);
+    
+    /**
+     * This is called if a parser is unloaded. The parser shall deregister all previously registered
+     * listeners and exit all it’s threads.
+     * 
+     * @param bot
+     *        The instance of {@link Bot} this parser object belongs to.
+     */
+    public void destroy(Bot bot);
 }

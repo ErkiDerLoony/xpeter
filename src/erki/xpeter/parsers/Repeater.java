@@ -34,6 +34,12 @@ public class Repeater implements Parser, Observer<TextMessage> {
     @Override
     public void init(Bot bot) {
         Log.debug("Initializing.");
+        bot.register(TextMessage.class, this);
+    }
+    
+    @Override
+    public void destroy(Bot bot) {
+        bot.deregister(TextMessage.class, this);
     }
     
     @Override
@@ -43,6 +49,7 @@ public class Repeater implements Parser, Observer<TextMessage> {
         String text = msg.getText();
         
         if (BotApi.addresses(text, nick)) {
+            Log.debug("Repeating " + msg + ".");
             text = BotApi.trimNick(text, nick);
             con.send(text);
         }

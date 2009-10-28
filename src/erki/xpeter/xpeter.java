@@ -47,8 +47,6 @@ public class xpeter {
     /** The version of xpeter. To be used wherever needed. */
     public static final String VERSION = "0.0.1";
     
-    private static final String CONFIG_FILE = ".botrc";
-    
     private static final String CONFIG_DIR = "config";
     
     /** Prints the "--help" message to stdout. */
@@ -80,6 +78,10 @@ public class xpeter {
         System.out.println("                 on the command line or in your .botrc file. Use one");
         System.out.println("                 -c switch for each connection you want the bot to");
         System.out.println("                 establish.");
+        System.out.println("  --config       Specify a config file to use. This defaults to be");
+        System.out.println("                 a file called .botrc in the main directory of the");
+        System.out.println("                 program (the directory that also contains the src,");
+        System.out.println("                 lib and bin folders).");
         System.out.println();
         System.out.println("All command line options can also be specified in a file called");
         System.out.println(".botrc located in the directory where the bot is executed. Beware");
@@ -121,20 +123,26 @@ public class xpeter {
             return;
         }
         
-        String name = "xpeter";
+        String name = "xpeter", configFile = ".botrc";
         String parsers = null, logfile = null;
         LinkedList<Class<? extends Parser>> chosenParsers = new LinkedList<Class<? extends Parser>>();
         LinkedList<Con> cons = new LinkedList<Con>();
         
-        if (new File(CONFIG_FILE).exists()) {
+        if (args.containsKey("--config")) {
+            configFile = args.get("--config");
+            args.remove("--config");
+        }
+        
+        if (new File(configFile).exists()) {
             
             try {
-                BufferedReader fileIn = new BufferedReader(new FileReader(CONFIG_FILE));
+                BufferedReader fileIn = new BufferedReader(new FileReader(configFile));
                 String line;
                 
                 while ((line = fileIn.readLine()) != null) {
                     
-                    if (line.equals("")) {
+                    if (line.trim().equals("") || line.trim().startsWith("//")
+                            || line.trim().startsWith("#")) {
                         continue;
                     }
                     
@@ -232,8 +240,9 @@ public class xpeter {
         }
         
         Log.info("This is xpeter v" + VERSION + ".");
-        TreeSet<Class<? extends Parser>> foundParsers = ParserFinder.findParsers(new File(".")
-                .getAbsoluteFile());
+        
+        TreeSet<Class<? extends Parser>> foundParsers = ParserFinder.findParsers(BotApi
+                .getParserDir());
         
         if (parsers != null && parsers.equals("*")) {
             Log.debug("Using all found parsers.");

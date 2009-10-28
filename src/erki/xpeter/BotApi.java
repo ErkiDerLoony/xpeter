@@ -1,5 +1,7 @@
 package erki.xpeter;
 
+import java.io.File;
+
 /**
  * This class contains static helper methods that are convenient for many parser implementations. If
  * these methods are used consistently in all parser implementations it ensures that the bot always
@@ -8,6 +10,22 @@ package erki.xpeter;
  * @author Edgar Kalkowski
  */
 public class BotApi {
+    
+    /**
+     * Find out whether the current directory already is the “bin” directory or not and try to
+     * assume the correct place to search for parsers. As this is only an heuristic it is not
+     * guaranteed to work but it’s the best I can do for now.
+     * 
+     * @return The folder that probably contains the parsers.
+     */
+    public static File getParserDir() {
+        
+        if (new File("bin").isDirectory()) {
+            return new File("bin").getAbsoluteFile();
+        } else {
+            return new File(".");
+        }
+    }
     
     /**
      * Checks if the text of a certain message addresses a certain nickname, i.e. the message starts
