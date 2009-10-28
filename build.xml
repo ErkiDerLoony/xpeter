@@ -1,4 +1,4 @@
-<project name="xpeter" default="jar">
+<project name="xpeter" default="make">
 
   <property name="version" value="0.0.1"/>
 
@@ -9,8 +9,9 @@
 
   <property name="main.class" value="erki.xpeter.xpeter"/>
 
-  <property name="jar.file" value="${ant.project.name}-${version}.jar"/>
   <property name="tar.file" value="${ant.project.name}-${version}.tar.bz2"/>
+  <property name="sh.file" value="${ant.project.name}.sh"/>
+  <property name="bat.file" value="${ant.project.name}.bat"/>
 
   <path id="classpath">
     <fileset dir="${lib.dir}">
@@ -18,7 +19,7 @@
     </fileset>
   </path>
 
-  <target name="all" depends="jar, doc"/>
+  <target name="all" depends="make, doc"/>
 
   <target name="tar" depends="clean">
     <tar destfile="${tar.file}" compression="bzip2">
@@ -27,30 +28,44 @@
     </tar>
   </target>
 
-  <target name="jar" depends="make">
-    <manifestclasspath property="manifest.classpath"
-                       jarfile="${jar.file}">
-      <classpath refid="classpath" />
-    </manifestclasspath>
-    <jar destfile="${jar.file}" basedir="${bin.dir}">
-      <manifest>
-        <attribute name="Main-Class" value="${main.class}"/>
-        <attribute name="Class-Path" value="${manifest.classpath}" />
-      </manifest>
-    </jar>
-  </target>
-
-  <target name="make">
+  <target name="make" depends="sh,bat">
     <mkdir dir="${bin.dir}"/>
     <javac srcdir="${src.dir}" destdir="${bin.dir}" classpathref="classpath"
            debuglevel="lines,vars,source" debug="true"/>
   </target>
 
+  <condition property="linux">
+    <or>
+      <os family="unix"/>
+      <os family="mac"/>
+    </or>
+  </condition>
+
+  <condition property="win">
+    <os family="windows"/>
+  </condition>
+
+  <target name="sh" if="linux">
+    <echo file="${sh.file}" append="false">#!/bin/bash
+java -cp bin:${toString:classpath} erki.xpeter.xpeter $@
+</echo>
+    <echo message="Creating executable shell script."/>
+    <chmod file="${sh.file}" perm="a+x"/>
+  </target>
+
+  <target name="bat" if="windows">
+    <echo file="${bat.file}" append="false">@echo off
+java -cp .;${toString:classpath} erki.xpeter.xpeter %*
+</echo>
+    <echo message="Creating executable batch script."/>
+  </target>
+
   <target name="clean">
     <delete dir="${bin.dir}"/>
     <delete dir="${doc.dir}"/>
-    <delete file="${jar.file}"/>
     <delete file="${tar.file}"/>
+    <delete file="${sh.file}"/>
+    <delete file="${bat.file}"/>
   </target>
 
   <target name="doc">
