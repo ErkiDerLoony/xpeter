@@ -74,9 +74,9 @@ public class ErkiTalkConnection implements Connection {
     
     @Override
     public void run() {
+        boolean pause = false;
         
         while (true) {
-            boolean pause = false;
             
             try {
                 Log.info("Trying to connect to " + host + ":" + port + ".");
