@@ -32,6 +32,7 @@ import java.util.logging.Level;
 
 import erki.api.util.CommandLineParser;
 import erki.api.util.Log;
+import erki.xpeter.con.erkitalk.ErkiTalkConnection;
 import erki.xpeter.con.xmpp.XmppConnection;
 import erki.xpeter.parsers.Parser;
 
@@ -123,7 +124,7 @@ public class xpeter {
             return;
         }
         
-        String name = "xpeter", configFile = ".botrc";
+        String nick = "xpeter", configFile = ".botrc";
         String parsers = null, logfile = null;
         LinkedList<Class<? extends Parser>> chosenParsers = new LinkedList<Class<? extends Parser>>();
         LinkedList<Con> cons = new LinkedList<Con>();
@@ -147,9 +148,9 @@ public class xpeter {
                     }
                     
                     if (line.toLowerCase().startsWith("name=")) {
-                        name = line.substring("name=".length());
+                        nick = line.substring("name=".length());
                     } else if (line.toLowerCase().startsWith("nick=")) {
-                        name = line.substring("nick=".length());
+                        nick = line.substring("nick=".length());
                     } else if (line.toLowerCase().startsWith("connection=")) {
                         parseCon(cons, line.substring("connection=".length()));
                     } else if (line.toLowerCase().startsWith("parsers=")) {
@@ -181,17 +182,17 @@ public class xpeter {
         }
         
         if (args.containsKey("-n")) {
-            name = args.get("-n");
+            nick = args.get("-n");
             args.remove("-n");
         }
         
         if (args.containsKey("--name")) {
-            name = args.get("--name");
+            nick = args.get("--name");
             args.remove("--name");
         }
         
         if (args.containsKey("--nick")) {
-            name = args.get("--nick");
+            nick = args.get("--nick");
             args.remove("--nick");
         }
         
@@ -286,11 +287,11 @@ public class xpeter {
                 throw new IllegalStateException("Not yet implemented!");
             } else if (con.protocol.equals("erki") || con.protocol.equals("erkitalk")) {
                 Log.info("Creating an ErkiTalk connection to " + con.host + ":" + con.port + ".");
-                throw new IllegalStateException("Not yet implemented!");
+                bot.add(new ErkiTalkConnection(bot, con.host, con.port, nick));
             } else if (con.protocol.equals("jabber") || con.protocol.equals("xmpp")) {
                 Log.info("Creating an XMPP connection to " + con.channel + "@" + con.host + ":"
                         + con.port + ".");
-                bot.add(new XmppConnection(bot, con.host, con.port, con.channel, name));
+                bot.add(new XmppConnection(bot, con.host, con.port, con.channel, nick));
             }
         }
         
