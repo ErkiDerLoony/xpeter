@@ -13,8 +13,17 @@ import java.util.Queue;
 import erki.api.util.Log;
 import erki.xpeter.Bot;
 import erki.xpeter.con.Connection;
+import erki.xpeter.msg.DelayedMessage;
 import erki.xpeter.msg.Message;
+import erki.xpeter.util.Delay;
 
+/**
+ * This class implements a connection to an ErkiTalk server. If the connection breaks because the
+ * server is no longer reachable or something else happens all messages that shall be sent are
+ * buffered until the connection can be re-established.
+ * 
+ * @author Edgar Kalkowski
+ */
 public class ErkiTalkConnection implements Connection {
     
     private Bot bot;
@@ -47,11 +56,29 @@ public class ErkiTalkConnection implements Connection {
     }
     
     @Override
-    public void send(Message msg) {
+    public void send(final Message msg) {
         
-        synchronized (sendQueue) {
-            sendQueue.offer(msg);
-            sendQueue.notify();
+        if (msg instanceof DelayedMessage) {
+            
+            new Delay((DelayedMessage) msg) {
+                
+                @Override
+                public void delayedAction() {
+                    
+                    synchronized (sendQueue) {
+                        sendQueue.offer(msg);
+                        sendQueue.notify();
+                    }
+                }
+                
+            }.start();
+            
+        } else {
+            
+            synchronized (sendQueue) {
+                sendQueue.offer(msg);
+                sendQueue.notify();
+            }
         }
     }
     
@@ -87,7 +114,7 @@ public class ErkiTalkConnection implements Connection {
                 ServerInputReader inputReader = new ServerInputReader(bot, this, socketIn);
                 inputReader.start();
                 
-                PrintWriter socketOut = new PrintWriter(new OutputStreamWriter(socket
+                final PrintWriter socketOut = new PrintWriter(new OutputStreamWriter(socket
                         .getOutputStream(), "UTF-8"), true);
                 pause = false;
                 Log.info("Connection established. Logging in.");
@@ -99,7 +126,8 @@ public class ErkiTalkConnection implements Connection {
                     synchronized (sendQueue) {
                         
                         while (!sendQueue.isEmpty()) {
-                            socketOut.println(new MessageEncoder(sendQueue.poll()).get());
+                            final Message msg = sendQueue.poll();
+                            socketOut.println(new MessageEncoder(msg).get());
                         }
                         
                         try {

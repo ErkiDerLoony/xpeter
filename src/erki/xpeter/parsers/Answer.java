@@ -20,9 +20,9 @@ package erki.xpeter.parsers;
 import erki.api.util.Log;
 import erki.api.util.Observer;
 import erki.xpeter.Bot;
-import erki.xpeter.BotApi;
 import erki.xpeter.con.Connection;
 import erki.xpeter.msg.TextMessage;
+import erki.xpeter.util.BotApi;
 
 /**
  * This {@link Parser} can answer questions sent to the chat in the form: [ ] A oder [ ] B?

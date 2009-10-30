@@ -34,9 +34,10 @@ import javax.swing.Timer;
 import erki.api.util.Log;
 import erki.api.util.Observer;
 import erki.xpeter.Bot;
-import erki.xpeter.BotApi;
 import erki.xpeter.con.Connection;
+import erki.xpeter.msg.DelayedMessage;
 import erki.xpeter.msg.TextMessage;
+import erki.xpeter.util.BotApi;
 
 /**
  * A {@link Parser} that greets people when they greet the bot or when they join the chat.
@@ -247,7 +248,7 @@ public class Greetings implements Parser, Observer<TextMessage> {
                     int rnd2 = (int) (Math.random() * phrases.size());
                     con.send(this.hello.get(rnd).substring(0, 1).toUpperCase()
                             + this.hello.get(rnd).substring(1) + " " + msg.getNick() + "!");
-                    con.send(phrases.get(rnd2));
+                    con.send(new DelayedMessage(phrases.get(rnd2), 2000));
                 } else {
                     rnd = (int) (Math.random() * this.hello.size());
                     con.send(this.hello.get(rnd).substring(0, 1).toUpperCase()

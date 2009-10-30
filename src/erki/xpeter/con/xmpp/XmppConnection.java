@@ -38,7 +38,9 @@ import org.jivesoftware.smackx.muc.MultiUserChat;
 import erki.api.util.Log;
 import erki.xpeter.Bot;
 import erki.xpeter.con.Connection;
+import erki.xpeter.msg.DelayedMessage;
 import erki.xpeter.msg.Message;
+import erki.xpeter.util.Delay;
 
 /**
  * Establishes a connection to an XMPP server. If the connection is lost it tries to reconnect from
@@ -215,13 +217,29 @@ public class XmppConnection implements Connection {
     }
     
     @Override
-    public void send(Message msg) {
-        Log.debug("Waiting to put " + msg + " into the queue.");
+    public void send(final Message msg) {
         
-        synchronized (sendQueue) {
-            sendQueue.offer(msg);
-            Log.debug("Added " + msg + " to the outgoing queue.");
-            sendQueue.notify();
+        if (msg instanceof DelayedMessage) {
+            
+            new Delay((DelayedMessage) msg) {
+                
+                @Override
+                public void delayedAction() {
+                    
+                    synchronized (sendQueue) {
+                        sendQueue.offer(msg);
+                        sendQueue.notify();
+                    }
+                }
+                
+            }.start();
+            
+        } else {
+            
+            synchronized (sendQueue) {
+                sendQueue.offer(msg);
+                sendQueue.notify();
+            }
         }
     }
     

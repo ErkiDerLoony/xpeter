@@ -39,6 +39,10 @@ public interface Connection extends Runnable {
      * @param msg
      *        The message to send.
      */
+    /*
+     * TODO: The implementation of this method in ErkiTalkConnection and XmppConnection is exactly
+     * the same. Perhaps refactor this to a common super-class?
+     */
     public void send(Message msg);
     
     /**

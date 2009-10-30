@@ -15,7 +15,7 @@
  * not, see <http://www.gnu.org/licenses/>.
  */
 
-package erki.xpeter;
+package erki.xpeter.util;
 
 import java.io.File;
 import java.io.IOException;

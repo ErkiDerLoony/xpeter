@@ -264,7 +264,12 @@ public class Bot {
      * registering observers (see #register).
      */
     @SuppressWarnings("unchecked")
-    public <MessageType extends Message> void process(MessageType msg) {
+    public void process(Message msg) {
+        
+        if (msg.getConnection() == null) {
+            Log.warning("Someone delivered a foul message (" + msg + "). Refusing to parse it!");
+            return;
+        }
         
         synchronized (parserMapping) {
             Log.debug("Processing " + msg.toString() + ".");

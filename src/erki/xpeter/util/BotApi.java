@@ -1,4 +1,4 @@
-package erki.xpeter;
+package erki.xpeter.util;
 
 import java.io.File;
 

@@ -83,6 +83,6 @@ public class Message {
     
     @Override
     public String toString() {
-        return "Message(“" + text + "”)";
+        return getClass().getSimpleName() + "(“" + text + "”)";
     }
 }
