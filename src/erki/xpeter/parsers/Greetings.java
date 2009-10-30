@@ -256,14 +256,40 @@ public class Greetings implements Parser, Observer<TextMessage> {
             }
         }
         
+        hello = ".*? " + greeting() + " .*?";
+        
+        if (text.matches(hello)) {
+            Log.info(msg.getNick() + " hat gegrüßt.");
+            int rnd = (int) (Math.random() * 3);
+            
+            if (rnd == 0) {
+                rnd = (int) (Math.random() * this.hello.size());
+                con.send(this.hello.get(rnd).substring(0, 1).toUpperCase()
+                        + this.hello.get(rnd).substring(1) + " " + msg.getNick() + "!");
+            }
+        }
+        
         String bye = "(" + nick + "[:,;]?[ ]?" + bye() + "[\\.,!?]?|" + bye() + "[:,;]? " + nick
                 + "[\\.,!?]?)";
         
         if (msg.getText().matches(bye)) {
-            Log.info(msg.getNick() + " hat sich verabschiedet.");
+            Log.info(msg.getNick() + " hat sich von mir verabschiedet.");
             int rnd = (int) (Math.random() * this.cu.size());
             con.send(this.cu.get(rnd).substring(0, 1).toUpperCase() + this.cu.get(rnd).substring(1)
                     + " " + msg.getNick() + "!");
+        }
+        
+        bye = ".*? " + greeting() + " .*?";
+        
+        if (text.matches(bye)) {
+            Log.info(msg.getNick() + " hat sich verabschiedet.");
+            int rnd = (int) (Math.random() * 3);
+            
+            if (rnd == 0) {
+                rnd = (int) (Math.random() * this.cu.size());
+                con.send(this.cu.get(rnd).substring(0, 1).toUpperCase()
+                        + this.cu.get(rnd).substring(1) + " " + msg.getNick() + "!");
+            }
         }
         
         String listHello = "[wW]elche [bB]egr(ü|ue)(ss|ß)ungen kennst [Dd]u( alles| so( alles)?)?\\?";
