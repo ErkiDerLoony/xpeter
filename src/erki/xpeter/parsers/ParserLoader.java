@@ -32,6 +32,7 @@ public class ParserLoader implements Parser, Observer<TextMessage> {
         bot.deregister(TextMessage.class, this);
     }
     
+    @SuppressWarnings("unchecked")
     @Override
     public void inform(TextMessage msg) {
         Log.debug("Informed of " + msg + ".");
@@ -46,7 +47,8 @@ public class ParserLoader implements Parser, Observer<TextMessage> {
         
         if (text.matches("[wW]elche [pP]arser gibt es\\.?\\??")
                 || text.matches("[wW]as f(ü|ue)r [Pp]arser gibt es\\.?\\??")
-                || text.matches("[Ww]elche [pP]arser (kennst|hast) [Dd]u\\.?\\??")) {
+                || text.matches("([Ww]elche|[wW]as f(ü|ue)r) [pP]arser "
+                        + "(kennst|hast) [Dd]u\\.?\\??")) {
             String response = "Ich kenne folgende Parser: ";
             TreeSet<Class<? extends Parser>> loadedParsers = bot.getParsers();
             TreeSet<Class<? extends Parser>> foundParsers = ParserFinder.findParsers(BotApi
@@ -64,6 +66,36 @@ public class ParserLoader implements Parser, Observer<TextMessage> {
             }
             
             con.send(response.substring(0, response.length() - 2) + ".");
+        }
+        
+        if (text.matches("([wW]elche|[wW]as f(ü|ue)r) [pP]arser sind geladen\\.?\\??")) {
+            String response = "Momentan sind die Parser ";
+            TreeSet<Class<? extends Parser>> loaded = bot.getParsers();
+            Class<? extends Parser>[] loadedParsers = loaded.toArray(new Class[0]);
+            
+            if (loadedParsers.length > 1) {
+                
+                for (int i = 0; i < loadedParsers.length; i++) {
+                    
+                    if (i < loadedParsers.length - 1) {
+                        response += loadedParsers[i].getSimpleName() + ", ";
+                    } else if (i == loadedParsers.length - 1) {
+                        response += loadedParsers[i].getSimpleName() + " und ";
+                    } else {
+                        response += loadedParsers[i].getSimpleName() + " geladen.";
+                    }
+                }
+                
+                con.send(response);
+            } else if (loadedParsers.length == 1) {
+                con.send("Im Moment ist nur der Parser " + loadedParsers[0].getSimpleName()
+                        + " geladen.");
+            } else {
+                con.send("Hm, es scheint so, als ob kein einiger Parser geladen wäre.");
+                con.send("Und doch bearbeitet dieser Parser gerade eine Nachricht.");
+                con.send("Das ist doch nicht möglich! ...");
+                con.send("Waaah! Ich werde verrückt!");
+            }
         }
         
         String match = "([Ll]ade|[Ll]oad) (.*?)";
