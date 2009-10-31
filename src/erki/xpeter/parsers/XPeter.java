@@ -117,6 +117,20 @@ public class XPeter implements Parser, Observer<TextMessage> {
             con.send("K.O.");
         }
         
+        if (addresses && text.matches("[gG]eh kacken( [jJ]unge)?( es?cht [gj]et?zt?)?!?\\.?")) {
+            int rnd = (int) Math.random() * 4;
+            
+            if (rnd == 0) {
+                con.send("Ja, wo denn?!");
+            } else if (rnd == 1) {
+                con.send("Kommst mit?");
+            } else if (rnd == 2) {
+                con.send("Selba! :P");
+            } else {
+                con.send("Ich weiß ja net, wo!");
+            }
+        }
+        
         String whatGoes = "([Aa]lt(er|a)[:;,!]? )?[wW]as geht[?.!]?[?.!]?[?.!]?";
         
         if (addresses && text.matches(whatGoes)) {
