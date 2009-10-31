@@ -78,7 +78,12 @@ public class LastFm implements Parser, Observer<TextMessage> {
     }
     
     private String formatTrack(Track track) {
-        return "„" + track.getName() + "“ von »" + track.getArtist() + "« auf dem Album „"
-                + track.getAlbum() + "“";
+        
+        if (track.getAlbum() == null || track.getAlbum().equals("")) {
+            return "„" + track.getName() + "“ von »" + track.getArtist() + "«";
+        } else {
+            return "„" + track.getName() + "“ von »" + track.getArtist() + "« auf dem Album „"
+                    + track.getAlbum() + "“";
+        }
     }
 }
