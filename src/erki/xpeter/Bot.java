@@ -288,7 +288,7 @@ public class Bot {
                     Log.info("Continuing anyway.");
                     msg.getConnection().send(
                             "Mumble mumble in " + parser.getClass().getSimpleName() + ": "
-                                    + e.getLocalizedMessage());
+                                    + e.getClass().getSimpleName());
                 }
             }
         }
