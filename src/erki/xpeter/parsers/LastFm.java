@@ -67,7 +67,7 @@ public class LastFm implements Parser, Observer<TextMessage> {
                 }
                 
             } else {
-                con.send(new DelayedMessage("Last.FM weiß leider nicht, was " + msg.getNick()
+                con.send(new DelayedMessage("Last.FM weiß leider nicht, was " + queryNick
                         + " gerade hört. :(", 1500));
                 con.send(new DelayedMessage("Tut mir Leid.", 2500));
             }
