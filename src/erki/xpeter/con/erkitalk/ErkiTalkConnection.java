@@ -117,6 +117,7 @@ public class ErkiTalkConnection implements Connection {
                 final PrintWriter socketOut = new PrintWriter(new OutputStreamWriter(socket
                         .getOutputStream(), "UTF-8"), true);
                 pause = false;
+                reconnect = false;
                 Log.info("Connection established. Logging in.");
                 socketOut.println("PONG");
                 socketOut.println("NICK " + nick);
@@ -155,7 +156,7 @@ public class ErkiTalkConnection implements Connection {
                     Log.info("Lost connection to ErkiTalk server. Trying to reconnect in 5 min.");
                     
                     try {
-                        Thread.sleep(300000);
+                        Thread.sleep(10000);
                     } catch (InterruptedException e) {
                     }
                     
