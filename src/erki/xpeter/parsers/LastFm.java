@@ -53,6 +53,18 @@ public class LastFm implements Parser, Observer<TextMessage> {
             queryNick = msg.getNick();
         }
         
+        String match = "[wW]as h(oe|ö)rt (.*?)( gerade)?\\??";
+        
+        if (text.matches(match)) {
+            queryNick = text.replaceAll(match, "$2");
+        }
+        
+        match = "[wW]as h(oe|ö)re ich( gerade)?\\??";
+        
+        if (text.matches(match)) {
+            queryNick = msg.getNick();
+        }
+        
         if (queryNick != null) {
             Collection<Track> tracks = User.getRecentTracks(queryNick, LAST_FM_API_KEY);
             
@@ -63,7 +75,8 @@ public class LastFm implements Parser, Observer<TextMessage> {
                     con.send(new DelayedMessage(queryNick + " hört gerade " + formatTrack(track)
                             + ".", 1000));
                 } else {
-                    con.send(new DelayedMessage(queryNick + " hört gerade gar nix.", 1000));
+                    con.send(new DelayedMessage(queryNick + " hat zuletzt " + formatTrack(track)
+                            + " gehört.", 1000));
                 }
                 
             } else {
