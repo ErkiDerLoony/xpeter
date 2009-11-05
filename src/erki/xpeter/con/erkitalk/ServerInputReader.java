@@ -6,6 +6,7 @@ import java.io.IOException;
 import erki.api.util.Log;
 import erki.xpeter.Bot;
 import erki.xpeter.msg.Message;
+import erki.xpeter.msg.RawMessage;
 import erki.xpeter.msg.TextMessage;
 
 /**
@@ -51,6 +52,8 @@ public class ServerInputReader extends Thread {
                     TextMessage msg = new TextMessage(nick, text, con);
                     Log.info("Received " + msg + ".");
                     bot.process(msg);
+                } else if (line.toUpperCase().equals("PING")) {
+                    con.send(new RawMessage("PONG"));
                 } else {
                     Log.warning("Unparsable message received: “" + line + "”.");
                 }

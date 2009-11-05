@@ -1,6 +1,7 @@
 package erki.xpeter.con.erkitalk;
 
 import erki.xpeter.msg.Message;
+import erki.xpeter.msg.RawMessage;
 
 /**
  * Encoded instances of {@link Message} (or of subclasses) to a raw string that can be sent to an
@@ -19,7 +20,22 @@ public class MessageEncoder {
      *        The message to encode.
      */
     public MessageEncoder(Message message) {
-        encoded = "TEXT " + message.getText();
+        
+        if (message instanceof RawMessage) {
+            encoded = message.getText();
+        } else {
+            
+            if (message.getText().contains("\n")) {
+                
+                for (String line : message.getText().split("\n")) {
+                    encoded = "TEXT " + line + "\n";
+                }
+                
+                encoded = encoded.substring(0, encoded.length() - 1);
+            } else {
+                encoded = "TEXT " + message.getText();
+            }
+        }
     }
     
     /**

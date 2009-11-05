@@ -41,7 +41,6 @@ public class PacketListener implements org.jivesoftware.smack.PacketListener {
     
     @Override
     public void processPacket(Packet packet) {
-        Log.debug("Packet received: " + packet);
         
         if (packet instanceof org.jivesoftware.smack.packet.Message) {
             org.jivesoftware.smack.packet.Message message = (org.jivesoftware.smack.packet.Message) packet;
@@ -49,6 +48,8 @@ public class PacketListener implements org.jivesoftware.smack.PacketListener {
             TextMessage msg = new TextMessage(from, message.getBody(), con);
             Log.info("Received " + msg + ".");
             bot.process(msg);
+        } else {
+            Log.info("Unknown packet received: " + packet);
         }
     }
 }

@@ -127,7 +127,7 @@ public class ErkiTalkConnection implements Connection {
                     synchronized (sendQueue) {
                         
                         while (!sendQueue.isEmpty()) {
-                            final Message msg = sendQueue.poll();
+                            Message msg = sendQueue.poll();
                             socketOut.println(new MessageEncoder(msg).get());
                         }
                         
