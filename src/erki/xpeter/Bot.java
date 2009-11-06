@@ -272,13 +272,9 @@ public class Bot {
         }
         
         synchronized (parserMapping) {
-            Log.debug("Processing " + msg.toString() + ".");
             LinkedList<Observer<? extends Message>> parsers = parserMapping.get(msg.getClass());
-            Log.debug("Registered observers for " + msg.getClass().getSimpleName() + " are "
-                    + parsers + ".");
             
             for (Observer parser : parsers) {
-                Log.debug("Informing " + parser.getClass().getSimpleName() + ".");
                 
                 try {
                     parser.inform(msg);

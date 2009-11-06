@@ -22,21 +22,18 @@ public class ParserLoader implements Parser, Observer<TextMessage> {
     
     @Override
     public void init(Bot bot) {
-        Log.debug("Initializing.");
         bot.register(TextMessage.class, this);
         this.bot = bot;
     }
     
     @Override
     public void destroy(Bot bot) {
-        Log.debug("Destroying.");
         bot.deregister(TextMessage.class, this);
     }
     
     @SuppressWarnings("unchecked")
     @Override
     public void inform(TextMessage msg) {
-        Log.debug("Informed of " + msg + ".");
         Connection con = msg.getConnection();
         String text = msg.getText();
         

@@ -33,19 +33,16 @@ public class Answer implements Parser, Observer<TextMessage> {
     
     @Override
     public void init(Bot bot) {
-        Log.finest("Initializing.");
         bot.register(TextMessage.class, this);
     }
     
     @Override
     public void destroy(Bot bot) {
-        Log.finest("Destroying.");
         bot.deregister(TextMessage.class, this);
     }
     
     @Override
     public void inform(TextMessage msg) {
-        Log.debug("Informed of " + msg + ".");
         String text = msg.getText();
         Connection con = msg.getConnection();
         String nick = con.getNick();

@@ -1,5 +1,6 @@
 package erki.xpeter.con.erkitalk;
 
+import erki.api.util.Log;
 import erki.xpeter.msg.Message;
 import erki.xpeter.msg.RawMessage;
 
@@ -44,6 +45,7 @@ public class MessageEncoder {
      * @return The encoded message ready to be sent to an ErkiTalk server.
      */
     public String get() {
+        Log.debug("Sending “" + encoded + "” to the server.");
         return encoded;
     }
 }
