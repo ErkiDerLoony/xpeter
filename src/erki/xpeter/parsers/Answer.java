@@ -17,7 +17,6 @@
 
 package erki.xpeter.parsers;
 
-import erki.api.util.Log;
 import erki.api.util.Observer;
 import erki.xpeter.Bot;
 import erki.xpeter.con.Connection;

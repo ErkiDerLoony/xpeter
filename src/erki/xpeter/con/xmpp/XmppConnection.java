@@ -120,6 +120,7 @@ public class XmppConnection implements Connection {
                 // chat.addSubjectUpdatedListener(new SubjectUpdatedListener());
                 chat.addUserStatusListener(new UserStatusListener(this));
                 // MultiUserChat.addInvitationListener(con, new InvitationListener());
+                con.addConnectionListener(new ConnectionListener(this));
                 
                 // We don’t want the bot to react on old stuff when he joins.
                 DiscussionHistory history = new DiscussionHistory();
