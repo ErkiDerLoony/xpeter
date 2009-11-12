@@ -95,6 +95,7 @@ public class XmppConnection implements Connection {
         boolean pause = false;
         
         while (true) {
+            ConnectionListener connectionListener = null;
             
             try {
                 Log.info("Connecting to " + channel + "@" + host + ":" + port + ".");
@@ -120,7 +121,8 @@ public class XmppConnection implements Connection {
                 // chat.addSubjectUpdatedListener(new SubjectUpdatedListener());
                 chat.addUserStatusListener(new UserStatusListener(this));
                 // MultiUserChat.addInvitationListener(con, new InvitationListener());
-                con.addConnectionListener(new ConnectionListener(this));
+                connectionListener = new ConnectionListener(this);
+                con.addConnectionListener(connectionListener);
                 
                 // We don’t want the bot to react on old stuff when he joins.
                 DiscussionHistory history = new DiscussionHistory();
@@ -153,6 +155,11 @@ public class XmppConnection implements Connection {
             } finally {
                 
                 if (con != null) {
+                    
+                    if (connectionListener != null) {
+                        con.removeConnectionListener(connectionListener);
+                    }
+                    
                     con.disconnect();
                 }
                 
@@ -163,6 +170,7 @@ public class XmppConnection implements Connection {
                         Thread.sleep(300000);
                     } catch (InterruptedException e) {
                     }
+                    
                 } else {
                     pause = true;
                     Log.info("Lost connection to XMPP server. Trying to reconnect.");

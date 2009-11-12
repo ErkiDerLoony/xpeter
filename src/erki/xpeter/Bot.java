@@ -102,17 +102,16 @@ public class Bot {
             parser.init(this);
             parsers.add(parser);
         } catch (InstantiationException e) {
-            Log.error(e);
-            Log.warning("Parser " + clazz.getCanonicalName() + " could not be loaded!");
+            Log.warning("Parser " + clazz.getSimpleName() + " could not be loaded ("
+                    + e.getClass().getSimpleName() + ")!");
             Log.info("Trying to continue without this parser.");
         } catch (IllegalAccessException e) {
-            Log.error(e);
             Log.warning("You are not allowed to instanciate the parser class "
                     + clazz.getCanonicalName() + ". Please check your security settings!");
             Log.info("Trying to continue without this parser.");
         } catch (Throwable e) {
-            Log.error(e);
-            Log.warning("Could not initialize the parser " + clazz.getCanonicalName() + ".");
+            Log.warning("Could not initialize the parser " + clazz.getSimpleName() + " ("
+                    + e.getClass().getSimpleName() + ").");
             Log.info("Trying to continue without this one.");
         }
     }
