@@ -18,6 +18,10 @@
 package erki.xpeter.con.xmpp;
 
 import erki.api.util.Log;
+import erki.xpeter.Bot;
+import erki.xpeter.msg.NickChangeMessage;
+import erki.xpeter.msg.UserJoinedMessage;
+import erki.xpeter.msg.UserLeftMessage;
 
 /**
  * This listener ist used in {@link XmppConnection} and is called if some member of the chat room
@@ -28,6 +32,15 @@ import erki.api.util.Log;
  */
 public class ParticipantStatusListener implements
         org.jivesoftware.smackx.muc.ParticipantStatusListener {
+    
+    private XmppConnection con;
+    
+    private Bot bot;
+    
+    public ParticipantStatusListener(XmppConnection con, Bot bot) {
+        this.con = con;
+        this.bot = bot;
+    }
     
     @Override
     public void adminGranted(String participant) {
@@ -42,21 +55,25 @@ public class ParticipantStatusListener implements
     @Override
     public void banned(String participant, String actor, String reason) {
         Log.debug(participant + " was banned by " + actor + " (" + reason + ").");
+        bot.process(new UserLeftMessage(getNick(participant), "Banned: " + reason, con));
     }
     
     @Override
     public void joined(String participant) {
         Log.debug(participant + " has joined the chat.");
+        bot.process(new UserJoinedMessage(getNick(participant), con));
     }
     
     @Override
     public void kicked(String participant, String actor, String reason) {
         Log.debug(participant + " was kicked by " + actor + " (" + reason + ").");
+        bot.process(new UserLeftMessage(getNick(participant), "Kicked: " + reason, con));
     }
     
     @Override
     public void left(String participant) {
         Log.debug(participant + " left the chat.");
+        bot.process(new UserLeftMessage(getNick(participant), "", con));
     }
     
     @Override
@@ -82,6 +99,7 @@ public class ParticipantStatusListener implements
     @Override
     public void nicknameChanged(String participant, String newNickname) {
         Log.debug(participant + " is now known as " + newNickname + ".");
+        bot.process(new NickChangeMessage(getNick(participant), newNickname, con));
     }
     
     @Override
@@ -102,5 +120,12 @@ public class ParticipantStatusListener implements
     @Override
     public void voiceRevoked(String participant) {
         Log.debug(participant + "’s void permissions were removed.");
+    }
+    
+    private String getNick(String participant) {
+        String nick = participant;
+        nick = nick.substring(nick.indexOf('@'));
+        nick = nick.substring(nick.indexOf('/') + 1);
+        return nick;
     }
 }

@@ -36,7 +36,9 @@ import erki.api.util.Observer;
 import erki.xpeter.Bot;
 import erki.xpeter.con.Connection;
 import erki.xpeter.msg.DelayedMessage;
+import erki.xpeter.msg.Message;
 import erki.xpeter.msg.TextMessage;
+import erki.xpeter.msg.UserJoinedMessage;
 import erki.xpeter.util.BotApi;
 
 /**
@@ -55,33 +57,30 @@ public class Greetings implements Parser, Observer<TextMessage> {
     private static final String GREETINGS_FILE = "config" + File.separator + "greetings";
     
     @Override
-    public void init(Bot bot) {
+    public void init(final Bot bot) {
         Log.debug("Initializing.");
         loadGreetings();
         bot.register(TextMessage.class, this);
         
-        // bot.register(new LoginMessageObserver() {
-        //            
-        // @Override
-        // public LinkedList<ResponseMessage> inform(LoginMessage message) {
-        // LinkedList<ResponseMessage> result = new LinkedList<ResponseMessage>();
-        //                
-        // if (checkTimer(message.getName())) {
-        // int rnd = (int) (Math.random() * hello.size());
-        // result.addLast(new ResponseMessage(hello.get(rnd).substring(0, 1).toUpperCase()
-        // + hello.get(rnd).substring(1) + " " + message.getName() + "!", 100,
-        // 5000));
-        // rnd = (int) (Math.random() * 5);
-        //                    
-        // if (rnd == 0) {
-        // rnd = (int) (Math.random() * phrases.size());
-        // result.addLast(new ResponseMessage(phrases.get(rnd), 100, 11000));
-        // }
-        // }
-        //                
-        // return result;
-        // }
-        // });
+        bot.register(UserJoinedMessage.class, new Observer<UserJoinedMessage>() {
+            
+            @Override
+            public void inform(UserJoinedMessage msg) {
+                Connection con = msg.getConnection();
+                
+                if (checkTimer(msg.getNick())) {
+                    int rnd = (int) (Math.random() * hello.size());
+                    con.send(new Message(hello.get(rnd).substring(0, 1).toUpperCase()
+                            + hello.get(rnd).substring(1) + " " + msg.getNick() + "!"));
+                    rnd = (int) (Math.random() * 5);
+                    
+                    if (rnd == 0) {
+                        rnd = (int) (Math.random() * phrases.size());
+                        con.send(new DelayedMessage(phrases.get(rnd), 3000));
+                    }
+                }
+            }
+        });
     }
     
     @Override

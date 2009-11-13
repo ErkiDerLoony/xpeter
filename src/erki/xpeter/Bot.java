@@ -49,15 +49,7 @@ public class Bot {
         }
     });
     
-    private TreeMap<Class<? extends Message>, LinkedList<Observer<? extends Message>>> parserMapping = new TreeMap<Class<? extends Message>, LinkedList<Observer<? extends Message>>>(
-            new Comparator<Class<? extends Message>>() {
-                
-                @Override
-                public int compare(Class<? extends Message> o1, Class<? extends Message> o2) {
-                    return o1.getClass().getCanonicalName().compareTo(
-                            o2.getClass().getCanonicalName());
-                }
-            });
+    private TreeMap<String, LinkedList<Observer<? extends Message>>> parserMapping = new TreeMap<String, LinkedList<Observer<? extends Message>>>();
     
     /**
      * Create a new Bot with an initial set of some parsers.
@@ -232,11 +224,12 @@ public class Bot {
         synchronized (parserMapping) {
             Log.debug("Registered new listener for " + messageType.getSimpleName() + "s.");
             
-            if (!parserMapping.containsKey(messageType)) {
-                parserMapping.put(messageType, new LinkedList<Observer<? extends Message>>());
+            if (!parserMapping.containsKey(messageType.getCanonicalName())) {
+                parserMapping.put(messageType.getCanonicalName(),
+                        new LinkedList<Observer<? extends Message>>());
             }
             
-            parserMapping.get(messageType).add(observer);
+            parserMapping.get(messageType.getCanonicalName()).add(observer);
         }
     }
     
@@ -245,8 +238,8 @@ public class Bot {
         
         synchronized (parserMapping) {
             
-            if (parserMapping.containsKey(messageType)) {
-                parserMapping.get(messageType).remove(observer);
+            if (parserMapping.containsKey(messageType.getCanonicalName())) {
+                parserMapping.get(messageType.getCanonicalName()).remove(observer);
             }
         }
     }
@@ -271,7 +264,10 @@ public class Bot {
         }
         
         synchronized (parserMapping) {
-            LinkedList<Observer<? extends Message>> parsers = parserMapping.get(msg.getClass());
+            Log.debug("Parsing a " + msg.getClass().getSimpleName() + ".");
+            LinkedList<Observer<? extends Message>> parsers = parserMapping.get(msg.getClass()
+                    .getCanonicalName());
+            Log.debug("Registered parsers are " + parsers + ".");
             
             for (Observer parser : parsers) {
                 
