@@ -73,6 +73,11 @@ public class Greetings implements Parser, Observer<TextMessage> {
             public void inform(UserJoinedMessage msg) {
                 final Connection con = msg.getConnection();
                 
+                // prevent self-greeting
+                if (msg.getNick().equals(msg.getConnection().getNick())) {
+                    return;
+                }
+                
                 synchronized (joins) {
                     
                     if (timer == null) {
