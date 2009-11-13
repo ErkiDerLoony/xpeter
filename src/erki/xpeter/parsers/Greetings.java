@@ -36,13 +36,12 @@ import erki.api.util.Observer;
 import erki.xpeter.Bot;
 import erki.xpeter.con.Connection;
 import erki.xpeter.msg.DelayedMessage;
-import erki.xpeter.msg.Message;
 import erki.xpeter.msg.TextMessage;
 import erki.xpeter.msg.UserJoinedMessage;
 import erki.xpeter.util.BotApi;
 
 /**
- * A {@link Parser} that greets people when they greet the bot or when they join the chat.
+ * A {@link Parser} that greets people when they greet the bot.
  * 
  * @author Edgar Kalkowski
  */
@@ -64,21 +63,42 @@ public class Greetings implements Parser, Observer<TextMessage> {
         
         bot.register(UserJoinedMessage.class, new Observer<UserJoinedMessage>() {
             
+            private Timer timer = null;
+            
+            private LinkedList<String> joins = new LinkedList<String>();
+            
             @Override
             public void inform(UserJoinedMessage msg) {
-                Connection con = msg.getConnection();
+                final Connection con = msg.getConnection();
                 
-                if (checkTimer(msg.getNick())) {
-                    int rnd = (int) (Math.random() * hello.size());
-                    con.send(new Message(hello.get(rnd).substring(0, 1).toUpperCase()
-                            + hello.get(rnd).substring(1) + " " + msg.getNick() + "!"));
-                    rnd = (int) (Math.random() * 5);
+                synchronized (joins) {
                     
-                    if (rnd == 0) {
-                        rnd = (int) (Math.random() * phrases.size());
-                        con.send(new DelayedMessage(phrases.get(rnd), 3000));
+                    if (timer == null) {
+                        joins.add(msg.getNick());
+                        
+                        timer = new Timer(5000, new ActionListener() {
+                            
+                            @Override
+                            public void actionPerformed(ActionEvent e) {
+                                
+                                synchronized (joins) {
+                                    int rnd = (int) (Math.random() * hello.size());
+                                    con.send(hello.get(rnd).substring(0, 1).toUpperCase()
+                                            + hello.get(rnd).substring(1) + " "
+                                            + BotApi.enumerate(joins) + "!");
+                                    timer = null;
+                                }
+                            }
+                        });
+                        
+                    } else {
+                        joins.add(msg.getNick());
+                        timer.restart();
                     }
                 }
+                
+                timer.setRepeats(false);
+                timer.start();
             }
         });
     }
@@ -300,20 +320,7 @@ public class Greetings implements Parser, Observer<TextMessage> {
         if (addresses && text.matches(listHello)) {
             
             if (this.hello.size() > 1) {
-                String response = "Ich kenne die Begrüßungen ";
-                
-                for (int i = 0; i < this.hello.size(); i++) {
-                    
-                    if (i < this.hello.size() - 2) {
-                        response += this.hello.get(i) + ", ";
-                    } else if (i == this.hello.size() - 2) {
-                        response += this.hello.get(i) + " und ";
-                    } else {
-                        response += this.hello.get(i) + ".";
-                    }
-                }
-                
-                con.send(response);
+                con.send("Ich kenne die Begrüßungen " + BotApi.enumerate(this.hello));
             } else if (this.hello.size() == 1) {
                 con.send("Ich kenne lediglich die Begrüßung " + this.hello.get(0) + ".");
             } else {
@@ -326,20 +333,7 @@ public class Greetings implements Parser, Observer<TextMessage> {
         if (addresses && text.matches(listCu)) {
             
             if (this.cu.size() > 1) {
-                String response = "Ich kenne die Verabschiedungen ";
-                
-                for (int i = 0; i < this.cu.size(); i++) {
-                    
-                    if (i < this.cu.size() - 2) {
-                        response += this.cu.get(i) + ", ";
-                    } else if (i == this.cu.size() - 2) {
-                        response += this.cu.get(i) + " und ";
-                    } else {
-                        response += this.cu.get(i) + ".";
-                    }
-                }
-                
-                con.send(response);
+                con.send("Ich kenne die Verabschiedungen " + BotApi.enumerate(this.cu));
             } else if (this.cu.size() == 1) {
                 con.send("Ich kenne lediglich die Verabschiedung " + this.cu.get(0) + ".");
             } else {
@@ -353,20 +347,7 @@ public class Greetings implements Parser, Observer<TextMessage> {
         if (addresses && text.matches(listPhrases)) {
             
             if (this.phrases.size() > 1) {
-                String response = "Ich kenne die Begrüßungen ";
-                
-                for (int i = 0; i < this.phrases.size(); i++) {
-                    
-                    if (i < this.phrases.size() - 2) {
-                        response += this.phrases.get(i) + ", ";
-                    } else if (i == this.phrases.size() - 2) {
-                        response += this.phrases.get(i) + " und ";
-                    } else {
-                        response += this.phrases.get(i) + ".";
-                    }
-                }
-                
-                con.send(response);
+                con.send("Ich kenne die Begrüßungen " + BotApi.enumerate(this.phrases));
             } else if (this.phrases.size() == 1) {
                 con.send("Ich kenne lediglich die eine Begrüßungsfloskel " + this.phrases.get(0)
                         + ".");

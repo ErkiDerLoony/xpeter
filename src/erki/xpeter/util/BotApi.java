@@ -1,6 +1,7 @@
 package erki.xpeter.util;
 
 import java.io.File;
+import java.util.List;
 
 /**
  * This class contains static helper methods that are convenient for many parser implementations. If
@@ -10,6 +11,31 @@ import java.io.File;
  * @author Edgar Kalkowski
  */
 public class BotApi {
+    
+    /**
+     * Enumerate things, i.e. place them in one string separated by commas except for the last two
+     * items which are separated by “und”.
+     * 
+     * @param things
+     *        The things to enumerate.
+     * @return The one string that enumerates all the given things.
+     */
+    public static String enumerate(List<? extends Object> things) {
+        String response = "";
+        
+        for (int i = 0; i < things.size(); i++) {
+            
+            if (i < things.size() - 2) {
+                response += things.get(i).toString() + ", ";
+            } else if (i == things.size() - 2) {
+                response += things.get(i).toString() + " und ";
+            } else {
+                response += things.get(i).toString();
+            }
+        }
+        
+        return response;
+    }
     
     /**
      * Find out whether the current directory already is the “bin” directory or not and try to
