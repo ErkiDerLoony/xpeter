@@ -17,6 +17,11 @@
 
 package erki.xpeter.con.xmpp;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.Timer;
+
 import erki.api.util.Log;
 import erki.xpeter.Bot;
 import erki.xpeter.msg.NickChangeMessage;
@@ -37,6 +42,8 @@ public class ParticipantStatusListener implements
     
     private Bot bot;
     
+    private String lastNickChangeNewNick = "";
+    
     public ParticipantStatusListener(XmppConnection con, Bot bot) {
         this.con = con;
         this.bot = bot;
@@ -54,25 +61,31 @@ public class ParticipantStatusListener implements
     
     @Override
     public void banned(String participant, String actor, String reason) {
-        Log.debug(participant + " was banned by " + actor + " (" + reason + ").");
+        Log.debug(getNick(participant) + " was banned by " + actor + " (" + reason + ").");
         bot.process(new UserLeftMessage(getNick(participant), "Banned: " + reason, con));
     }
     
     @Override
     public void joined(String participant) {
-        Log.debug(participant + " has joined the chat.");
-        bot.process(new UserJoinedMessage(getNick(participant), con));
+        
+        if (getNick(participant).equals(lastNickChangeNewNick)) {
+            Log.debug("Though it looks like " + getNick(participant)
+                    + " joined the chat, it really was only a nick change.");
+        } else {
+            Log.debug(getNick(participant) + " has joined the chat.");
+            bot.process(new UserJoinedMessage(getNick(participant), con));
+        }
     }
     
     @Override
     public void kicked(String participant, String actor, String reason) {
-        Log.debug(participant + " was kicked by " + actor + " (" + reason + ").");
+        Log.debug(getNick(participant) + " was kicked by " + actor + " (" + reason + ").");
         bot.process(new UserLeftMessage(getNick(participant), "Kicked: " + reason, con));
     }
     
     @Override
     public void left(String participant) {
-        Log.debug(participant + " left the chat.");
+        Log.debug(getNick(participant) + " left the chat.");
         bot.process(new UserLeftMessage(getNick(participant), "", con));
     }
     
@@ -98,8 +111,19 @@ public class ParticipantStatusListener implements
     
     @Override
     public void nicknameChanged(String participant, String newNickname) {
-        Log.debug(participant + " is now known as " + newNickname + ".");
+        Log.debug(getNick(participant) + " is now known as " + newNickname + ".");
+        lastNickChangeNewNick = newNickname;
         bot.process(new NickChangeMessage(getNick(participant), newNickname, con));
+        
+        // wait 5 seconds for the join message the protocol sends out and discard it
+        new Timer(5000, new ActionListener() {
+            
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                lastNickChangeNewNick = "";
+            }
+            
+        }).start();
     }
     
     @Override

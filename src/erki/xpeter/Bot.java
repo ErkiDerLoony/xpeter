@@ -267,7 +267,13 @@ public class Bot {
             Log.debug("Parsing a " + msg.getClass().getSimpleName() + ".");
             LinkedList<Observer<? extends Message>> parsers = parserMapping.get(msg.getClass()
                     .getCanonicalName());
-            Log.debug("Registered parsers are " + parsers + ".");
+            
+            if (parsers == null) {
+                Log.debug("There are no parsers registered.");
+                return;
+            } else {
+                Log.debug("Registered parsers are " + parsers + ".");
+            }
             
             for (Observer parser : parsers) {
                 
