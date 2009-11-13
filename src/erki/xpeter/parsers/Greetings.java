@@ -76,7 +76,7 @@ public class Greetings implements Parser, Observer<TextMessage> {
                     if (timer == null) {
                         joins.add(msg.getNick());
                         
-                        timer = new Timer(5000, new ActionListener() {
+                        timer = new Timer(3000, new ActionListener() {
                             
                             @Override
                             public void actionPerformed(ActionEvent e) {
@@ -86,6 +86,7 @@ public class Greetings implements Parser, Observer<TextMessage> {
                                     con.send(hello.get(rnd).substring(0, 1).toUpperCase()
                                             + hello.get(rnd).substring(1) + " "
                                             + BotApi.enumerate(joins) + "!");
+                                    joins.clear();
                                     timer = null;
                                 }
                             }
