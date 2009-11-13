@@ -55,13 +55,15 @@ public class Greetings implements Parser, Observer<TextMessage> {
     
     private static final String GREETINGS_FILE = "config" + File.separator + "greetings";
     
+    private Observer<UserJoinedMessage> userJoinedObserver;
+    
     @Override
     public void init(final Bot bot) {
         Log.debug("Initializing.");
         loadGreetings();
         bot.register(TextMessage.class, this);
         
-        bot.register(UserJoinedMessage.class, new Observer<UserJoinedMessage>() {
+        userJoinedObserver = new Observer<UserJoinedMessage>() {
             
             private Timer timer = null;
             
@@ -101,13 +103,15 @@ public class Greetings implements Parser, Observer<TextMessage> {
                 timer.setRepeats(false);
                 timer.start();
             }
-        });
+        };
+        
+        bot.register(UserJoinedMessage.class, userJoinedObserver);
     }
     
     @Override
     public void destroy(Bot bot) {
-        Log.debug("Destroying.");
         bot.deregister(TextMessage.class, this);
+        bot.deregister(UserJoinedMessage.class, userJoinedObserver);
     }
     
     @SuppressWarnings("unchecked")
