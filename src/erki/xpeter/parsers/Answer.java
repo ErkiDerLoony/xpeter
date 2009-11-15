@@ -17,6 +17,8 @@
 
 package erki.xpeter.parsers;
 
+import java.util.LinkedList;
+
 import erki.api.util.Observer;
 import erki.xpeter.Bot;
 import erki.xpeter.con.Connection;
@@ -24,7 +26,12 @@ import erki.xpeter.msg.TextMessage;
 import erki.xpeter.util.BotApi;
 
 /**
- * This {@link Parser} can answer questions sent to the chat in the form: [ ] A oder [ ] B?
+ * This {@link Parser} can answer questions. The questions can be of two forms:
+ * <ol>
+ * <li>( ) a ( ) b: In this case maximal one option is selected by the bot
+ * <li>[ ] a [ ] b: In this case one or more options are selected by the bot
+ * </ol>
+ * This means that the two questions “( ) a” and “[ ] a” are handled equally.
  * 
  * @author Edgar Kalkowski
  */
@@ -46,28 +53,59 @@ public class Answer implements Parser, Observer<TextMessage> {
         Connection con = msg.getConnection();
         String nick = con.getNick();
         
-        if (!BotApi.addresses(text, nick)) {
+        // don’t reply to self
+        if (msg.getNick().equals(nick)) {
             return;
         }
         
-        text = BotApi.trimNick(text, nick);
-        String question = "\\[ \\](.*?)\\[ \\](.*?)";
+        // omit the bot’s nick
+        if (BotApi.addresses(text, nick)) {
+            text = BotApi.trimNick(text, nick);
+        }
         
-        if (text.matches(question)) {
+        // check box
+        if (text.contains("[ ]")) {
             String response = "";
-            String[] split = text.split("\\[ \\]");
-            int rnd = (int) (Math.random() * (split.length - 1));
             
-            for (int i = 0; i < split.length; i++) {
+            while (text.contains("[ ]")) {
+                response += text.substring(0, text.indexOf("[ ]"));
+                text = text.substring(text.indexOf("[ ]") + 3);
+                int rnd = (int) (Math.random() * 2);
                 
-                if (i != rnd) {
-                    response += split[i] + "[ ]";
+                if (rnd == 0) {
+                    response += "[x]";
                 } else {
-                    response += split[i] + "[x]";
+                    response += "[ ]";
                 }
             }
             
-            con.send(response.substring(0, response.length() - 3));
+            con.send(response + text);
+        }
+        
+        // option box
+        if (text.contains("( )")) {
+            String response = "";
+            LinkedList<String> options = new LinkedList<String>();
+            
+            while (text.contains("( )")) {
+                options.add(text.substring(0, text.indexOf("( )")));
+                text = text.substring(text.indexOf("( )") + 3);
+            }
+            
+            options.add(text);
+            int choice = (int) (Math.random() * (options.size() - 1));
+            
+            for (int i = 0; i < options.size() - 1; i++) {
+                response += options.get(i);
+                
+                if (i == choice) {
+                    response += "(x)";
+                } else {
+                    response += "( )";
+                }
+            }
+            
+            con.send(response + options.get(options.size() - 1));
         }
     }
 }

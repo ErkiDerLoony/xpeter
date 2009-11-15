@@ -80,7 +80,7 @@ public class Greetings implements Parser, Observer<TextMessage> {
                 
                 synchronized (joins) {
                     
-                    if (timer == null) {
+                    if (timer == null && checkTimer(msg.getNick())) {
                         joins.add(msg.getNick());
                         
                         timer = new Timer(3000, new ActionListener() {
@@ -89,24 +89,28 @@ public class Greetings implements Parser, Observer<TextMessage> {
                             public void actionPerformed(ActionEvent e) {
                                 
                                 synchronized (joins) {
-                                    int rnd = (int) (Math.random() * hello.size());
-                                    con.send(hello.get(rnd).substring(0, 1).toUpperCase()
-                                            + hello.get(rnd).substring(1) + " "
-                                            + BotApi.enumerate(joins) + "!");
+                                    
+                                    // only greet if it’s not too many people
+                                    if (joins.size() < 3) {
+                                        int rnd = (int) (Math.random() * hello.size());
+                                        con.send(hello.get(rnd).substring(0, 1).toUpperCase()
+                                                + hello.get(rnd).substring(1) + " "
+                                                + BotApi.enumerate(joins) + "!");
+                                    }
+                                    
                                     joins.clear();
                                     timer = null;
                                 }
                             }
                         });
                         
-                    } else {
+                        timer.setRepeats(false);
+                        timer.start();
+                    } else if (timer != null && checkTimer(msg.getNick())) {
                         joins.add(msg.getNick());
                         timer.restart();
                     }
                 }
-                
-                timer.setRepeats(false);
-                timer.start();
             }
         };
         
@@ -285,20 +289,6 @@ public class Greetings implements Parser, Observer<TextMessage> {
                 }
             }
             
-        } else {
-            
-            hello = "(.*?[ ,:] ?" + greeting() + "[\\.,!?]?|" + greeting() + "[ ,:].*?)";
-            
-            if (text.matches(hello) && !msg.getNick().equals(con.getNick())) {
-                Log.info(msg.getNick() + " hat gegrüßt.");
-                int rnd = (int) (Math.random() * 3);
-                
-                if (rnd == 0) {
-                    rnd = (int) (Math.random() * this.hello.size());
-                    con.send(this.hello.get(rnd).substring(0, 1).toUpperCase()
-                            + this.hello.get(rnd).substring(1) + " " + msg.getNick() + "!");
-                }
-            }
         }
         
         String bye = "(" + nick + "[:,;]?[ ]?" + bye() + "[\\.,!?]?|" + bye() + "[:,;]? " + nick
@@ -309,20 +299,6 @@ public class Greetings implements Parser, Observer<TextMessage> {
             int rnd = (int) (Math.random() * this.cu.size());
             con.send(this.cu.get(rnd).substring(0, 1).toUpperCase() + this.cu.get(rnd).substring(1)
                     + " " + msg.getNick() + "!");
-        } else {
-            
-            bye = "(.*?[ ,:] ?" + bye() + "[\\.,!?]?|" + bye() + "[ ,:].*?)";
-            
-            if (text.matches(bye) && !msg.getNick().equals(con.getNick())) {
-                Log.info(msg.getNick() + " hat sich verabschiedet.");
-                int rnd = (int) (Math.random() * 3);
-                
-                if (rnd == 0) {
-                    rnd = (int) (Math.random() * this.cu.size());
-                    con.send(this.cu.get(rnd).substring(0, 1).toUpperCase()
-                            + this.cu.get(rnd).substring(1) + " " + msg.getNick() + "!");
-                }
-            }
         }
         
         String listHello = "[wW]elche [bB]egr(ü|ue)(ss|ß)ungen kennst [Dd]u( alles| so( alles)?)?\\?";
