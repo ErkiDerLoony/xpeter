@@ -75,6 +75,9 @@ public class ServerInputReader extends Thread {
                 } else if (line.toUpperCase().startsWith("JOIN ")) {
                     line = line.substring("JOIN ".length());
                     bot.process(new UserJoinedMessage(line, con));
+                } else if (line.toUpperCase().startsWith("USER ")) {
+                    line = line.substring("USER XX ".length());
+                    bot.process(new UserJoinedMessage(line, con));
                 } else if (line.toUpperCase().equals("PING")) {
                     con.send(new RawMessage("PONG"));
                 } else {
