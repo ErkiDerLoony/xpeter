@@ -107,7 +107,7 @@ public class SimpleMailbox implements Parser, Observer<TextMessage> {
         
         text = BotApi.trimNick(text, con.getNick());
         
-        if (text.matches("[fF](ue|ü)r wen (sind|hast du) ((so )?alles )?[nN]achrichten "
+        if (text.matches("[fF](ue|ü)r wen (sind|hast du) ((so )?alles |im [Mm]oment)?[nN]achrichten "
                 + "gespeichert\\?")
                 || text.matches("[wW]as f(ue|ü)r [nN]achrichten (hast|kennst) "
                         + "du( gespeichert| so)?\\?")

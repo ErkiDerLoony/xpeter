@@ -17,12 +17,16 @@
 
 package erki.xpeter.parsers.sms;
 
+import java.io.Serializable;
+
 /**
  * A container for a short message and its sender.
  * 
  * @author Edgar Kalkowski
  */
-public class ShortMessage {
+public class ShortMessage implements Serializable {
+    
+    private static final long serialVersionUID = 1974654312661296133L;
     
     private String msg;
     
