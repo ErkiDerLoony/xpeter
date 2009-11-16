@@ -2,6 +2,8 @@ package erki.xpeter.con.erkitalk;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.LinkedList;
 
 import erki.api.util.Log;
 import erki.xpeter.Bot;
@@ -25,6 +27,8 @@ public class ServerInputReader extends Thread {
     private BufferedReader socketIn;
     
     private ErkiTalkConnection con;
+    
+    private Collection<String> userList = new LinkedList<String>();
     
     public ServerInputReader(Bot bot, ErkiTalkConnection con, BufferedReader socketIn) {
         this.bot = bot;
@@ -60,23 +64,44 @@ public class ServerInputReader extends Thread {
                     String oldNick = line.substring(0, line.indexOf(':'));
                     String newNick = line.substring(line.indexOf(':') + 2);
                     Log.info(oldNick + " is now known as " + newNick + ".");
+                    
+                    synchronized (userList) {
+                        userList.remove(oldNick);
+                        userList.add(newNick);
+                    }
+                    
                     bot.process(new NickChangeMessage(oldNick, newNick, con));
                 } else if (line.toUpperCase().startsWith("QUIT ")) {
                     line = line.substring("QUIT ".length());
+                    String nick, reason = "";
                     
                     if (line.contains(":")) {
-                        String nick = line.substring(0, line.indexOf(':'));
-                        String reason = line.substring(line.indexOf(':') + 2);
-                        bot.process(new UserLeftMessage(nick, reason, con));
+                        nick = line.substring(0, line.indexOf(':'));
+                        reason = line.substring(line.indexOf(':') + 2);
                     } else {
-                        bot.process(new UserLeftMessage(line, "", con));
+                        nick = line;
                     }
                     
+                    synchronized (userList) {
+                        userList.remove(nick);
+                    }
+                    
+                    bot.process(new UserLeftMessage(nick, reason, con));
                 } else if (line.toUpperCase().startsWith("JOIN ")) {
                     line = line.substring("JOIN ".length());
+                    
+                    synchronized (userList) {
+                        userList.add(line);
+                    }
+                    
                     bot.process(new UserJoinedMessage(line, con));
                 } else if (line.toUpperCase().startsWith("USER ")) {
                     line = line.substring("USER XX ".length());
+                    
+                    synchronized (userList) {
+                        userList.add(line);
+                    }
+                    
                     bot.process(new UserJoinedMessage(line, con));
                 } else if (line.toUpperCase().equals("PING")) {
                     con.send(new RawMessage("PONG"));
@@ -89,5 +114,21 @@ public class ServerInputReader extends Thread {
                 break;
             }
         }
+    }
+    
+    /**
+     * Access the currently online users of this chat. The returned Collection is copied so no harm
+     * can be done editing it.
+     * 
+     * @return A Collection of currently online users of this chat.
+     */
+    public Collection<String> getUserList() {
+        LinkedList<String> users = new LinkedList<String>();
+        
+        synchronized (userList) {
+            users.addAll(userList);
+        }
+        
+        return users;
     }
 }

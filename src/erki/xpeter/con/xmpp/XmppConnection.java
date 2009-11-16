@@ -24,6 +24,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -66,6 +67,8 @@ public class XmppConnection implements Connection {
     private Bot bot;
     
     private XMPPConnection con;
+
+    private ParticipantStatusListener statusListener;
     
     /**
      * Create a new XmppConnection to an XMPP server.
@@ -116,7 +119,8 @@ public class XmppConnection implements Connection {
                 // chat.addInvitationRejectionListener(new InvitationRejectionListener());
                 chat.addMessageListener(packetListener);
                 // chat.addParticipantListener(packetListener);
-                chat.addParticipantStatusListener(new ParticipantStatusListener(this, bot));
+                statusListener = new ParticipantStatusListener(this, bot);
+                chat.addParticipantStatusListener(statusListener);
                 // chat.addPresenceInterceptor(new PresenceInterceptor());
                 // chat.addSubjectUpdatedListener(new SubjectUpdatedListener());
                 chat.addUserStatusListener(new UserStatusListener(this));
@@ -270,5 +274,10 @@ public class XmppConnection implements Connection {
     @Override
     public String toString() {
         return "Connection(xmpp://" + channel + "@" + host + ":" + port + ")";
+    }
+
+    @Override
+    public Collection<String> getUserList() {
+        return statusListener.getUserList();
     }
 }

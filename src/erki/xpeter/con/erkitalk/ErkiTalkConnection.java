@@ -7,6 +7,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -37,6 +38,8 @@ public class ErkiTalkConnection implements Connection {
     private boolean reconnect = false;
     
     private Socket socket;
+    
+    private ServerInputReader serverInputReader;
     
     public ErkiTalkConnection(Bot bot, String host, int port, String nick) {
         this.bot = bot;
@@ -111,8 +114,8 @@ public class ErkiTalkConnection implements Connection {
                 
                 BufferedReader socketIn = new BufferedReader(new InputStreamReader(socket
                         .getInputStream(), "UTF-8"));
-                ServerInputReader inputReader = new ServerInputReader(bot, this, socketIn);
-                inputReader.start();
+                serverInputReader = new ServerInputReader(bot, this, socketIn);
+                serverInputReader.start();
                 
                 final PrintWriter socketOut = new PrintWriter(new OutputStreamWriter(socket
                         .getOutputStream(), "UTF-8"), true);
@@ -166,5 +169,10 @@ public class ErkiTalkConnection implements Connection {
                 }
             }
         }
+    }
+    
+    @Override
+    public Collection<String> getUserList() {
+        return serverInputReader.getUserList();
     }
 }

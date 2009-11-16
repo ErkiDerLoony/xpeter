@@ -111,7 +111,14 @@ public class SimpleMailbox implements Parser, Observer<TextMessage> {
             String nick = text.replaceAll(match, "$2");
             String message = text.replaceAll(match, "$4");
             Log.debug("Recognized “" + message + "” to »" + nick + "«.");
-            add(nick, message, msg.getNick());
+            
+            if (con.getUserList().contains(nick)) {
+                con.send("Sag’s doch selber! " + nick + " ist ja grade online!");
+            } else {
+                add(nick, message, msg.getNick());
+                con.send("Ok, mach ich.");
+            }
+            
             return;
         }
         
@@ -121,7 +128,13 @@ public class SimpleMailbox implements Parser, Observer<TextMessage> {
             String nick = text.replaceAll(match, "$2");
             String message = text.replaceAll(match, "$3");
             Log.debug("Recognized “" + message + "” to »" + nick + "«.");
-            add(nick, message, msg.getNick());
+            
+            if (con.getUserList().contains(nick)) {
+                con.send("Sag’s doch selber! " + nick + " ist doch grade online!");
+            } else {
+                add(nick, message, msg.getNick());
+                con.send("Ok, mach ich.");
+            }
         }
     }
     

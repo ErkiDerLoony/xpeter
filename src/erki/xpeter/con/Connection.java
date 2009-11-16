@@ -17,6 +17,8 @@
 
 package erki.xpeter.con;
 
+import java.util.Collection;
+
 import erki.xpeter.msg.Message;
 import erki.xpeter.msg.TextMessage;
 import erki.xpeter.parsers.Interconnector;
@@ -60,6 +62,13 @@ public interface Connection extends Runnable {
      * @return The nickname of the bot.
      */
     public String getNick();
+    
+    /**
+     * Access the user list of this chat.
+     * 
+     * @return A Collection that contains all the users that are currently online in this chat.
+     */
+    public Collection<String> getUserList();
     
     /**
      * The {@link Interconnector} parser forwards messages received from one connection to all other

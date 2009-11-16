@@ -19,6 +19,8 @@ package erki.xpeter.con.xmpp;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Collection;
+import java.util.LinkedList;
 
 import javax.swing.Timer;
 
@@ -44,6 +46,8 @@ public class ParticipantStatusListener implements
     
     private String lastNickChangeNewNick = "";
     
+    private Collection<String> userList = new LinkedList<String>();
+    
     public ParticipantStatusListener(XmppConnection con, Bot bot) {
         this.con = con;
         this.bot = bot;
@@ -62,6 +66,11 @@ public class ParticipantStatusListener implements
     @Override
     public void banned(String participant, String actor, String reason) {
         Log.debug(getNick(participant) + " was banned by " + actor + " (" + reason + ").");
+        
+        synchronized (userList) {
+            userList.remove(getNick(participant));
+        }
+        
         bot.process(new UserLeftMessage(getNick(participant), "Banned: " + reason, con));
     }
     
@@ -73,6 +82,11 @@ public class ParticipantStatusListener implements
                     + " joined the chat, it really was only a nick change.");
         } else {
             Log.debug(getNick(participant) + " has joined the chat.");
+            
+            synchronized (userList) {
+                userList.add(getNick(participant));
+            }
+            
             bot.process(new UserJoinedMessage(getNick(participant), con));
         }
     }
@@ -80,12 +94,22 @@ public class ParticipantStatusListener implements
     @Override
     public void kicked(String participant, String actor, String reason) {
         Log.debug(getNick(participant) + " was kicked by " + actor + " (" + reason + ").");
+        
+        synchronized (userList) {
+            userList.remove(getNick(participant));
+        }
+        
         bot.process(new UserLeftMessage(getNick(participant), "Kicked: " + reason, con));
     }
     
     @Override
     public void left(String participant) {
         Log.debug(getNick(participant) + " left the chat.");
+        
+        synchronized (userList) {
+            userList.remove(getNick(participant));
+        }
+        
         bot.process(new UserLeftMessage(getNick(participant), "", con));
     }
     
@@ -113,6 +137,12 @@ public class ParticipantStatusListener implements
     public void nicknameChanged(String participant, String newNickname) {
         Log.debug(getNick(participant) + " is now known as " + newNickname + ".");
         lastNickChangeNewNick = newNickname;
+        
+        synchronized (userList) {
+            userList.remove(getNick(participant));
+            userList.add(newNickname);
+        }
+        
         bot.process(new NickChangeMessage(getNick(participant), newNickname, con));
         
         // wait 5 seconds for the join message the protocol sends out and discard it
@@ -151,5 +181,21 @@ public class ParticipantStatusListener implements
         nick = nick.substring(nick.indexOf('@'));
         nick = nick.substring(nick.indexOf('/') + 1);
         return nick;
+    }
+    
+    /**
+     * Access the current list of online users of this chat. The returned Collection is copied so no
+     * harm can be done editing it.
+     * 
+     * @return A Collection of currently online users.
+     */
+    public Collection<String> getUserList() {
+        LinkedList<String> users = new LinkedList<String>();
+        
+        synchronized (userList) {
+            users.addAll(userList);
+        }
+        
+        return users;
     }
 }

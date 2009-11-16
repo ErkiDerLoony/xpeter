@@ -168,6 +168,16 @@ public class Bot {
     }
     
     /**
+     * Access all connections of this bot. The returned instances of Connection are no copies! So
+     * don’t mess with them! ;)
+     * 
+     * @return A Collection of all Connections of this bot.
+     */
+    public Collection<Connection> getConnections() {
+        return cons;
+    }
+    
+    /**
      * Broadcast a message to all connections currently available to this bot.
      * 
      * @param msg
