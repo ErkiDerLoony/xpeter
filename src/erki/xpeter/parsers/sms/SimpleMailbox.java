@@ -31,6 +31,7 @@ import erki.api.util.Log;
 import erki.api.util.Observer;
 import erki.xpeter.Bot;
 import erki.xpeter.con.Connection;
+import erki.xpeter.msg.DelayedMessage;
 import erki.xpeter.msg.NickChangeMessage;
 import erki.xpeter.msg.TextMessage;
 import erki.xpeter.msg.UserJoinedMessage;
@@ -87,8 +88,8 @@ public class SimpleMailbox implements Parser, Observer<TextMessage> {
                 LinkedList<ShortMessage> sms = msgs.get(nick);
                 
                 for (ShortMessage m : sms) {
-                    con.send(nick + ": Ich soll dir von " + m.getSender() + " sagen: "
-                            + m.getMessage());
+                    con.send(new DelayedMessage(nick + ": Ich soll dir von " + m.getSender()
+                            + " sagen: " + m.getMessage(), 3000));
                 }
                 
                 msgs.remove(nick);
@@ -107,17 +108,18 @@ public class SimpleMailbox implements Parser, Observer<TextMessage> {
         
         text = BotApi.trimNick(text, con.getNick());
         
-        if (text.matches("[fF](ue|ü)r wen (sind|hast du) ((so )?alles |im [Mm]oment)?[nN]achrichten "
-                + "gespeichert\\?")
+        if (text
+                .matches("[fF](ue|ü)r wen (sind|hast du) ((so )?alles |im [Mm]oment)?[nN]achrichten "
+                        + "gespeichert\\?")
                 || text.matches("[wW]as f(ue|ü)r [nN]achrichten (hast|kennst) "
                         + "du( gespeichert| so)?\\?")
                 || text.matches("[mM]ailbox ?[sS]tatus\\??!?\\.?")) {
             
             if (msgs.isEmpty()) {
-                con.send("Im Moment sind keine Nachrichten gespeichert.");
+                con.send(new DelayedMessage("Im Moment sind keine Nachrichten gespeichert.", 3000));
             } else {
-                con.send("Im Moment sind Nachrichten für " + BotApi.enumerate(msgs.keySet())
-                        + " gespeichert.");
+                con.send(new DelayedMessage("Im Moment sind Nachrichten für "
+                        + BotApi.enumerate(msgs.keySet()) + " gespeichert.", 4000));
             }
             
             return;
@@ -131,10 +133,11 @@ public class SimpleMailbox implements Parser, Observer<TextMessage> {
             Log.debug("Recognized “" + message + "” to »" + nick + "«.");
             
             if (con.getUserList().contains(nick)) {
-                con.send("Sag’s doch selber! " + nick + " ist ja grade online!");
+                con.send(new DelayedMessage("Sag’s doch selber! " + nick + " ist ja grade online!",
+                        1500));
             } else {
                 add(nick, message, msg.getNick());
-                con.send("Ok, mach ich.");
+                con.send(new DelayedMessage("Ok, mach ich.", 2000));
             }
             
             return;
@@ -148,10 +151,11 @@ public class SimpleMailbox implements Parser, Observer<TextMessage> {
             Log.debug("Recognized “" + message + "” to »" + nick + "«.");
             
             if (con.getUserList().contains(nick)) {
-                con.send("Sag’s doch selber! " + nick + " ist doch grade online!");
+                con.send(new DelayedMessage("Sag’s doch selber! " + nick
+                        + " ist doch grade online!", 1500));
             } else {
                 add(nick, message, msg.getNick());
-                con.send("Ok, mach ich.");
+                con.send(new DelayedMessage("Ok, mach ich.", 2000));
             }
         }
     }
