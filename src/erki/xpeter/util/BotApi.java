@@ -1,7 +1,8 @@
 package erki.xpeter.util;
 
 import java.io.File;
-import java.util.List;
+import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * This class contains static helper methods that are convenient for many parser implementations. If
@@ -20,18 +21,23 @@ public class BotApi {
      *        The things to enumerate.
      * @return The one string that enumerates all the given things.
      */
-    public static String enumerate(List<? extends Object> things) {
+    public static String enumerate(Collection<? extends Object> things) {
         String response = "";
+        int i = 0;
+        Iterator<? extends Object> it = things.iterator();
         
-        for (int i = 0; i < things.size(); i++) {
+        while (it.hasNext()) {
+            Object thing = it.next();
             
             if (i < things.size() - 2) {
-                response += things.get(i).toString() + ", ";
+                response += thing.toString() + ", ";
             } else if (i == things.size() - 2) {
-                response += things.get(i).toString() + " und ";
+                response += thing.toString() + " und ";
             } else {
-                response += things.get(i).toString();
+                response += thing.toString();
             }
+            
+            i++;
         }
         
         return response;

@@ -90,6 +90,8 @@ public class SimpleMailbox implements Parser, Observer<TextMessage> {
                     con.send(nick + ": Ich soll dir von " + m.getSender() + " sagen: "
                             + m.getMessage());
                 }
+                
+                msgs.remove(nick);
             }
         }
     }
@@ -104,6 +106,22 @@ public class SimpleMailbox implements Parser, Observer<TextMessage> {
         }
         
         text = BotApi.trimNick(text, con.getNick());
+        
+        if (text.matches("[fF](ue|ü)r wen (sind|hast du) ((so )?alles )?[nN]achrichten "
+                + "gespeichert\\?")
+                || text.matches("[wW]as f(ue|ü)r [nN]achrichten (hast|kennst) "
+                        + "du( gespeichert| so)?\\?")
+                || text.matches("[mM]ailbox ?[sS]tatus\\??!?\\.?")) {
+            
+            if (msgs.isEmpty()) {
+                con.send("Im Moment sind keine Nachrichten gespeichert.");
+            } else {
+                con.send("Im Moment sind Nachrichten für " + BotApi.enumerate(msgs.keySet())
+                        + " gespeichert.");
+            }
+            
+            return;
+        }
         
         String match = "[sS]ag( der| dem)? (.*)? mal( von mir)?: (.*)?";
         
@@ -148,6 +166,8 @@ public class SimpleMailbox implements Parser, Observer<TextMessage> {
             
             msgs.get(nick).add(new ShortMessage(msg, sender));
         }
+        
+        save();
     }
     
     @SuppressWarnings("unchecked")
