@@ -28,10 +28,9 @@ import erki.xpeter.util.BotApi;
 /**
  * This {@link Parser} can answer questions. The questions can be of two forms:
  * <ol>
- * <li>( ) a ( ) b: In this case maximal one option is selected by the bot
- * <li>[ ] a [ ] b: In this case one or more options are selected by the bot
+ * <li>( ) a ( ) b: In this case exactly one option is selected by the bot.
+ * <li>[ ] a [ ] b: In this case one or more options are selected by the bot.
  * </ol>
- * This means that the two questions “( ) a” and “[ ] a” are handled equally.
  * 
  * @author Edgar Kalkowski
  */
@@ -52,6 +51,7 @@ public class Answer implements Parser, Observer<TextMessage> {
         String text = msg.getText();
         Connection con = msg.getConnection();
         String nick = con.getNick();
+        boolean processed = false;
         
         // don’t reply to self
         if (msg.getNick().equals(nick)) {
@@ -79,7 +79,8 @@ public class Answer implements Parser, Observer<TextMessage> {
                 }
             }
             
-            con.send(response + text);
+            text = response + text;
+            processed = true;
         }
         
         // option box
@@ -105,7 +106,12 @@ public class Answer implements Parser, Observer<TextMessage> {
                 }
             }
             
-            con.send(response + options.get(options.size() - 1));
+            text = response + options.get(options.size() - 1);
+            processed = true;
+        }
+        
+        if (processed) {
+            con.send(text);
         }
     }
 }
