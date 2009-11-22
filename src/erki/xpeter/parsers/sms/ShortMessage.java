@@ -19,6 +19,8 @@ package erki.xpeter.parsers.sms;
 
 import java.io.Serializable;
 
+import erki.xpeter.util.BotApi;
+
 /**
  * A container for a short message and its sender.
  * 
@@ -32,16 +34,99 @@ public class ShortMessage implements Serializable {
     
     private String sender;
     
+    private long time;
+    
+    /**
+     * Create a new ShortMessage.
+     * 
+     * @param msg
+     *        The actual text of the message.
+     * @param sender
+     *        The nickname of the sender of the message.
+     */
     public ShortMessage(String msg, String sender) {
         this.msg = msg;
         this.sender = sender;
+        time = System.currentTimeMillis();
     }
     
+    /**
+     * Access the text of this message.
+     * 
+     * @return The text of this message.
+     */
     public String getMessage() {
         return msg;
     }
     
+    /**
+     * Access the sender of this message.
+     * 
+     * @return The nickname of the sender of this message.
+     */
     public String getSender() {
         return sender;
+    }
+    
+    private static String day(long days) {
+        
+        if (days == 1) {
+            return "einem Tag";
+        } else {
+            return BotApi.number(days) + " Tagen";
+        }
+    }
+    
+    private static String hour(long hours) {
+        
+        if (hours == 1) {
+            return "einer Stunde";
+        } else {
+            return BotApi.number(hours) + " Stunden";
+        }
+    }
+    
+    private static String min(long mins) {
+        
+        if (mins == 1) {
+            return "einer Minute";
+        } else {
+            return BotApi.number(mins) + " Minuten";
+        }
+    }
+    
+    private static String sec(long secs) {
+        
+        if (secs == 1) {
+            return "einer Sekunde";
+        } else {
+            return BotApi.number(secs) + " Sekunden";
+        }
+    }
+    
+    /**
+     * Describes the time that elapsed since this message was created.
+     * 
+     * @return A string representation of the time that elapsed since this message was created.
+     */
+    public String getDate() {
+        long diff = System.currentTimeMillis() - time;
+        long secs = diff / 1000;
+        long mins = secs / 60;
+        secs %= 60;
+        long hours = mins / 60;
+        mins %= 60;
+        long days = hours / 24;
+        hours %= 24;
+        
+        if (days == 0 && mins == 0 && hours == 0) {
+            return sec(secs);
+        } else if (days == 0 && hours == 0) {
+            return min(mins) + " und " + sec(secs);
+        } else if (days == 0) {
+            return hour(hours) + ", " + min(mins) + " und " + sec(secs);
+        } else {
+            return day(days) + ", " + hour(hours) + " und " + min(mins);
+        }
     }
 }

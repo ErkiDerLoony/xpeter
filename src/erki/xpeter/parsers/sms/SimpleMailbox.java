@@ -89,10 +89,11 @@ public class SimpleMailbox implements Parser, Observer<TextMessage> {
                 
                 for (ShortMessage m : sms) {
                     con.send(new DelayedMessage(nick + ": Ich soll dir von " + m.getSender()
-                            + " sagen: " + m.getMessage(), 3000));
+                            + " sagen: " + m.getMessage() + " (vor " + m.getDate() + ")", 3000));
                 }
                 
                 msgs.remove(nick);
+                save();
             }
         }
     }
@@ -115,11 +116,35 @@ public class SimpleMailbox implements Parser, Observer<TextMessage> {
                         + "du( gespeichert| so)?\\?")
                 || text.matches("[mM]ailbox ?[sS]tatus\\??!?\\.?")) {
             
-            if (msgs.isEmpty()) {
-                con.send(new DelayedMessage("Im Moment sind keine Nachrichten gespeichert.", 3000));
-            } else {
-                con.send(new DelayedMessage("Im Moment sind Nachrichten für "
-                        + BotApi.enumerate(msgs.keySet()) + " gespeichert.", 4000));
+            synchronized (msgs) {
+                
+                if (msgs.isEmpty()) {
+                    con.send(new DelayedMessage("Im Moment sind keine Nachrichten gespeichert.",
+                            3000));
+                } else if (msgs.size() == 1
+                        && msgs.get(msgs.keySet().iterator().next()).size() == 1) {
+                    con.send(new DelayedMessage("Im Moment ist eine Nachricht für "
+                            + msgs.keySet().iterator().next() + " gespeichert (seit "
+                            + msgs.get(msgs.keySet().iterator().next()).get(0).getDate() + ").",
+                            3000));
+                } else {
+                    String response = "Im Moment sind gespeichert:";
+                    
+                    for (String nick : msgs.keySet()) {
+                        
+                        if (msgs.get(nick).size() == 1) {
+                            response += "\n – eine Nachricht für " + nick + " (seit "
+                                    + msgs.get(nick).get(0).getDate() + ")";
+                        } else {
+                            response += "\n – " + BotApi.number(msgs.get(nick).size())
+                                    + " Nachrichten für " + nick + " (die älteste seit "
+                                    + msgs.get(nick).getFirst().getDate() + ", die neuste seit "
+                                    + msgs.get(nick).getLast().getDate() + ")";
+                        }
+                    }
+                    
+                    con.send(new DelayedMessage(response, 4000));
+                }
             }
             
             return;
@@ -168,7 +193,7 @@ public class SimpleMailbox implements Parser, Observer<TextMessage> {
                 msgs.put(nick, new LinkedList<ShortMessage>());
             }
             
-            msgs.get(nick).add(new ShortMessage(msg, sender));
+            msgs.get(nick).addLast(new ShortMessage(msg, sender));
         }
         
         save();

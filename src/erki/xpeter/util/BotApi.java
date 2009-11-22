@@ -14,6 +14,47 @@ import java.util.Iterator;
 public class BotApi {
     
     /**
+     * Create a string representation of a number. If the number is less or equal than 12 the number
+     * is written out in letters. Otherwise the returned string directly contains the number.
+     * 
+     * @param number
+     *        The number to transform into a String. Must be greater or equal 0 and not equal 1!
+     * @return A syntactically correct representation of the given number.
+     */
+    public static String number(long number) {
+        
+        if (number == 0) {
+            return "null";
+        } else if (number == 1) {
+            throw new IllegalArgumentException();
+        } else if (number == 2) {
+            return "zwei";
+        } else if (number == 3) {
+            return "drei";
+        } else if (number == 4) {
+            return "vier";
+        } else if (number == 5) {
+            return "fünf";
+        } else if (number == 6) {
+            return "sechs";
+        } else if (number == 7) {
+            return "sieben";
+        } else if (number == 8) {
+            return "acht";
+        } else if (number == 9) {
+            return "neun";
+        } else if (number == 10) {
+            return "zehn";
+        } else if (number == 11) {
+            return "elf";
+        } else if (number == 12) {
+            return "zwölf";
+        } else {
+            return "" + number;
+        }
+    }
+    
+    /**
      * Enumerate things, i.e. place them in one string separated by commas except for the last two
      * items which are separated by “und”.
      * 
