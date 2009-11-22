@@ -58,10 +58,12 @@ public class Answer implements Parser, Observer<TextMessage> {
             return;
         }
         
-        // omit the bot’s nick
-        if (BotApi.addresses(text, nick)) {
-            text = BotApi.trimNick(text, nick);
+        // only reply if asked
+        if (!BotApi.addresses(text, nick)) {
+            return;
         }
+        
+        text = BotApi.trimNick(text, nick);
         
         // check box
         if (text.contains("[ ]")) {
