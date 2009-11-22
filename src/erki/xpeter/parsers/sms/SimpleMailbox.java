@@ -89,7 +89,7 @@ public class SimpleMailbox implements Parser, Observer<TextMessage> {
                 
                 for (ShortMessage m : sms) {
                     con.send(new DelayedMessage(nick + ": Ich soll dir von " + m.getSender()
-                            + " sagen: " + m.getMessage() + " (vor " + m.getDate() + ")", 3000));
+                            + " sagen: " + m.getMessage() + " (vor " + m.getDate() + ")", 2000));
                 }
                 
                 msgs.remove(nick);
@@ -103,6 +103,8 @@ public class SimpleMailbox implements Parser, Observer<TextMessage> {
         Connection con = msg.getConnection();
         String text = msg.getText();
         
+        check(msg.getNick(), con);
+        
         if (!BotApi.addresses(text, con.getNick())) {
             return;
         }
@@ -114,7 +116,8 @@ public class SimpleMailbox implements Parser, Observer<TextMessage> {
                         + "gespeichert\\?")
                 || text.matches("[wW]as f(ue|ü)r [nN]achrichten (hast|kennst) "
                         + "du( gespeichert| so)?\\?")
-                || text.matches("[mM]ailbox ?[sS]tatus\\??!?\\.?")) {
+                || text.matches("[mM]ailbox ?[sS]tatus\\??!?\\.?")
+                || text.matches("[sS]tatus der [mM]ailbox\\??!?\\.?")) {
             
             synchronized (msgs) {
                 
@@ -156,15 +159,8 @@ public class SimpleMailbox implements Parser, Observer<TextMessage> {
             String nick = text.replaceAll(match, "$2");
             String message = text.replaceAll(match, "$4");
             Log.debug("Recognized “" + message + "” to »" + nick + "«.");
-            
-            if (con.getUserList().contains(nick)) {
-                con.send(new DelayedMessage("Sag’s doch selber! " + nick + " ist ja grade online!",
-                        1500));
-            } else {
-                add(nick, message, msg.getNick());
-                con.send(new DelayedMessage("Ok, mach ich.", 2000));
-            }
-            
+            add(nick, message, msg.getNick());
+            con.send(new DelayedMessage("Ok, mach ich.", 2000));
             return;
         }
         
@@ -174,14 +170,8 @@ public class SimpleMailbox implements Parser, Observer<TextMessage> {
             String nick = text.replaceAll(match, "$2");
             String message = text.replaceAll(match, "$3");
             Log.debug("Recognized “" + message + "” to »" + nick + "«.");
-            
-            if (con.getUserList().contains(nick)) {
-                con.send(new DelayedMessage("Sag’s doch selber! " + nick
-                        + " ist doch grade online!", 1500));
-            } else {
-                add(nick, message, msg.getNick());
-                con.send(new DelayedMessage("Ok, mach ich.", 2000));
-            }
+            add(nick, message, msg.getNick());
+            con.send(new DelayedMessage("Ok, mach ich.", 2000));
         }
     }
     
