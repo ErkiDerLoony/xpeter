@@ -78,6 +78,10 @@ public class LastFm implements Parser, Observer<TextMessage> {
         
         if (text.toLowerCase().trim().startsWith("np ")) {
             queryNick = text.substring("np ".length());
+            
+            if (nicks.containsKey(queryNick)) {
+                queryNick = nicks.get(queryNick);
+            }
         }
         
         if (text.toLowerCase().trim().equals("np")) {
@@ -93,6 +97,10 @@ public class LastFm implements Parser, Observer<TextMessage> {
         
         if (text.matches(match)) {
             queryNick = text.replaceAll(match, "$2");
+            
+            if (nicks.containsKey(queryNick)) {
+                queryNick = nicks.get(queryNick);
+            }
         }
         
         match = "[wW]as h(oe|ö)re ich( gerade)?\\??";
@@ -108,6 +116,10 @@ public class LastFm implements Parser, Observer<TextMessage> {
         
         if (queryNick != null) {
             Collection<Track> tracks = User.getRecentTracks(queryNick, LAST_FM_API_KEY);
+            
+            if (!queryNick.equals(msg.getNick())) {
+                queryNick = queryNick + " (" + msg.getNick() + ")";
+            }
             
             if (!tracks.isEmpty()) {
                 Track track = tracks.iterator().next();
