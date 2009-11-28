@@ -124,7 +124,7 @@ public class ShortMessage implements Serializable {
         } else if (days == 0 && hours == 0) {
             return min(mins) + " und " + sec(secs);
         } else if (days == 0) {
-            return hour(hours) + ", " + min(mins) + " und " + sec(secs);
+            return hour(hours) + " und " + min(mins);
         } else {
             return day(days) + ", " + hour(hours) + " und " + min(mins);
         }
