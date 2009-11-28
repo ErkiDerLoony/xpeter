@@ -115,6 +115,12 @@ public class GermanBash implements Parser, Observer<TextMessage> {
                     quote = quote.substring(0, quote.length() - 1);
                     quote = quote.replaceAll("&gt;", ">");
                     quote = quote.replaceAll("&lt;", "<");
+                    String orig = quote;
+                    
+                    while (!(quote = quote.replaceAll("([\\w\\W]*?)&quot;([\\w\\W]*?)&quot;([\\w\\W]*)",
+                            "$1„$2“$3")).equals(orig)) {
+                        orig = quote;
+                    }
                     
                     con.send("german-bash.org – Zitat Nr. " + number + ":\n" + quote);
                 } else if (website.contains("Ein Zitat mit dieser id existiert leider nicht.")) {
