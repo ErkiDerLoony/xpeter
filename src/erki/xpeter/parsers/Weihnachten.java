@@ -26,7 +26,8 @@ public class Weihnachten implements Parser, Observer<TextMessage> {
         Connection con = msg.getConnection();
         String text = msg.getText();
         
-        if (text.contains("Weihnachtsbaum") || text.contains("Weihnachten")) {
+        if (text.contains("Weihnachtsbaum") || text.contains("Weihnachten")
+                || text.contains("weihnachten") || text.contains("weihnachtsbaum")) {
             con.send(new DelayedMessage(getTree(), 3000));
         }
     }
