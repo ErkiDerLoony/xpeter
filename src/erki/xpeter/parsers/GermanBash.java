@@ -122,6 +122,10 @@ public class GermanBash implements Parser, Observer<TextMessage> {
                         orig = quote;
                     }
                     
+                    while (quote.endsWith("\n")) {
+                        quote = quote.substring(0, quote.length() - 1);
+                    }
+                    
                     con.send("german-bash.org – Zitat Nr. " + number + ":\n" + quote);
                 } else if (website.contains("Ein Zitat mit dieser id existiert leider nicht.")) {
                     con.send("Ein Zitat mit dieser Nummer gibt es bei german-bash.org nicht.");
