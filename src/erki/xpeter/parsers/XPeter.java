@@ -137,12 +137,30 @@ public class XPeter implements Parser, Observer<TextMessage> {
             con.send(new DelayedMessage("Alles, was Beine hat.", 1500));
         }
         
+        String please = "[Bb]itte\\.?!?";
+        
+        if (addresses && text.matches(please)) {
+            con.send(new DelayedMessage("Danke!", 2000));
+        }
+        
+        String thanks = "[dD]anke\\.?!?";
+        
+        if (addresses && text.matches(thanks)) {
+            con.send(new DelayedMessage("Bitte!", 2000));
+        }
+        
+        String wellDone = "[gG]ut gemacht\\.!?";
+        
+        if (addresses && text.matches(wellDone)) {
+            con.send(new DelayedMessage("Danke! :)", 2000));
+        }
+        
         String why = "[wW]arum\\??\\??\\?";
         
         if (addresses && text.matches(why)) {
             con.send(new DelayedMessage("Weil Gott es so gewollt hat und Einstein Unrecht hat.",
                     2000));
-            con.send(new DelayedMessage("Gott würfelt _doch_!", 5000));
+            con.send(new DelayedMessage("Gott würfelt *doch*!", 5000));
         }
     }
 }
