@@ -67,7 +67,7 @@ public class XmppConnection implements Connection {
     private Bot bot;
     
     private XMPPConnection con;
-
+    
     private ParticipantStatusListener statusListener;
     
     /**
@@ -275,7 +275,7 @@ public class XmppConnection implements Connection {
     public String toString() {
         return "Connection(xmpp://" + channel + "@" + host + ":" + port + ")";
     }
-
+    
     @Override
     public Collection<String> getUserList() {
         return statusListener.getUserList();
