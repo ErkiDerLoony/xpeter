@@ -55,7 +55,7 @@ java -cp bin:${toString:classpath} erki.xpeter.xpeter $@
 
   <target name="bat" if="windows">
     <echo file="${bat.file}" append="false">@echo off
-java -cp .;${toString:classpath} erki.xpeter.xpeter %*
+java -cp bin;${toString:classpath} erki.xpeter.xpeter %*
 </echo>
     <echo message="Creating executable batch script."/>
   </target>
