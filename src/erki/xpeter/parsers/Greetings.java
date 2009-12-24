@@ -78,6 +78,11 @@ public class Greetings implements Parser, Observer<TextMessage> {
                     return;
                 }
                 
+                // Don’t greet *every*body.
+                if (Math.random() > 0.5) {
+                    return;
+                }
+                
                 synchronized (joins) {
                     
                     if (timer == null && checkTimer(msg.getNick())) {
