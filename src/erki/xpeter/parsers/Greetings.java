@@ -79,7 +79,7 @@ public class Greetings implements Parser, Observer<TextMessage> {
                 }
                 
                 // Don’t greet *every*body.
-                if (Math.random() > 0.5) {
+                if (Math.random() > 0.1) {
                     return;
                 }
                 
