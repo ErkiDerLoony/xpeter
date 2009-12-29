@@ -142,11 +142,11 @@ public class LastFm implements Parser, Observer<TextMessage> {
             }
         }
         
-        match = "([bB]ei )?[lL]ast\\.?[fF][mM] (kennt( man)? mich als|bin ich bekannt "
+        match = "([bB]ei )?[lL]ast\\.?[fF][mM] (hei(ss|ß)e ich|kennt( man)? mich als|bin ich bekannt "
                 + "(als|unter)) (.*?)";
         
         if (text.matches(match)) {
-            String lastFmNick = text.replaceAll(match, "$5");
+            String lastFmNick = text.replaceAll(match, "$6");
             lastFmNick = lastFmNick.replaceAll(" ", "");
             lastFmNick = lastFmNick.replaceAll("!", "");
             lastFmNick = lastFmNick.replaceAll("\\.", "");
