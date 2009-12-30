@@ -153,7 +153,7 @@ public class SimpleMailbox implements Parser, Observer<TextMessage> {
             return;
         }
         
-        String match = "[sS]ag( der| dem)? (.*?) mal( von mir)?: (.*)";
+        String match = "[sS]ag( der| dem)? (.*?) mal( von mir)?[:;,] (.*)";
         
         if (text.matches(match)) {
             String nick = text.replaceAll(match, "$2");
@@ -164,7 +164,7 @@ public class SimpleMailbox implements Parser, Observer<TextMessage> {
             return;
         }
         
-        match = "[sS]ag( der| dem)? (.*?): (.*)";
+        match = "[sS]ag( der| dem)? (.*?)[:;,] (.*)";
         
         if (text.matches(match)) {
             String nick = text.replaceAll(match, "$2");
