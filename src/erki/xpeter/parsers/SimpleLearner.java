@@ -130,7 +130,20 @@ public class SimpleLearner implements Parser, Observer<TextMessage> {
                         + hit, 3000));
                 return;
             } else {
-                msg.respond(new DelayedMessage("Darüber weiß ich nichts.", 3000));
+                String txt = "";
+                int number = 5;
+                
+                if (Math.random() > 1.0 / number) {
+                    txt = "Kein Plan.";
+                } else if (Math.random() > 2.0 / number) {
+                    txt = "Davon weiß ich nichts.";
+                } else if (Math.random() > 3.0 / number) {
+                    txt = "Keine Ahnung.";
+                } else {
+                    txt = "Darüber weiß ich nichts.";
+                }
+                
+                msg.respond(new DelayedMessage(txt, 3000));
                 return;
             }
         }
