@@ -22,8 +22,8 @@ import java.util.TreeSet;
 import erki.api.util.Log;
 import erki.api.util.Observer;
 import erki.xpeter.Bot;
-import erki.xpeter.con.Connection;
 import erki.xpeter.msg.DelayedMessage;
+import erki.xpeter.msg.Message;
 import erki.xpeter.msg.TextMessage;
 import erki.xpeter.util.BotApi;
 import erki.xpeter.util.ParserFinder;
@@ -51,14 +51,13 @@ public class ParserLoader implements Parser, Observer<TextMessage> {
     @SuppressWarnings("unchecked")
     @Override
     public void inform(TextMessage msg) {
-        Connection con = msg.getConnection();
         String text = msg.getText();
         
-        if (!BotApi.addresses(text, con.getNick())) {
+        if (!BotApi.addresses(text, msg.getBotNick())) {
             return;
         }
         
-        text = BotApi.trimNick(text, con.getNick());
+        text = BotApi.trimNick(text, msg.getBotNick());
         
         if (text.matches("[wW]elche [pP]arser gibt es\\.?\\??")
                 || text.matches("[wW]as f(ü|ue)r [Pp]arser gibt es\\.?\\??")
@@ -80,7 +79,9 @@ public class ParserLoader implements Parser, Observer<TextMessage> {
                 }
             }
             
-            con.send(new DelayedMessage(response.substring(0, response.length() - 2) + ".", 2000));
+            msg
+                    .respond(new DelayedMessage(response.substring(0, response.length() - 2) + ".",
+                            2000));
         }
         
         if (text.matches("([wW]elche|[wW]as f(ü|ue)r) [pP]arser sind geladen\\.?\\??")) {
@@ -101,17 +102,17 @@ public class ParserLoader implements Parser, Observer<TextMessage> {
                     }
                 }
                 
-                con.send(new DelayedMessage(response, 3000));
+                msg.respond(new DelayedMessage(response, 3000));
             } else if (loadedParsers.length == 1) {
-                con.send(new DelayedMessage("Im Moment ist nur der Parser "
+                msg.respond(new DelayedMessage("Im Moment ist nur der Parser "
                         + loadedParsers[0].getSimpleName() + " geladen.", 1500));
             } else {
-                con.send(new DelayedMessage(
+                msg.respond(new DelayedMessage(
                         "Hm, es scheint so, als ob kein einiger Parser geladen wäre.", 3500));
-                con.send(new DelayedMessage(
+                msg.respond(new DelayedMessage(
                         "Und doch bearbeitet dieser Parser gerade eine Nachricht.", 7500));
-                con.send(new DelayedMessage("Das ist doch nicht möglich! ...", 11000));
-                con.send(new DelayedMessage("Waaah! Ich werde verrückt!", 15000));
+                msg.respond(new DelayedMessage("Das ist doch nicht möglich! ...", 11000));
+                msg.respond(new DelayedMessage("Waaah! Ich werde verrückt!", 15000));
             }
         }
         
@@ -143,9 +144,9 @@ public class ParserLoader implements Parser, Observer<TextMessage> {
             }
             
             if (added) {
-                con.send("Ok.");
+                msg.respond(new Message("Ok."));
             } else {
-                con.send(new DelayedMessage("Ein Parser mit dem Namen " + parser
+                msg.respond(new DelayedMessage("Ein Parser mit dem Namen " + parser
                         + " wurde nicht gefunden!", 2000));
             }
         }
@@ -166,7 +167,9 @@ public class ParserLoader implements Parser, Observer<TextMessage> {
             Log.debug("Recognized match for parser " + parser + ".");
             
             if (parser.equals("ParserLoader")) {
-                con.send(new DelayedMessage("Der ParserLoader kann nicht entfernt werden!", 2000));
+                msg
+                        .respond(new DelayedMessage("Der ParserLoader kann nicht entfernt werden!",
+                                2000));
             } else {
                 TreeSet<Class<? extends Parser>> parsers = bot.getParsers();
                 boolean removed = false;
@@ -182,9 +185,9 @@ public class ParserLoader implements Parser, Observer<TextMessage> {
                 }
                 
                 if (removed) {
-                    con.send("Ok.");
+                    msg.respond(new Message("Ok."));
                 } else {
-                    con.send(new DelayedMessage("Der Parser " + parser
+                    msg.respond(new DelayedMessage("Der Parser " + parser
                             + " ist entweder nicht geladen oder er existiert gar nicht!", 2000));
                 }
             }

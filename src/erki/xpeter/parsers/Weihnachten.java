@@ -5,7 +5,6 @@ import java.util.Calendar;
 
 import erki.api.util.Observer;
 import erki.xpeter.Bot;
-import erki.xpeter.con.Connection;
 import erki.xpeter.msg.DelayedMessage;
 import erki.xpeter.msg.TextMessage;
 
@@ -23,12 +22,11 @@ public class Weihnachten implements Parser, Observer<TextMessage> {
     
     @Override
     public void inform(TextMessage msg) {
-        Connection con = msg.getConnection();
         String text = msg.getText();
         
         if (text.contains("Weihnachtsbaum") || text.contains("Weihnachten")
                 || text.contains("weihnachten") || text.contains("weihnachtsbaum")) {
-            con.send(new DelayedMessage(getTree(), 3000));
+            msg.respond(new DelayedMessage(getTree(), 3000));
         }
     }
     

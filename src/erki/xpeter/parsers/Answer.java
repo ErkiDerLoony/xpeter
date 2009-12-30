@@ -21,7 +21,7 @@ import java.util.LinkedList;
 
 import erki.api.util.Observer;
 import erki.xpeter.Bot;
-import erki.xpeter.con.Connection;
+import erki.xpeter.msg.DelayedMessage;
 import erki.xpeter.msg.TextMessage;
 import erki.xpeter.util.BotApi;
 
@@ -49,8 +49,7 @@ public class Answer implements Parser, Observer<TextMessage> {
     @Override
     public void inform(TextMessage msg) {
         String text = msg.getText();
-        Connection con = msg.getConnection();
-        String nick = con.getNick();
+        String nick = msg.getBotNick();
         boolean processed = false;
         
         // don’t reply to self
@@ -113,7 +112,7 @@ public class Answer implements Parser, Observer<TextMessage> {
         }
         
         if (processed) {
-            con.send(text);
+            msg.respond(new DelayedMessage(text, 1400));
         }
     }
 }

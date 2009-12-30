@@ -30,8 +30,8 @@ import java.util.TreeMap;
 import erki.api.util.Log;
 import erki.api.util.Observer;
 import erki.xpeter.Bot;
-import erki.xpeter.con.Connection;
 import erki.xpeter.msg.DelayedMessage;
+import erki.xpeter.msg.Message;
 import erki.xpeter.msg.NickChangeMessage;
 import erki.xpeter.msg.TextMessage;
 import erki.xpeter.msg.UserJoinedMessage;
@@ -57,14 +57,14 @@ public class SimpleMailbox implements Parser, Observer<TextMessage> {
             
             @Override
             public void inform(UserJoinedMessage msg) {
-                check(msg.getNick(), msg.getConnection());
+                check(msg.getNick(), msg);
             }
         };
         
         nickChangeObserver = new Observer<NickChangeMessage>() {
             
             public void inform(NickChangeMessage msg) {
-                check(msg.getNewNick(), msg.getConnection());
+                check(msg.getNewNick(), msg);
             }
         };
         
@@ -80,7 +80,7 @@ public class SimpleMailbox implements Parser, Observer<TextMessage> {
         save();
     }
     
-    private void check(String nick, Connection con) {
+    private void check(String nick, Message msg) {
         
         synchronized (msgs) {
             
@@ -88,7 +88,7 @@ public class SimpleMailbox implements Parser, Observer<TextMessage> {
                 LinkedList<ShortMessage> sms = msgs.get(nick);
                 
                 for (ShortMessage m : sms) {
-                    con.send(new DelayedMessage(nick + ": Ich soll dir von " + m.getSender()
+                    msg.respond(new DelayedMessage(nick + ": Ich soll dir von " + m.getSender()
                             + " sagen: " + m.getMessage() + " (vor " + m.getDate() + ")", 2000));
                 }
                 
@@ -100,16 +100,15 @@ public class SimpleMailbox implements Parser, Observer<TextMessage> {
     
     @Override
     public void inform(TextMessage msg) {
-        Connection con = msg.getConnection();
         String text = msg.getText();
         
-        check(msg.getNick(), con);
+        check(msg.getNick(), msg);
         
-        if (!BotApi.addresses(text, con.getNick())) {
+        if (!BotApi.addresses(text, msg.getBotNick())) {
             return;
         }
         
-        text = BotApi.trimNick(text, con.getNick());
+        text = BotApi.trimNick(text, msg.getBotNick());
         
         if (text
                 .matches("[fF](ue|ü)r wen (sind|hast du) ((so )?alles |im [Mm]oment)?[nN]achrichten "
@@ -122,11 +121,11 @@ public class SimpleMailbox implements Parser, Observer<TextMessage> {
             synchronized (msgs) {
                 
                 if (msgs.isEmpty()) {
-                    con.send(new DelayedMessage("Im Moment sind keine Nachrichten gespeichert.",
+                    msg.respond(new DelayedMessage("Im Moment sind keine Nachrichten gespeichert.",
                             3000));
                 } else if (msgs.size() == 1
                         && msgs.get(msgs.keySet().iterator().next()).size() == 1) {
-                    con.send(new DelayedMessage("Im Moment ist eine Nachricht für "
+                    msg.respond(new DelayedMessage("Im Moment ist eine Nachricht für "
                             + msgs.keySet().iterator().next() + " gespeichert (seit "
                             + msgs.get(msgs.keySet().iterator().next()).get(0).getDate() + ").",
                             3000));
@@ -146,7 +145,7 @@ public class SimpleMailbox implements Parser, Observer<TextMessage> {
                         }
                     }
                     
-                    con.send(new DelayedMessage(response, 4000));
+                    msg.respond(new DelayedMessage(response, 4000));
                 }
             }
             
@@ -160,7 +159,7 @@ public class SimpleMailbox implements Parser, Observer<TextMessage> {
             String message = text.replaceAll(match, "$4");
             Log.debug("Recognized “" + message + "” to »" + nick + "«.");
             add(nick, message, msg.getNick());
-            con.send(new DelayedMessage("Ok, mach ich.", 2000));
+            msg.respond(new DelayedMessage("Ok, mach ich.", 2000));
             return;
         }
         
@@ -171,7 +170,7 @@ public class SimpleMailbox implements Parser, Observer<TextMessage> {
             String message = text.replaceAll(match, "$3");
             Log.debug("Recognized “" + message + "” to »" + nick + "«.");
             add(nick, message, msg.getNick());
-            con.send(new DelayedMessage("Ok, mach ich.", 2000));
+            msg.respond(new DelayedMessage("Ok, mach ich.", 2000));
         }
     }
     

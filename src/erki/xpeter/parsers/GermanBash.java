@@ -12,8 +12,8 @@ import java.util.logging.Level;
 import erki.api.util.Log;
 import erki.api.util.Observer;
 import erki.xpeter.Bot;
-import erki.xpeter.con.Connection;
 import erki.xpeter.msg.DelayedMessage;
+import erki.xpeter.msg.Message;
 import erki.xpeter.msg.TextMessage;
 import erki.xpeter.util.BotApi;
 
@@ -31,8 +31,7 @@ public class GermanBash implements Parser, Observer<TextMessage> {
     
     @Override
     public void inform(TextMessage msg) {
-        Connection con = msg.getConnection();
-        String nick = con.getNick();
+        String nick = msg.getBotNick();
         String text = msg.getText();
         
         if (!BotApi.addresses(text, nick)) {
@@ -117,8 +116,9 @@ public class GermanBash implements Parser, Observer<TextMessage> {
                     quote = quote.replaceAll("&lt;", "<");
                     String orig = quote;
                     
-                    while (!(quote = quote.replaceAll("([\\w\\W]*?)&quot;([\\w\\W]*?)&quot;([\\w\\W]*)",
-                            "$1„$2“$3")).equals(orig)) {
+                    while (!(quote = quote.replaceAll(
+                            "([\\w\\W]*?)&quot;([\\w\\W]*?)&quot;([\\w\\W]*)", "$1„$2“$3"))
+                            .equals(orig)) {
                         orig = quote;
                     }
                     
@@ -126,18 +126,23 @@ public class GermanBash implements Parser, Observer<TextMessage> {
                         quote = quote.substring(0, quote.length() - 1);
                     }
                     
-                    con.send("german-bash.org – Zitat Nr. " + number + ":\n" + quote);
+                    msg
+                            .respond(new Message("german-bash.org – Zitat Nr. " + number + ":\n"
+                                    + quote));
                 } else if (website.contains("Ein Zitat mit dieser id existiert leider nicht.")) {
-                    con.send("Ein Zitat mit dieser Nummer gibt es bei german-bash.org nicht.");
+                    msg.respond(new Message("Ein Zitat mit dieser Nummer gibt es bei "
+                            + "german-bash.org nicht."));
                 } else {
-                    con.send("Ich kann leider nicht verstehen, was german-bash.org zu mir sagt.");
+                    msg.respond(new Message("Ich kann leider nicht verstehen, was german-bash.org "
+                            + "zu mir sagt."));
                 }
                 
             } catch (UnknownHostException e) {
-                con.send(new DelayedMessage("Tut mir Leid, aber die IP-Adresse zu german-bash.org "
-                        + "konnte nicht gefunden werden (" + e.getMessage() + ").", 3000));
+                msg.respond(new DelayedMessage(
+                        "Tut mir Leid, aber die IP-Adresse zu german-bash.org "
+                                + "konnte nicht gefunden werden (" + e.getMessage() + ").", 3000));
             } catch (IOException e) {
-                con.send(new DelayedMessage("Tut mir Leid, aber beim Datenaustausch mit "
+                msg.respond(new DelayedMessage("Tut mir Leid, aber beim Datenaustausch mit "
                         + "german-bash.org ist ein Fehler aufgetreten (" + e.getMessage() + ").",
                         3000));
             }

@@ -34,8 +34,8 @@ import javax.swing.Timer;
 import erki.api.util.Log;
 import erki.api.util.Observer;
 import erki.xpeter.Bot;
-import erki.xpeter.con.Connection;
 import erki.xpeter.msg.DelayedMessage;
+import erki.xpeter.msg.Message;
 import erki.xpeter.msg.TextMessage;
 import erki.xpeter.msg.UserJoinedMessage;
 import erki.xpeter.util.BotApi;
@@ -70,11 +70,10 @@ public class Greetings implements Parser, Observer<TextMessage> {
             private LinkedList<String> joins = new LinkedList<String>();
             
             @Override
-            public void inform(UserJoinedMessage msg) {
-                final Connection con = msg.getConnection();
+            public void inform(final UserJoinedMessage msg) {
                 
                 // prevent self-greeting
-                if (msg.getNick().equals(msg.getConnection().getNick())) {
+                if (msg.getNick().equals(msg.getBotNick())) {
                     return;
                 }
                 
@@ -98,9 +97,11 @@ public class Greetings implements Parser, Observer<TextMessage> {
                                     // only greet if it’s not too many people
                                     if (joins.size() < 3) {
                                         int rnd = (int) (Math.random() * hello.size());
-                                        con.send(hello.get(rnd).substring(0, 1).toUpperCase()
-                                                + hello.get(rnd).substring(1) + " "
-                                                + BotApi.enumerate(joins) + "!");
+                                        msg.respond(new Message(hello.get(rnd).substring(0, 1)
+                                                .toUpperCase()
+                                                + hello.get(rnd).substring(1)
+                                                + " "
+                                                + BotApi.enumerate(joins) + "!"));
                                     }
                                     
                                     joins.clear();
@@ -206,8 +207,7 @@ public class Greetings implements Parser, Observer<TextMessage> {
     
     @Override
     public void inform(final TextMessage msg) {
-        Connection con = msg.getConnection();
-        String nick = con.getNick();
+        String nick = msg.getBotNick();
         String text = msg.getText();
         boolean addresses = false;
         
@@ -232,9 +232,9 @@ public class Greetings implements Parser, Observer<TextMessage> {
                 this.hello.add(newHello);
                 saveGreetings();
                 Log.info("Neue Begrüßung „" + newHello + "“ hinzugefügt.");
-                con.send("Ich habe die neue Begrüßung „" + newHello + "“ gelernt!");
+                msg.respond(new Message("Ich habe die neue Begrüßung „" + newHello + "“ gelernt!"));
             } else {
-                con.send("Diese Begrüßung kenne ich schon.");
+                msg.respond(new Message("Diese Begrüßung kenne ich schon."));
             }
         }
         
@@ -251,9 +251,11 @@ public class Greetings implements Parser, Observer<TextMessage> {
                 this.cu.add(newCu);
                 saveGreetings();
                 Log.info("Neue Verabschiedung „" + newCu + "“ hinzugefügt.");
-                con.send("Ich habe die neue Verabschiedung „" + newCu + "“ gelernt!");
+                msg
+                        .respond(new Message("Ich habe die neue Verabschiedung „" + newCu
+                                + "“ gelernt!"));
             } else {
-                con.send("Diese Verabschiedung kenne ich schon.");
+                msg.respond(new Message("Diese Verabschiedung kenne ich schon."));
             }
         }
         
@@ -266,9 +268,10 @@ public class Greetings implements Parser, Observer<TextMessage> {
                 phrases.add(newPhrase);
                 saveGreetings();
                 Log.info("Neue Begrüßungsfloskel „" + newPhrase + "“ hinzugefügt.");
-                con.send("Ich habe die neue Begrüßungsfloskel „" + newPhrase + "“ gelernt!");
+                msg.respond(new Message("Ich habe die neue Begrüßungsfloskel „" + newPhrase
+                        + "“ gelernt!"));
             } else {
-                con.send("Diese Begrüßungsfloskel kenne ich schon.");
+                msg.respond(new Message("Diese Begrüßungsfloskel kenne ich schon."));
             }
         }
         
@@ -284,13 +287,13 @@ public class Greetings implements Parser, Observer<TextMessage> {
                 if (rnd == 0) {
                     rnd = (int) (Math.random() * this.hello.size());
                     int rnd2 = (int) (Math.random() * phrases.size());
-                    con.send(this.hello.get(rnd).substring(0, 1).toUpperCase()
-                            + this.hello.get(rnd).substring(1) + " " + msg.getNick() + "!");
-                    con.send(new DelayedMessage(phrases.get(rnd2), 2000));
+                    msg.respond(new Message(this.hello.get(rnd).substring(0, 1).toUpperCase()
+                            + this.hello.get(rnd).substring(1) + " " + msg.getNick() + "!"));
+                    msg.respond(new DelayedMessage(phrases.get(rnd2), 2000));
                 } else {
                     rnd = (int) (Math.random() * this.hello.size());
-                    con.send(this.hello.get(rnd).substring(0, 1).toUpperCase()
-                            + this.hello.get(rnd).substring(1) + " " + msg.getNick() + "!");
+                    msg.respond(new Message(this.hello.get(rnd).substring(0, 1).toUpperCase()
+                            + this.hello.get(rnd).substring(1) + " " + msg.getNick() + "!"));
                 }
             }
             
@@ -302,8 +305,8 @@ public class Greetings implements Parser, Observer<TextMessage> {
         if (msg.getText().matches(bye)) {
             Log.info(msg.getNick() + " hat sich von mir verabschiedet.");
             int rnd = (int) (Math.random() * this.cu.size());
-            con.send(this.cu.get(rnd).substring(0, 1).toUpperCase() + this.cu.get(rnd).substring(1)
-                    + " " + msg.getNick() + "!");
+            msg.respond(new Message(this.cu.get(rnd).substring(0, 1).toUpperCase()
+                    + this.cu.get(rnd).substring(1) + " " + msg.getNick() + "!"));
         }
         
         String listHello = "[wW]elche [bB]egr(ü|ue)(ss|ß)ungen kennst [Dd]u( alles| so( alles)?)?\\?";
@@ -311,11 +314,14 @@ public class Greetings implements Parser, Observer<TextMessage> {
         if (addresses && text.matches(listHello)) {
             
             if (this.hello.size() > 1) {
-                con.send("Ich kenne die Begrüßungen " + BotApi.enumerate(this.hello));
+                msg
+                        .respond(new Message("Ich kenne die Begrüßungen "
+                                + BotApi.enumerate(this.hello)));
             } else if (this.hello.size() == 1) {
-                con.send("Ich kenne lediglich die Begrüßung " + this.hello.get(0) + ".");
+                msg.respond(new Message("Ich kenne lediglich die Begrüßung " + this.hello.get(0)
+                        + "."));
             } else {
-                con.send("Ich kenne gar keine Begrüßungen. :(");
+                msg.respond(new Message("Ich kenne gar keine Begrüßungen. :("));
             }
         }
         
@@ -324,11 +330,13 @@ public class Greetings implements Parser, Observer<TextMessage> {
         if (addresses && text.matches(listCu)) {
             
             if (this.cu.size() > 1) {
-                con.send("Ich kenne die Verabschiedungen " + BotApi.enumerate(this.cu));
+                msg.respond(new Message("Ich kenne die Verabschiedungen "
+                        + BotApi.enumerate(this.cu)));
             } else if (this.cu.size() == 1) {
-                con.send("Ich kenne lediglich die Verabschiedung " + this.cu.get(0) + ".");
+                msg.respond(new Message("Ich kenne lediglich die Verabschiedung " + this.cu.get(0)
+                        + "."));
             } else {
-                con.send("Ich kenne gar keine Verabschiedungen. :(");
+                msg.respond(new Message("Ich kenne gar keine Verabschiedungen. :("));
             }
         }
         
@@ -338,12 +346,13 @@ public class Greetings implements Parser, Observer<TextMessage> {
         if (addresses && text.matches(listPhrases)) {
             
             if (this.phrases.size() > 1) {
-                con.send("Ich kenne die Begrüßungen " + BotApi.enumerate(this.phrases));
+                msg.respond(new Message("Ich kenne die Begrüßungen "
+                        + BotApi.enumerate(this.phrases)));
             } else if (this.phrases.size() == 1) {
-                con.send("Ich kenne lediglich die eine Begrüßungsfloskel " + this.phrases.get(0)
-                        + ".");
+                msg.respond(new Message("Ich kenne lediglich die eine Begrüßungsfloskel "
+                        + this.phrases.get(0) + "."));
             } else {
-                con.send("Ich kenne leider gar keine Begrüßungsfloskeln. :(");
+                msg.respond(new Message("Ich kenne leider gar keine Begrüßungsfloskeln. :("));
             }
         }
         
@@ -355,15 +364,15 @@ public class Greetings implements Parser, Observer<TextMessage> {
             if (this.hello.contains(forget)) {
                 this.hello.remove(forget);
                 saveGreetings();
-                con.send("Schon vergessen ...");
+                msg.respond(new Message("Schon vergessen ..."));
             } else {
                 
                 if (this.hello.contains(forget.substring(0, forget.length() - 1))) {
                     this.hello.remove(forget.substring(0, forget.length() - 1));
                     saveGreetings();
-                    con.send("Schon vergessen ...");
+                    msg.respond(new Message("Schon vergessen ..."));
                 } else {
-                    con.send("Die Begrüßung „" + forget + "“ kenne ich gar nicht!");
+                    msg.respond(new Message("Die Begrüßung „" + forget + "“ kenne ich gar nicht!"));
                 }
             }
         }
@@ -376,15 +385,16 @@ public class Greetings implements Parser, Observer<TextMessage> {
             if (this.cu.contains(forget)) {
                 this.cu.remove(forget);
                 saveGreetings();
-                con.send("Schon vergessen ...");
+                msg.respond(new Message("Schon vergessen ..."));
             } else {
                 
                 if (this.cu.contains(forget.substring(0, forget.length() - 1))) {
                     this.cu.remove(forget.substring(0, forget.length() - 1));
                     saveGreetings();
-                    con.send("Schon vergessen ...");
+                    msg.respond(new Message("Schon vergessen ..."));
                 } else {
-                    con.send("Die Verabschiedung „" + forget + "“ kenne ich gar nicht!");
+                    msg.respond(new Message("Die Verabschiedung „" + forget
+                            + "“ kenne ich gar nicht!"));
                 }
             }
         }
@@ -397,15 +407,16 @@ public class Greetings implements Parser, Observer<TextMessage> {
             if (phrases.contains(forget)) {
                 phrases.remove(forget);
                 saveGreetings();
-                con.send("Schon vergessen ...");
+                msg.respond(new Message("Schon vergessen ..."));
             } else {
                 
                 if (phrases.contains(forget.substring(0, forget.length() - 1))) {
                     phrases.remove(forget.substring(0, forget.length() - 1));
                     saveGreetings();
-                    con.send("Schon vergessen ...");
+                    msg.respond(new Message("Schon vergessen ..."));
                 } else {
-                    con.send("Die Begrüßungsfloskel „" + forget + "“ kenne ich gar nicht!");
+                    msg.respond(new Message("Die Begrüßungsfloskel „" + forget
+                            + "“ kenne ich gar nicht!"));
                 }
             }
         }

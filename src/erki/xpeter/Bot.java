@@ -27,6 +27,7 @@ import java.util.TreeSet;
 import erki.api.util.Log;
 import erki.api.util.Observer;
 import erki.xpeter.con.Connection;
+import erki.xpeter.msg.DelayedMessage;
 import erki.xpeter.msg.Message;
 import erki.xpeter.parsers.Parser;
 
@@ -195,22 +196,21 @@ public class Bot {
     
     /**
      * Broadcast a message to all connection currently available to this bot with the exception of
-     * {@code con}.
+     * one connection.
      * 
      * @param msg
      *        The message to broadcast.
-     * @param con
-     *        The Connection instance that will not receive {@code msg}. The connections are
-     *        compared using the “==” operator.
+     * @param shortId
+     *        The short identifier of the connection that will not receive {@code msg}.
      */
-    public void broadcast(Message msg, Connection con) {
+    public void broadcast(Message msg, String shortId) {
         
         synchronized (cons) {
             
-            for (Connection conn : cons) {
+            for (Connection con : cons) {
                 
-                if (conn != con) {
-                    conn.send(msg);
+                if (!con.getShortId().equals(shortId)) {
+                    con.send(msg);
                 }
             }
         }
@@ -268,11 +268,6 @@ public class Bot {
     @SuppressWarnings("unchecked")
     public void process(Message msg) {
         
-        if (msg.getConnection() == null) {
-            Log.warning("Someone delivered a foul message (" + msg + "). Refusing to parse it!");
-            return;
-        }
-        
         synchronized (parserMapping) {
             Log.debug("Parsing a " + msg.getClass().getSimpleName() + ".");
             LinkedList<Observer<? extends Message>> parsers = parserMapping.get(msg.getClass()
@@ -293,11 +288,13 @@ public class Bot {
                     Log.error(e);
                     Log.warning("Parser " + parser.getClass().getSimpleName() + " crashed!");
                     Log.info("Continuing anyway.");
-                    msg.getConnection().send(
-                            "Mumble mumble in " + parser.getClass().getSimpleName() + ": "
-                                    + e.getClass().getSimpleName());
+                    msg.respond(new DelayedMessage("Mumble mumble in "
+                            + parser.getClass().getSimpleName() + ": "
+                            + e.getClass().getSimpleName(), 2500));
                 }
             }
+            
+            msg.conclude();
         }
     }
 }

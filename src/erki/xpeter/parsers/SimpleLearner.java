@@ -9,11 +9,11 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.LinkedList;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import erki.api.util.Log;
 import erki.api.util.Observer;
 import erki.xpeter.Bot;
-import erki.xpeter.con.Connection;
 import erki.xpeter.msg.DelayedMessage;
 import erki.xpeter.msg.TextMessage;
 import erki.xpeter.util.BotApi;
@@ -22,7 +22,7 @@ public class SimpleLearner implements Parser, Observer<TextMessage> {
     
     private static final String CONFIG_FILE = "config" + File.separator + "knowledge";
     
-    private TreeMap<String, LinkedList<String>> knowledge = new TreeMap<String, LinkedList<String>>();
+    private TreeMap<String, TreeSet<String>> knowledge = new TreeMap<String, TreeSet<String>>();
     
     @Override
     public void init(Bot bot) {
@@ -40,7 +40,7 @@ public class SimpleLearner implements Parser, Observer<TextMessage> {
         
         try {
             ObjectInputStream fileIn = new ObjectInputStream(new FileInputStream(CONFIG_FILE));
-            knowledge = (TreeMap<String, LinkedList<String>>) fileIn.readObject();
+            knowledge = (TreeMap<String, TreeSet<String>>) fileIn.readObject();
             fileIn.close();
             
             for (String key : knowledge.keySet()) {
@@ -81,9 +81,8 @@ public class SimpleLearner implements Parser, Observer<TextMessage> {
     
     @Override
     public void inform(TextMessage msg) {
-        Connection con = msg.getConnection();
         String text = msg.getText();
-        String nick = con.getNick();
+        String nick = msg.getBotNick();
         boolean addresses = false;
         
         if (BotApi.addresses(text, nick)) {
@@ -91,44 +90,100 @@ public class SimpleLearner implements Parser, Observer<TextMessage> {
             text = BotApi.trimNick(text, nick);
         }
         
-        String knowledge = "(.*?) (" + verbs() + ") (.*?)";
-        Log.debug("Matching “" + text + "” with “" + knowledge + "”.");
-        
-        if (text.matches(knowledge)) {
-            String key = text.replaceAll(knowledge, "$1");
-            String verb = text.replaceAll(knowledge, "$2");
-            String value = text.replaceAll(knowledge, "$3");
-            Log.debug("Recognized knowledge: “" + key + "” → “" + verb + "” → “" + value + "”.");
+        for (String verb : verbs()) {
             
-            if (!this.knowledge.containsKey(key)) {
-                this.knowledge.put(key, new LinkedList<String>());
-            }
-            
-            this.knowledge.get(key).add(verb + " " + value);
-            save();
-            
-            if (addresses) {
-                con.send(new DelayedMessage("Ok, weißsch Bescheid.", 2000));
+            if (text.toLowerCase().contains(" " + verb + " ")) {
+                String key = text.substring(0, text.toLowerCase().indexOf(verb) - 1);
+                String value = text.substring(text.toLowerCase().indexOf(verb) + verb.length() + 1);
+                Log
+                        .debug("Recognized knowledge: “" + key + "” → “" + verb + "” → “" + value
+                                + "”.");
+                
+                if (!this.knowledge.containsKey(key)) {
+                    this.knowledge.put(key, new TreeSet<String>());
+                }
+                
+                this.knowledge.get(key).add(verb + " " + value);
+                save();
+                
+                if (addresses) {
+                    msg.respond(new DelayedMessage("Ok, weißsch Bescheid.", 2000));
+                    return;
+                }
+                
+                break;
             }
         }
         
-        String query = "[wW]as (wei(ss|ß)t [dD]u|kannst [dD]u sagen) (ü|ue)ber (.*?)\\??";
+        String query = "[wW]as (wei(ss|ß)t [dD]u|kannst [dD]u sagen) (ü|ue)ber (.*?)";
         
         if (addresses && text.matches(query)) {
             String key = text.replaceAll(query, "$4");
+            String subkey = key.substring(0, key.length() - 1);
             Log.debug("Recognized query for “" + key + "”.");
             
-            if (this.knowledge.containsKey(key)) {
-                LinkedList<String> hits = this.knowledge.get(key);
-                String hit = hits.get((int) (Math.random() * hits.size()));
-                con.send(new DelayedMessage(key + " " + hit, 3000));
+            if (this.knowledge.containsKey(key) || this.knowledge.containsKey(subkey)) {
+                TreeSet<String> hits = this.knowledge.containsKey(key) ? this.knowledge.get(key)
+                        : this.knowledge.get(subkey);
+                String hit = hits.toArray(new String[0])[(int) (Math.random() * hits.size())];
+                msg.respond(new DelayedMessage(this.knowledge.containsKey(key) ? key : subkey + " "
+                        + hit, 3000));
+                return;
             } else {
-                con.send(new DelayedMessage("Darüber weiß ich nichts.", 3000));
+                msg.respond(new DelayedMessage("Darüber weiß ich nichts.", 3000));
+                return;
             }
+        }
+        
+        boolean match = false;
+        
+        for (String key : this.knowledge.keySet()) {
+            
+            if (text.contains(key)) {
+                Log.debug("Someone mentioned “" + key + "”.");
+                match = true;
+                TreeSet<String> hits = this.knowledge.get(key);
+                String hit = hits.toArray(new String[0])[(int) (Math.random() * hits.size())];
+                
+                if (addresses) {
+                    msg.respond(new DelayedMessage(key + " " + hit, 3000));
+                } else {
+                    
+                    // Also respond seldomly if not directly addressed.
+                    if (Math.random() < 0.1) {
+                        msg.respond(new DelayedMessage(key + " " + hit, 2000));
+                    }
+                }
+            }
+        }
+        
+        if (addresses && !match) {
+            String txt = "";
+            int number = 5;
+            
+            if (Math.random() > 1.0 / number) {
+                txt = "Kein Plan.";
+            } else if (Math.random() > 2.0 / number) {
+                txt = "Davon weiß ich nichts.";
+            } else if (Math.random() > 3.0 / number) {
+                txt = "Keine Ahnung.";
+            } else {
+                txt = "Darüber weiß ich nichts.";
+            }
+            
+            msg.setDefaultResponse(new DelayedMessage(txt, 3000));
         }
     }
     
-    private static String verbs() {
-        return "ist|hat|kann|wohnt|sind|wird";
+    private static LinkedList<String> verbs() {
+        LinkedList<String> result = new LinkedList<String>();
+        result.add("hat");
+        result.add("ist");
+        result.add("kann");
+        result.add("wohnt");
+        result.add("kommt");
+        result.add("wird");
+        result.add("sind");
+        return result;
     }
 }

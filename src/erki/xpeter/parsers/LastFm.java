@@ -33,7 +33,6 @@ import net.roarsoftware.lastfm.User;
 import erki.api.util.Log;
 import erki.api.util.Observer;
 import erki.xpeter.Bot;
-import erki.xpeter.con.Connection;
 import erki.xpeter.msg.DelayedMessage;
 import erki.xpeter.msg.TextMessage;
 import erki.xpeter.util.BotApi;
@@ -65,8 +64,7 @@ public class LastFm implements Parser, Observer<TextMessage> {
     
     @Override
     public void inform(TextMessage msg) {
-        Connection con = msg.getConnection();
-        String nick = con.getNick();
+        String nick = msg.getBotNick();
         String text = msg.getText();
         
         if (!BotApi.addresses(text, nick)) {
@@ -84,7 +82,24 @@ public class LastFm implements Parser, Observer<TextMessage> {
             }
         }
         
-        if (text.toLowerCase().trim().equals("np")) {
+        if (text.toLowerCase().trim().startsWith("last.fm ")) {
+            queryNick = text.substring("last.fm ".length());
+            
+            if (nicks.containsKey(queryNick)) {
+                queryNick = nicks.get(queryNick);
+            }
+        }
+        
+        if (text.toLowerCase().trim().startsWith("lastfm")) {
+            queryNick = text.substring("lastfm".length());
+            
+            if (nicks.containsKey(queryNick)) {
+                queryNick = nicks.get(queryNick);
+            }
+        }
+        
+        if (text.toLowerCase().trim().equals("np") || text.toLowerCase().trim().equals("last.fm")
+                || text.toLowerCase().trim().equals("lastfm")) {
             
             if (nicks.containsKey(msg.getNick())) {
                 queryNick = nicks.get(msg.getNick());
@@ -125,19 +140,19 @@ public class LastFm implements Parser, Observer<TextMessage> {
                 Track track = tracks.iterator().next();
                 
                 if (track.isNowPlaying()) {
-                    con.send(new DelayedMessage(queryNick + " hört gerade " + formatTrack(track)
+                    msg.respond(new DelayedMessage(queryNick + " hört gerade " + formatTrack(track)
                             + ".", 1000));
                 } else {
-                    con.send(new DelayedMessage(queryNick + " hat zuletzt " + formatTrack(track)
+                    msg.respond(new DelayedMessage(queryNick + " hat zuletzt " + formatTrack(track)
                             + " gehört.", 1000));
                 }
                 
             } else {
-                con.send(new DelayedMessage("Last.fm weiß leider nicht, was " + queryNick
+                msg.respond(new DelayedMessage("Last.fm weiß leider nicht, was " + queryNick
                         + " gerade hört. :(", 1500));
                 
                 if (((int) (Math.random() * 3)) == 0) {
-                    con.send(new DelayedMessage("Tut mir Leid.", 2500));
+                    msg.respond(new DelayedMessage("Tut mir Leid.", 2500));
                 }
             }
         }
@@ -151,7 +166,7 @@ public class LastFm implements Parser, Observer<TextMessage> {
             lastFmNick = lastFmNick.replaceAll("!", "");
             lastFmNick = lastFmNick.replaceAll("\\.", "");
             nicks.put(msg.getNick(), lastFmNick);
-            con.send(new DelayedMessage(msg.getNick() + ": Ok, bei Last.fm heißt du also „"
+            msg.respond(new DelayedMessage(msg.getNick() + ": Ok, bei Last.fm heißt du also „"
                     + lastFmNick + "“.", 2000));
             save();
         }
