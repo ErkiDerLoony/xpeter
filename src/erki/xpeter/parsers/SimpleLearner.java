@@ -163,7 +163,7 @@ public class SimpleLearner implements Parser, Observer<TextMessage> {
                 } else {
                     
                     // Also respond seldomly if not directly addressed.
-                    if (Math.random() < 0.1) {
+                    if (Math.random() < 0.02) {
                         msg.respond(new DelayedMessage(key + " " + hit, 2000));
                     }
                 }
