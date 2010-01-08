@@ -17,24 +17,31 @@
 
 package erki.xpeter.msg;
 
+import java.util.LinkedList;
+
+import erki.api.util.Log;
+import erki.xpeter.Bot;
 import erki.xpeter.con.Connection;
-import erki.xpeter.parsers.Parser;
 
 /**
  * Superclass for all messages that can be processed by xpeter. It assumes that every message at
  * least contains some text. The text that this class contains is immutable. Just create a new
- * instance if needed. This class also contains the {@link Connection} over which this message was
- * received so the {@link Parser}s can easily create response messages.
+ * instance if needed. This class also provides an easy way to respond to messages.
  * <p>
- * Known subclasses: {@link TextMessage}
+ * Known subclasses: {@link TextMessage}, {@link DelayedMessage}, {@link RawMessage},
+ * {@link NickChangeMessage}, {@link UserJoinedMessage}, {@link UserLeftMessage}
  * 
  * @author Edgar Kalkowski
  */
 public class Message {
     
-    private Connection connection;
+    protected Connection connection;
     
-    private String text;
+    protected String text;
+    
+    protected Message defaultResponse = null;
+    
+    protected LinkedList<Message> responses = new LinkedList<Message>();
     
     /**
      * Create a new Message object.
@@ -72,13 +79,80 @@ public class Message {
     }
     
     /**
-     * Access the connection over which this message was received. This is useful for {@link Parser}
-     * s that want to build response messages.
+     * Access the nickname that the bot itself uses for the connection this message belongs to. This
+     * call is directly forwarded to the {@link Connection} that is associated to this message.
      * 
-     * @return The connection instance over which this message was received.
+     * @return The bot’s nickname or {@code null} if it is unknown to which connection this message
+     *         belongs.
      */
-    public Connection getConnection() {
-        return connection;
+    public String getBotNick() {
+        return connection != null ? connection.getNick() : null;
+    }
+    
+    /**
+     * Access a short identifier for the connection that is associated to this message. See
+     * {@link Connection#getShortId()} for details.
+     * 
+     * @return A short identifier for this message’s connection or {@code null} if there is no
+     *         connection associated to this message.
+     */
+    public String getShortId() {
+        return connection != null ? connection.getShortId() : null;
+    }
+    
+    /**
+     * Set a default response that shall be sent if no parser finds a suitable response.
+     * 
+     * @param defaultResponse
+     *        The default response to this message or {@code null} if no such message shall be sent.
+     */
+    public void setDefaultResponse(Message defaultResponse) {
+        this.defaultResponse = defaultResponse;
+    }
+    
+    /**
+     * Add a response to this message to the list of responses. All response messages are
+     * accumulated and sent after all parsers have finished processing this message. If no parser
+     * finds a suitable response the default response is sent if one was set (see
+     * {@link #setDefaultResponse(String)}).
+     * 
+     * @param msg
+     *        The message that will be sent as a response to this message.
+     */
+    public void respond(Message msg) {
+        responses.add(msg);
+    }
+    
+    /**
+     * This method is called by {@link Bot} after all parsers had a chance to compute their
+     * responses and add them to this messages send queue. <i>It must not be called by any
+     * parser!</i> After this method was called subsequent calls to {@link #respond(Message)} will
+     * have no effect!
+     */
+    public final void conclude() {
+        
+        if (!responses.isEmpty()) {
+            
+            for (Message msg : responses) {
+                
+                if (connection != null) {
+                    connection.send(msg);
+                } else {
+                    Log.warning("Someone delivered a foul message! Refusing to answer to it!");
+                }
+            }
+            
+        } else {
+            
+            if (defaultResponse != null) {
+                
+                if (connection != null) {
+                    connection.send(defaultResponse);
+                } else {
+                    Log.warning("Someone delivered a foul message! Refusing to answer to it!");
+                }
+            }
+        }
     }
     
     @Override

@@ -49,8 +49,8 @@ public class Interconnector implements Parser, Observer<TextMessage> {
             
             @Override
             public void inform(UserJoinedMessage msg) {
-                bot.broadcast(new Message(msg.getConnection().getShortId() + ": " + msg.getNick()
-                        + " hat den Chat betreten."), msg.getConnection());
+                bot.broadcast(new Message(msg.getShortId() + ": " + msg.getNick()
+                        + " hat den Chat betreten."), msg.getShortId());
             }
         };
         
@@ -58,8 +58,8 @@ public class Interconnector implements Parser, Observer<TextMessage> {
             
             @Override
             public void inform(UserLeftMessage msg) {
-                bot.broadcast(new Message(msg.getConnection().getShortId() + ": " + msg.getNick()
-                        + " hat den Chat verlassen."), msg.getConnection());
+                bot.broadcast(new Message(msg.getShortId() + ": " + msg.getNick()
+                        + " hat den Chat verlassen."), msg.getShortId());
             }
         };
         
@@ -67,9 +67,8 @@ public class Interconnector implements Parser, Observer<TextMessage> {
             
             @Override
             public void inform(NickChangeMessage msg) {
-                bot.broadcast(new Message(msg.getConnection().getShortId() + ": "
-                        + msg.getOldNick() + " heißt jetzt " + msg.getNewNick() + "."), msg
-                        .getConnection());
+                bot.broadcast(new Message(msg.getShortId() + ": " + msg.getOldNick()
+                        + " heißt jetzt " + msg.getNewNick() + "."), msg.getShortId());
             }
         };
         
@@ -89,9 +88,9 @@ public class Interconnector implements Parser, Observer<TextMessage> {
     @Override
     public void inform(TextMessage msg) {
         
-        if (!msg.getNick().equals(msg.getConnection().getNick())) {
-            bot.broadcast(new Message(msg.getNick() + "@" + msg.getConnection().getShortId()
-                    + ": »" + msg.getText() + "«"), msg.getConnection());
+        if (!msg.getNick().equals(msg.getBotNick())) {
+            bot.broadcast(new Message(msg.getNick() + "@" + msg.getShortId() + ": »"
+                    + msg.getText() + "«"), msg.getShortId());
         }
     }
 }

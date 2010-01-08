@@ -74,9 +74,8 @@ public interface Connection extends Runnable {
      * The {@link Interconnector} parser forwards messages received from one connection to all other
      * connections. In the other chats the bot says something like {@code Rolf@#linux: Linux rulz!}.
      * In that example “#linux” would be the short id of an IRC connection to the channel {@code
-     * #linux} on some IRC network. The returned identifier needs not be unique among the bot’s
-     * connections (but if it is not one may not be able to distinguish things people say in
-     * different chats when using the Interconnector parser).
+     * #linux} on some IRC network. The returned identifier should be unique among the connections
+     * of a bot. Otherwise some things might not work as expected.
      * 
      * @return A short identifier for this connection.
      */

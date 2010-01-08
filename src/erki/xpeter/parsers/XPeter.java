@@ -19,8 +19,8 @@ package erki.xpeter.parsers;
 
 import erki.api.util.Observer;
 import erki.xpeter.Bot;
-import erki.xpeter.con.Connection;
 import erki.xpeter.msg.DelayedMessage;
+import erki.xpeter.msg.Message;
 import erki.xpeter.msg.TextMessage;
 import erki.xpeter.util.BotApi;
 
@@ -43,9 +43,8 @@ public class XPeter implements Parser, Observer<TextMessage> {
     
     @Override
     public void inform(TextMessage msg) {
-        Connection con = msg.getConnection();
         String text = msg.getText();
-        String nick = con.getNick();
+        String nick = msg.getBotNick();
         boolean addresses = false;
         
         if (BotApi.addresses(text, nick)) {
@@ -57,7 +56,7 @@ public class XPeter implements Parser, Observer<TextMessage> {
                 + "[dD]u( denn)?|[wW]ho (are|r) you)\\??";
         
         if (addresses && text.matches(whoRYou)) {
-            con.send(new DelayedMessage("My name is Peter, I'm old.", 3000));
+            msg.respond(new DelayedMessage("My name is Peter, I'm old.", 3000));
         }
         
         String job = "[wW]as machst [dD]u( denn)?( so)?( hier( so)?)?\\?";
@@ -67,11 +66,11 @@ public class XPeter implements Parser, Observer<TextMessage> {
             int rnd = (int) (Math.random() * 2);
             
             if (rnd == 0) {
-                con.send(new DelayedMessage("I'm a drummer in a band and I'm old.", 2500));
+                msg.respond(new DelayedMessage("I'm a drummer in a band and I'm old.", 2500));
             } else {
-                con.send(new DelayedMessage("I'm grabbing my grave behind the tent.", 3000));
-                con.send(new DelayedMessage("One millimeter a week.", 6000));
-                con.send(new DelayedMessage("'Cause I'm too schwach to hold the schaufel "
+                msg.respond(new DelayedMessage("I'm grabbing my grave behind the tent.", 3000));
+                msg.respond(new DelayedMessage("One millimeter a week.", 6000));
+                msg.respond(new DelayedMessage("'Cause I'm too schwach to hold the schaufel "
                         + "with my arms.", 11000));
             }
         }
@@ -80,9 +79,9 @@ public class XPeter implements Parser, Observer<TextMessage> {
                 && ((int) (Math.random() * 3)) == 0 && !msg.getNick().equals(nick)) {
             
             if ((int) (Math.random() * 2) == 0) {
-                con.send("Oo");
+                msg.respond(new Message("Oo"));
             } else {
-                con.send("0o");
+                msg.respond(new Message("0o"));
             }
         }
         
@@ -90,59 +89,77 @@ public class XPeter implements Parser, Observer<TextMessage> {
                 && ((int) (Math.random() * 5)) == 0 && !msg.getNick().equals(nick)) {
             
             if ((int) (Math.random() * 2) == 0) {
-                con.send("oO");
+                msg.respond(new Message("oO"));
             } else {
-                con.send("o0");
+                msg.respond(new Message("o0"));
             }
         }
         
-        if (msg.getText().trim().equals("^^") && ((int) (Math.random() * 2)) == 0) {
-            con.send("vv");
+        if (msg.getText().trim().equals("^^") && ((int) (Math.random() * 4)) == 0) {
+            msg.respond(new Message("vv"));
         }
         
         if (msg.getText().toLowerCase().trim().equals("asdf") && ((int) (Math.random() * 3)) == 0
                 && !msg.getNick().equals(nick)) {
-            con.send("fdsa");
+            msg.respond(new Message("fdsa"));
         }
         
         if (msg.getText().toLowerCase().trim().equals("fdsa") && ((int) (Math.random() * 3)) == 0
                 && !msg.getNick().equals(nick)) {
-            con.send("asdf");
+            msg.respond(new Message("asdf"));
         }
         
         if ((msg.getText().toLowerCase().trim().equals("ok")
                 || msg.getText().toLowerCase().trim().equals("ok.") || msg.getText().toLowerCase()
                 .trim().equals("ok!"))
                 && ((int) (Math.random() * 3)) == 0) {
-            con.send("K.O.");
+            msg.respond(new Message("K.O."));
         }
         
         if (addresses && text.matches("[gG]eh kacken( [jJ]unge)?( es?cht [gj]et?zt?)?!?\\.?")) {
             int rnd = (int) (Math.random() * 4);
             
             if (rnd == 0) {
-                con.send("Ja, wo denn?!");
+                msg.respond(new Message("Ja, wo denn?!"));
             } else if (rnd == 1) {
-                con.send("Kommst mit?");
+                msg.respond(new Message("Kommst mit?"));
             } else if (rnd == 2) {
-                con.send("Selba! :P");
+                msg.respond(new Message("Selba! :P"));
             } else {
-                con.send("Ich weiß ja net, wo!");
+                msg.respond(new Message("Ich weiß ja net, wo!"));
             }
         }
         
         String whatGoes = "([Aa]lt(er|a)[:;,!]? )?[wW]as geht[?.!]?[?.!]?[?.!]?";
         
         if (addresses && text.matches(whatGoes)) {
-            con.send(new DelayedMessage("Alles, was Beine hat.", 1500));
+            msg.respond(new DelayedMessage("Alles, was Beine hat.", 1500));
+        }
+        
+        String please = "[Bb]itte\\.?!?";
+        
+        if (addresses && text.matches(please)) {
+            msg.respond(new DelayedMessage("Danke!", 2000));
+        }
+        
+        String thanks = "[dD]anke\\.?!?";
+        
+        if (addresses && text.matches(thanks)) {
+            msg.respond(new DelayedMessage("Bitte!", 2000));
+        }
+        
+        String wellDone = "[gG]ut gemacht\\.!?";
+        
+        if (addresses && text.matches(wellDone)) {
+            msg.respond(new DelayedMessage("Danke! :)", 2000));
         }
         
         String why = "[wW]arum\\??\\??\\?";
         
         if (addresses && text.matches(why)) {
-            con.send(new DelayedMessage("Weil Gott es so gewollt hat und Einstein Unrecht hat.",
+            msg.respond(new DelayedMessage("Weil Gott es so gewollt hat und Einstein Unrecht hat.",
                     2000));
-            con.send(new DelayedMessage("Gott würfelt _doch_!", 5000));
+            msg.respond(new DelayedMessage("Gott würfelt *doch*!", 5000));
         }
     }
 }
