@@ -118,7 +118,7 @@ public class XPeter implements Parser, Observer<TextMessage> {
         }
         
         if (addresses && text.matches("[gG]eh kacken( [jJ]unge)?( es?cht [gj]et?zt?)?!?\\.?")) {
-            int rnd = (int) Math.random() * 4;
+            int rnd = (int) (Math.random() * 4);
             
             if (rnd == 0) {
                 con.send("Ja, wo denn?!");
