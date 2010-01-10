@@ -62,7 +62,8 @@ public class ParserLoader implements Parser, Observer<TextMessage> {
         if (text.matches("[wW]elche [pP]arser gibt es\\.?\\??")
                 || text.matches("[wW]as f(ü|ue)r [Pp]arser gibt es\\.?\\??")
                 || text.matches("([Ww]elche|[wW]as f(ü|ue)r) [pP]arser "
-                        + "(kennst|hast) [Dd]u\\.?\\??")) {
+                        + "(kennst|hast) [Dd]u\\.?\\??")
+                || text.matches("[lL]ist [pP]arsers?!?\\.?")) {
             String response = "Ich kenne folgende Parser: ";
             TreeSet<Class<? extends Parser>> loadedParsers = bot.getParsers();
             TreeSet<Class<? extends Parser>> foundParsers = ParserFinder.findParsers(BotApi
