@@ -27,7 +27,7 @@ public class Sed implements Parser, Observer<TextMessage> {
         String text = msg.getText();
         String nick = msg.getNick();
         
-        if (lastSaid.containsKey(nick) && text.startsWith("s") && text.length() > 1) {
+        if (lastSaid.containsKey(nick) && text.startsWith("s") && text.length() > 2) {
             String delimiter = text.substring(1, 2);
             String rest = text.substring(2, text.length() - 1);
             
