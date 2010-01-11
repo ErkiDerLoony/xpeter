@@ -43,14 +43,15 @@ public class Sed implements Parser, Observer<TextMessage> {
                 if (text.endsWith(delimiter) && rest.contains(delimiter)) {
                     regex = rest.substring(0, rest.indexOf(delimiter));
                     replacement = rest.substring(rest.indexOf(delimiter) + 1);
+                    Log.debug("Replacing " + regex + " with " + replacement + ".");
+                    String result = lastSaid.get(nick).replaceAll(regex, replacement);
+                    msg.respond(new Message(nick + " meinte: " + result));
+                    return;
                 }
                 
                 if (longrest.contains(delimiter)) {
                     regex = longrest.substring(0, longrest.indexOf(delimiter));
                     replacement = longrest.substring(longrest.indexOf(delimiter) + 1);
-                }
-                
-                if (regex != null && replacement != null) {
                     Log.debug("Replacing " + regex + " with " + replacement + ".");
                     String result = lastSaid.get(nick).replaceAll(regex, replacement);
                     msg.respond(new Message(nick + " meinte: " + result));
