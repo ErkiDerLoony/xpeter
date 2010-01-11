@@ -99,6 +99,12 @@ public class GermanBash implements Parser, Observer<TextMessage> {
             try {
                 String website = getWebsite(query);
                 
+                if (website.contains("Ein Zitat mit dieser id existiert leider nicht.")) {
+                    msg.respond(new Message("Ein Zitat mit dieser Nummer gibt es bei "
+                            + "german-bash.org nicht."));
+                    return;
+                }
+                
                 String match = "[\\w\\W]*?<div class=\"zitat\">([\\w\\W]*?)</div>[\\w\\W]*";
                 String header = "[\\w\\W]*?<div class=\"quote_header\">([\\w\\W]*?)</div>[\\w\\W]*";
                 
@@ -129,9 +135,6 @@ public class GermanBash implements Parser, Observer<TextMessage> {
                     msg
                             .respond(new Message("german-bash.org – Zitat Nr. " + number + ":\n"
                                     + quote));
-                } else if (website.contains("Ein Zitat mit dieser id existiert leider nicht.")) {
-                    msg.respond(new Message("Ein Zitat mit dieser Nummer gibt es bei "
-                            + "german-bash.org nicht."));
                 } else {
                     msg.respond(new Message("Ich kann leider nicht verstehen, was german-bash.org "
                             + "zu mir sagt."));
