@@ -85,11 +85,6 @@ public class ErkiTalkConnection implements Connection {
         }
     }
     
-    @Override
-    public void send(String msg) {
-        send(new Message(msg, this));
-    }
-    
     /**
      * Used by {@link ServerInputReader} to trigger a reconnect if the connection was lost and thus
      * no more input could be read from the server.

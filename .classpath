@@ -6,5 +6,6 @@
 	<classpathentry kind="lib" path="lib/smack-3.1.0.jar" sourcepath="lib/smack-3.1.0-src.jar"/>
 	<classpathentry kind="lib" path="lib/smackx-3.1.0.jar" sourcepath="lib/smackx-3.1.0-src.jar"/>
 	<classpathentry kind="lib" path="lib/last.fm-bindings-7.3.jar" sourcepath="lib/last.fm-bindings-7.3-src.jar"/>
+	<classpathentry kind="lib" path="lib/pircbot-1.5.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
