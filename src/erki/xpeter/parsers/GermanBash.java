@@ -7,7 +7,6 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.logging.Level;
 
 import erki.api.util.Log;
 import erki.api.util.Observer;
@@ -91,7 +90,6 @@ public class GermanBash implements Parser, Observer<TextMessage> {
             }
         }
         
-        Log.setLevelForClasses(Level.FINE, GermanBash.class);
         Log.debug("Query is: " + query);
         
         if (query != null) {
