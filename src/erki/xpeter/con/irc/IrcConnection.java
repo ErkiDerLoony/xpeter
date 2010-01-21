@@ -124,6 +124,9 @@ public class IrcConnection extends PircBot implements Connection {
                 Log.error(e);
             } catch (IrcException e) {
                 Log.error(e);
+            } catch (Throwable e) {
+                // See that _everything_ goes to the log.
+                Log.error(e);
             } finally {
                 disconnect();
                 

@@ -140,6 +140,9 @@ public class ErkiTalkConnection implements Connection {
                 Log.error(e);
             } catch (IOException e) {
                 Log.error(e);
+            } catch (Throwable e) {
+                // See that _everything_ goes to the log.
+                Log.error(e);
             } finally {
                 
                 if (socket != null) {
