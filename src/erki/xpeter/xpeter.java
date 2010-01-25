@@ -33,6 +33,7 @@ import java.util.logging.Level;
 import erki.api.util.CommandLineParser;
 import erki.api.util.Log;
 import erki.xpeter.con.erkitalk.ErkiTalkConnection;
+import erki.xpeter.con.irc.IrcConnection;
 import erki.xpeter.con.xmpp.XmppConnection;
 import erki.xpeter.parsers.Parser;
 import erki.xpeter.util.BotApi;
@@ -284,9 +285,8 @@ public class xpeter {
         for (Con con : cons) {
             
             if (con.protocol.equals("irc")) {
-                Log.info("Creating an IRC connection to " + con.channel + "@" + con.host + ":"
-                        + con.port + ".");
-                throw new IllegalStateException("Not yet implemented!");
+                Log.info("Creating an IRC connection to " + con.host + ":" + con.port + ".");
+                bot.add(new IrcConnection(bot, con.host, con.port, con.channel, nick));
             } else if (con.protocol.equals("erki") || con.protocol.equals("erkitalk")) {
                 Log.info("Creating an ErkiTalk connection to " + con.host + ":" + con.port + ".");
                 bot.add(new ErkiTalkConnection(bot, con.host, con.port, nick));

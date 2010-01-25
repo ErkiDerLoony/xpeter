@@ -158,6 +158,9 @@ public class XmppConnection implements Connection {
                 
             } catch (XMPPException e) {
                 Log.error(e);
+            } catch (Throwable e) {
+                // See that _everything_ goes to the log.
+                Log.error(e);
             } finally {
                 
                 if (con != null) {
@@ -256,11 +259,6 @@ public class XmppConnection implements Connection {
                 sendQueue.notify();
             }
         }
-    }
-    
-    @Override
-    public void send(String msg) {
-        send(new Message(msg, this));
     }
     
     @Override

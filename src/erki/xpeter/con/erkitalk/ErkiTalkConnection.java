@@ -85,11 +85,6 @@ public class ErkiTalkConnection implements Connection {
         }
     }
     
-    @Override
-    public void send(String msg) {
-        send(new Message(msg, this));
-    }
-    
     /**
      * Used by {@link ServerInputReader} to trigger a reconnect if the connection was lost and thus
      * no more input could be read from the server.
@@ -144,6 +139,9 @@ public class ErkiTalkConnection implements Connection {
             } catch (UnknownHostException e) {
                 Log.error(e);
             } catch (IOException e) {
+                Log.error(e);
+            } catch (Throwable e) {
+                // See that _everything_ goes to the log.
                 Log.error(e);
             } finally {
                 
