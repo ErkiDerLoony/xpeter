@@ -106,50 +106,52 @@ public class XmppConnection implements Connection {
                 con = new XMPPConnection(config);
                 con.connect();
                 
-                Log.info("Connection established. Logging in.");
-                load();
-                con.login(loginName, password, "Daheim");
-                // Get the password out of memory asap.
-                loginName = null;
-                password = null;
-                System.gc();
-                
-                MultiUserChat chat = new MultiUserChat(con, channel);
-                PacketListener packetListener = new PacketListener(this, bot);
-                // chat.addInvitationRejectionListener(new InvitationRejectionListener());
-                chat.addMessageListener(packetListener);
-                // chat.addParticipantListener(packetListener);
-                statusListener = new ParticipantStatusListener(this, bot);
-                chat.addParticipantStatusListener(statusListener);
-                // chat.addPresenceInterceptor(new PresenceInterceptor());
-                // chat.addSubjectUpdatedListener(new SubjectUpdatedListener());
-                chat.addUserStatusListener(new UserStatusListener(this));
-                // MultiUserChat.addInvitationListener(con, new InvitationListener());
-                connectionListener = new ConnectionListener(this);
-                con.addConnectionListener(connectionListener);
-                
-                // We don’t want the bot to react on old stuff when he joins.
-                DiscussionHistory history = new DiscussionHistory();
-                history.setMaxStanzas(0);
-                
-                Log.info("Logged in. Joining chat.");
-                chat.join(nick, null, history, SmackConfiguration.getPacketReplyTimeout());
-                pause = false;
-                
-                // Wait for messages to send.
-                while (con.isConnected()) {
+                if (con.isConnected()) {
+                    Log.info("Connection established. Logging in.");
+                    load();
+                    con.login(loginName, password, "Daheim");
+                    // Get the password out of memory asap.
+                    loginName = null;
+                    password = null;
+                    System.gc();
                     
-                    synchronized (sendQueue) {
+                    MultiUserChat chat = new MultiUserChat(con, channel);
+                    PacketListener packetListener = new PacketListener(this, bot);
+                    // chat.addInvitationRejectionListener(new InvitationRejectionListener());
+                    chat.addMessageListener(packetListener);
+                    // chat.addParticipantListener(packetListener);
+                    statusListener = new ParticipantStatusListener(this, bot);
+                    chat.addParticipantStatusListener(statusListener);
+                    // chat.addPresenceInterceptor(new PresenceInterceptor());
+                    // chat.addSubjectUpdatedListener(new SubjectUpdatedListener());
+                    chat.addUserStatusListener(new UserStatusListener(this));
+                    // MultiUserChat.addInvitationListener(con, new InvitationListener());
+                    connectionListener = new ConnectionListener(this);
+                    con.addConnectionListener(connectionListener);
+                    
+                    // We don’t want the bot to react on old stuff when he joins.
+                    DiscussionHistory history = new DiscussionHistory();
+                    history.setMaxStanzas(0);
+                    
+                    Log.info("Logged in. Joining chat.");
+                    chat.join(nick, null, history, SmackConfiguration.getPacketReplyTimeout());
+                    pause = false;
+                    
+                    // Wait for messages to send.
+                    while (con.isConnected()) {
                         
-                        while (!sendQueue.isEmpty()) {
-                            Message msg = sendQueue.poll();
-                            Log.debug("Sending " + msg + " to the server.");
-                            chat.sendMessage(msg.getText());
-                        }
-                        
-                        try {
-                            sendQueue.wait();
-                        } catch (InterruptedException e) {
+                        synchronized (sendQueue) {
+                            
+                            while (!sendQueue.isEmpty()) {
+                                Message msg = sendQueue.poll();
+                                Log.debug("Sending " + msg + " to the server.");
+                                chat.sendMessage(msg.getText());
+                            }
+                            
+                            try {
+                                sendQueue.wait();
+                            } catch (InterruptedException e) {
+                            }
                         }
                     }
                 }
