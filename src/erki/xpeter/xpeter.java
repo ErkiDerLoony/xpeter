@@ -49,7 +49,7 @@ import erki.xpeter.util.ParserFinder;
 public class xpeter {
     
     /** The version of xpeter. To be used wherever needed. */
-    public static final String VERSION = "0.0.1";
+    public static final String VERSION = "0.5.0";
     
     private static final String CONFIG_DIR = "config";
     

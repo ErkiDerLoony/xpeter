@@ -1,0 +1,44 @@
+v0.5.0
+– Finally IRC is back and with it comes the good old GiveOp parser.
+– Music suggestions for users based on Last.Fm.
+
+v0.4.0
+– Implement short message service from scratch.
+– User lists.
+– Allow alternate nicknames for Last.Fm.
+– Get funny (?) quotes from german-bash.org.
+– Count the days to christmas.
+– Less greeting spam.
+– Re-implement a very simple learner that remembers things people talk about
+  or that people tell the bot.
+– Cache outgoing messages until all parsers had the chance to parse the
+  incoming message and compute a response. This allows for a default response
+  that shall be sent if no parser finds an appropriate response (e.g. used by
+  the SimpleLearner).
+– New Sed parser allows people to correct themselves with a well known sytax.
+
+v0.3.0
+– Re-introduced time-delayed messages.
+– Merge in the old XPeter parser that does some silly stuff like writing vv if
+  someone says ^^.
+– Last.Fm parser allows the bot to query music infos about users from Last.fm.
+– Split multiline messages for ErkiTalk as the protocol only supports singe-line
+  messages.
+– Greet people that join the chat.
+– Also notify the interconnected chats if someone joins or leaves.
+– Improved Answer parser. It now understands checkboxes [ ] and options ( ).
+– Less greeting spam.
+
+v0.2.0
+– Reconnect to XMPP server if kicked or banned.
+– The Interconnector parser allows the interconnection of all the chats the bot
+  is connected to.
+– Re-implement the old Answer parser that answers questions.
+– Dynamic (un)loading of parsers at runtime.
+– Greetings parser greets people back that greet the bot.
+– Implement the ErkiTalk protocol. This allows to interconnect XMPP and ErkiTalk
+  chats with the bot.
+
+v0.1.0
+– The bot can connect to XMPP (Jabber) servers and repeat everything that is
+  said (for testing purposes).
