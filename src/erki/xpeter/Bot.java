@@ -24,12 +24,14 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import erki.api.storage.Storage;
 import erki.api.util.Log;
 import erki.api.util.Observer;
 import erki.xpeter.con.Connection;
 import erki.xpeter.msg.DelayedMessage;
 import erki.xpeter.msg.Message;
 import erki.xpeter.parsers.Parser;
+import erki.xpeter.util.StorageKey;
 
 /**
  * This class connects the different connections the bot handles. If a new connection is added (via
@@ -52,13 +54,16 @@ public class Bot {
     
     private TreeMap<String, LinkedList<Observer<? extends Message>>> parserMapping = new TreeMap<String, LinkedList<Observer<? extends Message>>>();
     
+    private final Storage<StorageKey> storage;
+    
     /**
      * Create a new Bot with an initial set of some parsers.
      * 
      * @param parsers
      *        The initially used parsers of this Bot.
      */
-    public Bot(Iterable<Class<? extends Parser>> parsers) {
+    public Bot(Iterable<Class<? extends Parser>> parsers, Storage<StorageKey> storage) {
+        this.storage = storage;
         
         for (Class<? extends Parser> clazz : parsers) {
             add(clazz);
@@ -151,6 +156,16 @@ public class Bot {
                 parsers.remove(p);
             }
         }
+    }
+    
+    /**
+     * Access the storage facility of this bot. Parsers can use it to persistently store
+     * information.
+     * 
+     * @return A persistent storage facility.
+     */
+    public Storage<StorageKey> getStorage() {
+        return storage;
     }
     
     /**

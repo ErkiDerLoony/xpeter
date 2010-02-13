@@ -30,6 +30,8 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Level;
 
+import erki.api.storage.JavaObjectStorage;
+import erki.api.storage.Storage;
 import erki.api.util.CommandLineParser;
 import erki.api.util.Log;
 import erki.xpeter.con.erkitalk.ErkiTalkConnection;
@@ -38,6 +40,7 @@ import erki.xpeter.con.xmpp.XmppConnection;
 import erki.xpeter.parsers.Parser;
 import erki.xpeter.util.BotApi;
 import erki.xpeter.util.ParserFinder;
+import erki.xpeter.util.StorageKey;
 
 /**
  * This class parses the command line or a config file if present. It then initializes the correct
@@ -50,8 +53,6 @@ public class xpeter {
     
     /** The version of xpeter. To be used wherever needed. */
     public static final String VERSION = "0.5.0";
-    
-    private static final String CONFIG_DIR = "config";
     
     /** Prints the "--help" message to stdout. */
     private static void printHelp() {
@@ -86,6 +87,10 @@ public class xpeter {
         System.out.println("                 a file called .botrc in the main directory of the");
         System.out.println("                 program (the directory that also contains the src,");
         System.out.println("                 lib and bin folders).");
+        System.out.println("  -s, --storage  Specify a file that can be used by the parsers to");
+        System.out.println("                 store various information. This defaults to be a");
+        System.out.println("                 file called .storage in the program’s main");
+        System.out.println("                 directory.");
         System.out.println();
         System.out.println("All command line options can also be specified in a file called");
         System.out.println(".botrc located in the directory where the bot is executed. Beware");
@@ -127,10 +132,20 @@ public class xpeter {
             return;
         }
         
-        String nick = "xpeter", configFile = ".botrc";
+        String nick = "xpeter", configFile = ".botrc", storageFile = ".storage";
         String parsers = null, logfile = null;
         LinkedList<Class<? extends Parser>> chosenParsers = new LinkedList<Class<? extends Parser>>();
         LinkedList<Con> cons = new LinkedList<Con>();
+        
+        if (args.containsKey("-s")) {
+            storageFile = args.get("-s");
+            args.remove("-s");
+        }
+        
+        if (args.containsKey("--storage")) {
+            storageFile = args.get("--storage");
+            args.remove("--storage");
+        }
         
         if (args.containsKey("--config")) {
             configFile = args.get("--config");
@@ -280,7 +295,8 @@ public class xpeter {
             System.exit(17);
         }
         
-        Bot bot = new Bot(chosenParsers);
+        Storage<StorageKey> storage = new JavaObjectStorage<StorageKey>(storageFile);
+        Bot bot = new Bot(chosenParsers, storage);
         
         for (Con con : cons) {
             
@@ -294,18 +310,6 @@ public class xpeter {
                 Log.info("Creating an XMPP connection to " + con.channel + "@" + con.host + ":"
                         + con.port + ".");
                 bot.add(new XmppConnection(bot, con.host, con.port, con.channel, nick));
-            }
-        }
-        
-        /*
-         * Before we start make sure the config directory exists because it is needed by some
-         * connections and/or parsers.
-         */
-        if (!new File(CONFIG_DIR).isDirectory()) {
-            
-            if (!new File(CONFIG_DIR).mkdir()) {
-                Log.error("Could not create config dir!");
-                Log.info("Trying to continue but this is likely not to work!");
             }
         }
     }
