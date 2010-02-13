@@ -134,7 +134,7 @@ public class IrcConnection extends PircBot implements Connection {
                     Log.info("Lost connection to IRC server. Trying to reconnect in 5 min.");
                     
                     try {
-                        Thread.sleep(10000);
+                        Thread.sleep(300000);
                     } catch (InterruptedException e) {
                     }
                     
