@@ -47,6 +47,13 @@ public class SimpleMailbox implements Parser, Observer<TextMessage> {
     @Override
     public void init(Bot bot) {
         storage = bot.getStorage();
+        StorageKey<TreeMap<String, LinkedList<ShortMessage>>> key = new StorageKey<TreeMap<String, LinkedList<ShortMessage>>>(
+                Keys.SHORT_MESSAGES);
+        
+        if (storage.contains(key)) {
+            msgs = storage.get(key);
+        }
+        
         bot.register(TextMessage.class, this);
         
         userJoinedObserver = new Observer<UserJoinedMessage>() {
