@@ -31,7 +31,7 @@ import erki.xpeter.con.Connection;
 import erki.xpeter.msg.DelayedMessage;
 import erki.xpeter.msg.Message;
 import erki.xpeter.parsers.Parser;
-import erki.xpeter.util.StorageKey;
+import erki.xpeter.util.Keys;
 
 /**
  * This class connects the different connections the bot handles. If a new connection is added (via
@@ -54,7 +54,7 @@ public class Bot {
     
     private TreeMap<String, LinkedList<Observer<? extends Message>>> parserMapping = new TreeMap<String, LinkedList<Observer<? extends Message>>>();
     
-    private final Storage<StorageKey> storage;
+    private final Storage<Keys> storage;
     
     /**
      * Create a new Bot with an initial set of some parsers.
@@ -62,7 +62,7 @@ public class Bot {
      * @param parsers
      *        The initially used parsers of this Bot.
      */
-    public Bot(Iterable<Class<? extends Parser>> parsers, Storage<StorageKey> storage) {
+    public Bot(Iterable<Class<? extends Parser>> parsers, Storage<Keys> storage) {
         this.storage = storage;
         
         for (Class<? extends Parser> clazz : parsers) {
@@ -164,7 +164,7 @@ public class Bot {
      * 
      * @return A persistent storage facility.
      */
-    public Storage<StorageKey> getStorage() {
+    public Storage<Keys> getStorage() {
         return storage;
     }
     

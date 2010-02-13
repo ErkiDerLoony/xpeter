@@ -40,7 +40,7 @@ import erki.xpeter.con.xmpp.XmppConnection;
 import erki.xpeter.parsers.Parser;
 import erki.xpeter.util.BotApi;
 import erki.xpeter.util.ParserFinder;
-import erki.xpeter.util.StorageKey;
+import erki.xpeter.util.Keys;
 
 /**
  * This class parses the command line or a config file if present. It then initializes the correct
@@ -295,7 +295,7 @@ public class xpeter {
             System.exit(17);
         }
         
-        Storage<StorageKey> storage = new JavaObjectStorage<StorageKey>(storageFile);
+        Storage<Keys> storage = new JavaObjectStorage<Keys>(storageFile);
         Bot bot = new Bot(chosenParsers, storage);
         
         for (Con con : cons) {

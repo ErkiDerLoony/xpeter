@@ -17,16 +17,10 @@
 
 package erki.xpeter.parsers.sms;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.LinkedList;
 import java.util.TreeMap;
 
+import erki.api.storage.Storage;
 import erki.api.util.Log;
 import erki.api.util.Observer;
 import erki.xpeter.Bot;
@@ -37,10 +31,10 @@ import erki.xpeter.msg.TextMessage;
 import erki.xpeter.msg.UserJoinedMessage;
 import erki.xpeter.parsers.Parser;
 import erki.xpeter.util.BotApi;
+import erki.xpeter.util.Keys;
+import erki.xpeter.util.StorageKey;
 
 public class SimpleMailbox implements Parser, Observer<TextMessage> {
-    
-    private static final String CONFIG_FILE = "config" + File.separator + "sms";
     
     private TreeMap<String, LinkedList<ShortMessage>> msgs = new TreeMap<String, LinkedList<ShortMessage>>();
     
@@ -48,9 +42,11 @@ public class SimpleMailbox implements Parser, Observer<TextMessage> {
     
     private Observer<NickChangeMessage> nickChangeObserver;
     
+    private Storage<Keys> storage;
+    
     @Override
     public void init(Bot bot) {
-        load();
+        storage = bot.getStorage();
         bot.register(TextMessage.class, this);
         
         userJoinedObserver = new Observer<UserJoinedMessage>() {
@@ -77,7 +73,8 @@ public class SimpleMailbox implements Parser, Observer<TextMessage> {
         bot.deregister(TextMessage.class, this);
         bot.deregister(UserJoinedMessage.class, userJoinedObserver);
         bot.deregister(NickChangeMessage.class, nickChangeObserver);
-        save();
+        storage.add(new StorageKey<TreeMap<String, LinkedList<ShortMessage>>>(Keys.SHORT_MESSAGES),
+                msgs);
     }
     
     private void check(String nick, Message msg) {
@@ -93,7 +90,8 @@ public class SimpleMailbox implements Parser, Observer<TextMessage> {
                 }
                 
                 msgs.remove(nick);
-                save();
+                storage.add(new StorageKey<TreeMap<String, LinkedList<ShortMessage>>>(
+                        Keys.SHORT_MESSAGES), msgs);
             }
         }
     }
@@ -185,40 +183,7 @@ public class SimpleMailbox implements Parser, Observer<TextMessage> {
             msgs.get(nick).addLast(new ShortMessage(msg, sender));
         }
         
-        save();
-    }
-    
-    @SuppressWarnings("unchecked")
-    private void load() {
-        
-        try {
-            ObjectInputStream fileIn = new ObjectInputStream(new FileInputStream(CONFIG_FILE));
-            msgs = (TreeMap<String, LinkedList<ShortMessage>>) fileIn.readObject();
-            Log.info("Loaded stored msgs from " + CONFIG_FILE + ".");
-            fileIn.close();
-        } catch (FileNotFoundException e) {
-            Log.info("No stored sms found.");
-        } catch (IOException e) {
-            Log.warning("An error occurred while loading the stored sms: "
-                    + e.getClass().getSimpleName() + ".");
-            Log.info("Discarding the stored messages and trying to continue without them.");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-    
-    private void save() {
-        
-        try {
-            ObjectOutputStream fileOut = new ObjectOutputStream(new FileOutputStream(CONFIG_FILE));
-            fileOut.writeObject(msgs);
-            Log.info("Stored sms to " + CONFIG_FILE + ".");
-            fileOut.close();
-        } catch (FileNotFoundException e) {
-            Log.warning("Could not store sms to config file (file not found)!");
-        } catch (IOException e) {
-            Log.warning("Could not store sms to config file (" + e.getClass().getSimpleName()
-                    + ").");
-        }
+        storage.add(new StorageKey<TreeMap<String, LinkedList<ShortMessage>>>(Keys.SHORT_MESSAGES),
+                msgs);
     }
 }
