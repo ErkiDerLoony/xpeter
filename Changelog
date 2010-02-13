@@ -1,6 +1,7 @@
 v0.5.0
 – Finally IRC is back and with it comes the good old GiveOp parser.
 – Music suggestions for users based on Last.Fm.
+– New parser for rss feeds.
 
 v0.4.0
 – Implement short message service from scratch.
