@@ -32,9 +32,9 @@ public class UpdateThread extends Thread {
     private boolean killed = false;
     
     private Bot bot;
-
+    
     private StorageKey<TreeMap<String, LinkedList<String>>> key;
-
+    
     private Storage<Keys> storage;
     
     /**
@@ -90,6 +90,22 @@ public class UpdateThread extends Thread {
                             storage.add(key, feeds);
                             bot.broadcast(new Message("[" + channel.getDescription() + "] "
                                     + item.getTitle() + " (" + item.getLink() + ")"));
+                        }
+                    }
+                    
+                    // Clean up old items.
+                    for (String oldItem : knownItems) {
+                        boolean contained = false;
+                        
+                        for (RSSItem item : (Iterable<RSSItem>) channel.getItems()) {
+                            
+                            if (item.toString().equals(oldItem)) {
+                                contained = true;
+                            }
+                        }
+                        
+                        if (!contained) {
+                            feeds.get(url).remove(oldItem);
                         }
                     }
                     
