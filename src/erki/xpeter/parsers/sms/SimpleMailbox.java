@@ -36,7 +36,7 @@ import erki.xpeter.util.StorageKey;
 
 public class SimpleMailbox implements Parser, Observer<TextMessage> {
     
-    private TreeMap<String, LinkedList<ShortMessage>> msgs = new TreeMap<String, LinkedList<ShortMessage>>();
+    private TreeMap<String, LinkedList<ShortMessage>> msgs;
     
     private Observer<UserJoinedMessage> userJoinedObserver;
     
@@ -52,6 +52,8 @@ public class SimpleMailbox implements Parser, Observer<TextMessage> {
         
         if (storage.contains(key)) {
             msgs = storage.get(key);
+        } else {
+            msgs = new TreeMap<String, LinkedList<ShortMessage>>();
         }
         
         bot.register(TextMessage.class, this);
