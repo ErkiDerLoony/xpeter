@@ -1,11 +1,11 @@
 /*
- * © Copyright 2008–2009 by Edgar Kalkowski (eMail@edgar-kalkowski.de)
+ * © Copyright 2008–2010 by Edgar Kalkowski <eMail@edgar-kalkowski.de>
  * 
- * This file is part of the chatbot ABCPeter.
+ * This file is part of the chatbot xpeter.
  * 
- * The chatbot ABCPeter is free software; you can redistribute it and/or modify it under the terms
- * of the GNU General Public License as published by the Free Software Foundation; either version 3
- * of the License, or (at your option) any later version.
+ * The chatbot xpeter is free software; you can redistribute it and/or modify it under the terms of
+ * the GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
  * 
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.TreeMap;
 
 import net.roarsoftware.lastfm.Caller;
@@ -169,6 +170,30 @@ public class LastFm implements Parser, Observer<TextMessage> {
             msg.respond(new DelayedMessage(msg.getNick() + ": Ok, bei Last.fm heißt du also „"
                     + lastFmNick + "“.", 2000));
             save();
+        }
+        
+        match = "[wW]as (soll ich h(oe|ö)ren|h(oe|ö)re ich gerne|f(ue|ü)r [iI]nterpreten)\\?";
+        
+        if (text.matches("[wW]as (f(ue|ü)r Musik )?soll ich( mir)? (an)?h(oe|ö)ren\\?")
+                || text.matches("[wW]as h(oe|ö)re ich gerne?\\?")
+                || text.matches("([wW]as f(ue|ü)r|[wW]elche) ([Ii]nterpreten|[Mm]usike?r?) "
+                        + "(mag ich( gerne?)?|h(oe|ö)re ich gerne?)\\?")) {
+            queryNick = msg.getNick();
+            
+            if (nicks.containsKey(queryNick)) {
+                queryNick = nicks.get(queryNick);
+            }
+            
+            LinkedList<Track> tracks = new LinkedList<Track>(User.getTopTracks(queryNick,
+                    LAST_FM_API_KEY));
+            
+            if (!tracks.isEmpty()) {
+                Track suggestion = tracks.get((int) (Math.random() * tracks.size()));
+                msg.respond(new DelayedMessage("Wie wär’s mit " + suggestion.getName() + " von "
+                        + suggestion.getArtist() + "?", 2000));
+            } else {
+                msg.respond(new DelayedMessage("Das weiß ich auch nicht.", 2000));
+            }
         }
     }
     

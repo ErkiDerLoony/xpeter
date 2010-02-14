@@ -17,15 +17,19 @@
 
 package erki.xpeter.parsers;
 
-import java.text.NumberFormat;
-import java.util.Calendar;
-
 import erki.api.util.Observer;
 import erki.xpeter.Bot;
 import erki.xpeter.msg.DelayedMessage;
+import erki.xpeter.msg.RawMessage;
 import erki.xpeter.msg.TextMessage;
+import erki.xpeter.util.BotApi;
 
-public class Weihnachten implements Parser, Observer<TextMessage> {
+/**
+ * This enables the bot to give users operator status on irc.
+ * 
+ * @author Edgar Kalkowski <eMail@edgar-kalkowski.de>
+ */
+public class GiveOp implements Parser, Observer<TextMessage> {
     
     @Override
     public void init(Bot bot) {
@@ -39,39 +43,23 @@ public class Weihnachten implements Parser, Observer<TextMessage> {
     
     @Override
     public void inform(TextMessage msg) {
+        boolean addresses = false;
         String text = msg.getText();
+        String botNick = msg.getBotNick();
+        String nick = msg.getNick();
         
-        if (text.contains("Weihnachtsbaum") || text.contains("Weihnachten")
-                || text.contains("weihnachten") || text.contains("weihnachtsbaum")) {
-            msg.respond(new DelayedMessage(getTree(), 3000));
-        }
-    }
-    
-    private String getTree() {
-        NumberFormat nf = NumberFormat.getInstance();
-        nf.setMinimumIntegerDigits(3);
-        nf.setMaximumIntegerDigits(3);
-        Calendar xmas = Calendar.getInstance();
-        xmas.set(Calendar.MONTH, Calendar.DECEMBER);
-        xmas.set(Calendar.DAY_OF_MONTH, 24);
-        Calendar now = Calendar.getInstance();
-        
-        if (now.after(xmas)) {
-            xmas.add(Calendar.YEAR, 1);
+        if (BotApi.addresses(text, botNick)) {
+            addresses = true;
+            text = BotApi.trimNick(text, botNick);
         }
         
-        long diff = xmas.getTimeInMillis() - now.getTimeInMillis();
-        long days = diff / 1000 / 60 / 60 / 24;
-        
-        String result = "\n";
-        result += "    *    \n";
-        result += "   / \\   \n";
-        result += "  / o \\  \n";
-        result += "  /o o\\  \n";
-        result += " /  o  \\ \n";
-        result += " / " + nf.format(days + 1) + " \\ \n";
-        result += "/ o   o \\\n";
-        result += "^^^[_]^^^";
-        return result;
+        if (addresses && text.matches("([gG]i(b|ve|pp?) ?[oO]pp?!?!?!?\\.?|[oO]pp?!?!?!?\\.?)")) {
+            
+            if (nick.matches("DZoom") || nick.matches("ErkiDerLoony")) {
+                msg.respond(new RawMessage("MODE " + msg.getShortId() + " +o " + nick));
+            } else {
+                msg.respond(new DelayedMessage("Nope.", 1500));
+            }
+        }
     }
 }

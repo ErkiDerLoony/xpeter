@@ -15,35 +15,32 @@
  * not, see <http://www.gnu.org/licenses/>.
  */
 
-package erki.xpeter.msg;
+package erki.xpeter.util;
 
-import erki.xpeter.con.Connection;
+import java.util.LinkedList;
+import java.util.TreeMap;
+
+import erki.xpeter.parsers.feeds.RssFeed;
+import erki.xpeter.parsers.sms.ShortMessage;
+import erki.xpeter.parsers.sms.SimpleMailbox;
 
 /**
- * This message indicates that some user joined the chat.
+ * This enum contains constants that can be used to store information in the persistent storage
+ * file. A parser should not use the storage keys of other parsers but rather create its own.
  * 
  * @author Edgar Kalkowski
  */
-public class UserJoinedMessage extends Message {
+public enum Keys {
     
     /**
-     * Create a new UserJoinedMessage.
-     * 
-     * @param nick
-     *        The nickname of the user who joined the chat.
-     * @param con
-     *        The connection this message belongs to.
+     * A {@link TreeMap}&lt;{@link String}, {@link LinkedList}&lt;{@link ShortMessage}&gt;&gt; that
+     * contains the short messages stored by {@link SimpleMailbox}.
      */
-    public UserJoinedMessage(String nick, Connection con) {
-        super(nick, con);
-    }
-    
+    SHORT_MESSAGES,
+
     /**
-     * Access the nickname of the user who joined the chat.
-     * 
-     * @return The nickname of the user who joined the chat.
+     * This {@link TreeMap}&lt;{@link String}, {@link LinkedList}&lt;{@link String}&gt;&gt; contains
+     * all the feed urls known to {@link RssFeed} together with all the entries already posted.
      */
-    public String getNick() {
-        return getText();
-    }
+    RSS_FEEDS,
 }

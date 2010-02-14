@@ -1,3 +1,20 @@
+/*
+ * © Copyright 2008–2010 by Edgar Kalkowski <eMail@edgar-kalkowski.de>
+ * 
+ * This file is part of the chatbot xpeter.
+ * 
+ * The chatbot xpeter is free software; you can redistribute it and/or modify it under the terms of
+ * the GNU General Public License as published by the Free Software Foundation; either version 3 of
+ * the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
+ */
+
 package erki.xpeter.con.erkitalk;
 
 import java.io.BufferedReader;
@@ -85,11 +102,6 @@ public class ErkiTalkConnection implements Connection {
         }
     }
     
-    @Override
-    public void send(String msg) {
-        send(new Message(msg, this));
-    }
-    
     /**
      * Used by {@link ServerInputReader} to trigger a reconnect if the connection was lost and thus
      * no more input could be read from the server.
@@ -144,6 +156,9 @@ public class ErkiTalkConnection implements Connection {
             } catch (UnknownHostException e) {
                 Log.error(e);
             } catch (IOException e) {
+                Log.error(e);
+            } catch (Throwable e) {
+                // See that _everything_ goes to the log.
                 Log.error(e);
             } finally {
                 

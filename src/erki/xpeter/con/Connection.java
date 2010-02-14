@@ -1,5 +1,5 @@
 /*
- * © Copyright 2008–2009 by Edgar Kalkowski (eMail@edgar-kalkowski.de)
+ * © Copyright 2008–2010 by Edgar Kalkowski <eMail@edgar-kalkowski.de>
  * 
  * This file is part of the chatbot xpeter.
  * 
@@ -20,7 +20,6 @@ package erki.xpeter.con;
 import java.util.Collection;
 
 import erki.xpeter.msg.Message;
-import erki.xpeter.msg.TextMessage;
 import erki.xpeter.parsers.Interconnector;
 
 /**
@@ -46,15 +45,6 @@ public interface Connection extends Runnable {
      * the same. Perhaps refactor this to a common super-class?
      */
     public void send(Message msg);
-    
-    /**
-     * Send a simple text to the chat. This is a convenience method that saves the wrapping of the
-     * string in a {@link Message} or {@link TextMessage} object.
-     * 
-     * @param msg
-     *        The text to send to the chat.
-     */
-    public void send(String msg);
     
     /**
      * Access the nickname the bot uses with this connection.
