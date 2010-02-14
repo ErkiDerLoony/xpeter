@@ -92,6 +92,7 @@ public class RssFeed implements Parser, Observer<TextMessage> {
         
         if (text.matches(match)) {
             String url = text.replaceAll(match, "$1");
+            Log.debug("Recognized feed url: “" + url + "”.");
             RSSHandler handler = new RSSHandler();
             
             try {
