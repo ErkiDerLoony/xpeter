@@ -1,4 +1,4 @@
-package erki.xpeter.parsers.feeds;
+package erki.xpeter.parsers.rss;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -27,13 +27,13 @@ import erki.xpeter.util.StorageKey;
  */
 public class UpdateThread extends Thread {
     
-    private TreeMap<String, LinkedList<String>> feeds;
+    private TreeMap<String, FeedData> feeds;
     
     private boolean killed = false;
     
     private Bot bot;
     
-    private StorageKey<TreeMap<String, LinkedList<String>>> key;
+    private StorageKey<TreeMap<String, FeedData>> key;
     
     private Storage<Keys> storage;
     
@@ -49,8 +49,8 @@ public class UpdateThread extends Thread {
      * @param storage
      *        The persistant storage facility to store the feeds to if something changed.
      */
-    public UpdateThread(TreeMap<String, LinkedList<String>> feeds, Bot bot,
-            StorageKey<TreeMap<String, LinkedList<String>>> key, Storage<Keys> storage) {
+    public UpdateThread(TreeMap<String, FeedData> feeds, Bot bot,
+            StorageKey<TreeMap<String, FeedData>> key, Storage<Keys> storage) {
         super("RssUpdateThread");
         this.feeds = feeds;
         this.bot = bot;
@@ -68,47 +68,39 @@ public class UpdateThread extends Thread {
             
             for (String url : keys) {
                 RSSHandler handler = new RSSHandler();
-                String[] knownItems = feeds.get(url).toArray(new String[0]);
+                FeedData feed = feeds.get(url);
                 
                 try {
                     RSSParser.parseXmlFile(new URL(url), handler, false);
                     RSSChannel channel = handler.getRSSChannel();
+                    feed.setTitle(channel.getTitle());
+                    feed.setDescription(channel.getDescription());
                     
                     for (RSSItem item : (Iterable<RSSItem>) channel.getItems()) {
-                        boolean known = false;
                         
-                        for (String knownItem : knownItems) {
-                            
-                            if (knownItem.equals(item.toString())) {
-                                known = true;
-                                break;
-                            }
-                        }
-                        
-                        if (!known) {
-                            feeds.get(url).add(item.toString());
+                        if (!feed.isKnown(item.toString())) {
+                            feed.add(item.toString());
                             storage.add(key, feeds);
-                            bot.broadcast(new Message("[" + channel.getDescription() + "] "
-                                    + item.getTitle() + " (" + item.getLink() + ")"));
+                            
+                            if (feed.isVerbose()) {
+                                bot.broadcast(new Message("[" + feed.getTitle() + "] "
+                                        + item.getTitle() + "\n" + item.getDescription() + "\n("
+                                        + item.getLink() + ")"));
+                            } else {
+                                bot.broadcast(new Message("[" + feed.getTitle() + "] "
+                                        + item.getTitle() + " (" + item.getLink() + ")"));
+                            }
                         }
                     }
                     
                     // Clean up old items.
-                    for (String oldItem : knownItems) {
-                        boolean contained = false;
-                        
-                        for (RSSItem item : (Iterable<RSSItem>) channel.getItems()) {
-                            
-                            if (item.toString().equals(oldItem)) {
-                                contained = true;
-                            }
-                        }
-                        
-                        if (!contained) {
-                            feeds.get(url).remove(oldItem);
-                        }
+                    LinkedList<String> items = new LinkedList<String>();
+                    
+                    for (RSSItem item : (Iterable<RSSItem>) channel.getItems()) {
+                        items.add(item.toString());
                     }
                     
+                    feed.cleanup(items);
                 } catch (RSSException e) {
                     Log.error(e);
                     bot.broadcast(new Message("There is something wrong with this rss here …"));
