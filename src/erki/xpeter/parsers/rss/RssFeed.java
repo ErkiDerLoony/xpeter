@@ -153,11 +153,7 @@ public class RssFeed implements Parser, Observer<TextMessage> {
                         response += "\n – (ohne Details) ";
                     }
                     
-                    if (feed.getDescription().equals("")) {
-                        response += feed.getTitle();
-                    } else {
-                        response += feed.getTitle() + " (" + feed.getDescription() + ")";
-                    }
+                    response += feed.getTitle() + " (" + feed.getUrl() + ")";
                 }
                 
                 msg.respond(new Message(response));
@@ -175,8 +171,7 @@ public class RssFeed implements Parser, Observer<TextMessage> {
             for (String url : feeds.keySet()) {
                 FeedData feed = feeds.get(url);
                 
-                if (feed.getTitle().contains(identifier)
-                        || feed.getDescription().contains(identifier)) {
+                if (feed.getTitle().contains(identifier) || feed.getUrl().equals(identifier)) {
                     matches.add(feed.getTitle());
                     
                     if (mode.equals("an") || mode.equals("on")) {
@@ -211,8 +206,7 @@ public class RssFeed implements Parser, Observer<TextMessage> {
             for (String url : feedArray) {
                 FeedData feed = feeds.get(url);
                 
-                if (feed.getTitle().contains(identifier)
-                        || feed.getDescription().contains(identifier)) {
+                if (feed.getTitle().contains(identifier) || feed.getUrl().equals(identifier)) {
                     matches.add(feed.getTitle());
                     feeds.remove(url);
                 }
