@@ -130,7 +130,16 @@ public class IrcConnection extends PircBot implements Connection {
                             if (msg instanceof RawMessage) {
                                 sendRawLine(msg.getText());
                             } else {
-                                sendMessage(channel, msg.getText());
+                                
+                                if (msg.getText().contains("\n")) {
+                                    
+                                    for (String line : msg.getText().split("\n")) {
+                                        sendMessage(channel, line);
+                                    }
+                                    
+                                } else {
+                                    sendMessage(channel, msg.getText());
+                                }
                             }
                         }
                     }
