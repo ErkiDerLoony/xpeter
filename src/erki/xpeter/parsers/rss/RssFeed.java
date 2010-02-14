@@ -61,8 +61,10 @@ public class RssFeed implements Parser, Observer<TextMessage> {
         
         if (storage.contains(key)) {
             feeds = storage.get(key);
+            Log.info("Stored feeds successfully loaded.");
         } else {
             feeds = new TreeMap<String, FeedData>();
+            Log.info("No stored feeds found.");
         }
         
         updateThread = new UpdateThread(feeds, bot, key, storage);
@@ -135,8 +137,8 @@ public class RssFeed implements Parser, Observer<TextMessage> {
                             .respond(new Message("Ich kenne nur den einen Feed " + feed.getTitle()
                                     + "."));
                 } else {
-                    msg.respond(new Message("Ich kenne nur den einen Feed " + feed.getTitle()
-                            + " (" + feed.getDescription() + ")."));
+                    msg.respond(new Message("Ich kenne nur den einen Feed „" + feed.getTitle()
+                            + " (" + feed.getDescription() + ")“."));
                 }
                 
             } else {
