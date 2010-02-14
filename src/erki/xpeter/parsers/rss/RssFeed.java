@@ -145,7 +145,7 @@ public class RssFeed implements Parser, Observer<TextMessage> {
                 String oldTitle = feeds.get(matches.get(0)).getTitle();
                 feeds.get(matches.get(0)).setTitle(title);
                 storage.add(key, feeds);
-                msg.respond(new Message("Ok. „" + oldTitle + "“ hat jetzt den Title „" + title
+                msg.respond(new Message("Ok. „" + oldTitle + "“ hat jetzt den Titel „" + title
                         + "“."));
             }
         }
