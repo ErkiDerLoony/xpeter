@@ -108,8 +108,7 @@ public class RssFeed implements Parser, Observer<TextMessage> {
                     knownItems.add(item.toString());
                 }
                 
-                FeedData feed = new FeedData(channel.getTitle(), channel.getDescription(), url,
-                        knownItems);
+                FeedData feed = new FeedData(channel.getTitle(), url, knownItems);
                 feeds.put(url, feed);
                 storage.add(key, feeds);
                 msg.respond(new Message("Ok, ist gespeichert."));
@@ -122,6 +121,35 @@ public class RssFeed implements Parser, Observer<TextMessage> {
             }
         }
         
+        match = "[fF]eed-?[tT]itel:? (\\S*) (.*)";
+        
+        if (text.matches(match)) {
+            String identifier = text.replaceAll(match, "$1");
+            String title = text.replaceAll(match, "$2");
+            LinkedList<String> matches = new LinkedList<String>();
+            
+            for (String url : feeds.keySet()) {
+                FeedData feed = feeds.get(url);
+                
+                if (feed.getTitle().contains(identifier) || feed.getUrl().equals(identifier)) {
+                    matches.add(url);
+                }
+            }
+            
+            if (matches.isEmpty()) {
+                msg.respond(new Message("Ich konnte leider keinen passenden Feed finden. :("));
+            } else if (matches.size() > 1) {
+                msg.respond(new Message("Es wurden mehrere Feeds gefunden. Bitte schränke die "
+                        + "Auswahl mehr ein!"));
+            } else {
+                String oldTitle = feeds.get(matches.get(0)).getTitle();
+                feeds.get(matches.get(0)).setTitle(title);
+                storage.add(key, feeds);
+                msg.respond(new Message("Ok. „" + oldTitle + "“ hat jetzt den Title „" + title
+                        + "“."));
+            }
+        }
+        
         match = "(([wW]elche|[wW]as f(ue|ü)r) [fF]eeds (hast|kennst) "
                 + "[dD]u( so)?\\??|[fF]eed-?[dD]etails\\.?\\??!?)";
         
@@ -131,16 +159,8 @@ public class RssFeed implements Parser, Observer<TextMessage> {
                 msg.respond(new Message("Ich kenne leider gar keinen Feed. :("));
             } else if (feeds.size() == 1) {
                 FeedData feed = feeds.get(feeds.keySet().iterator().next());
-                
-                if (feed.getDescription().equals("")) {
-                    msg
-                            .respond(new Message("Ich kenne nur den einen Feed " + feed.getTitle()
-                                    + "."));
-                } else {
-                    msg.respond(new Message("Ich kenne nur den einen Feed „" + feed.getTitle()
-                            + " (" + feed.getDescription() + ")“."));
-                }
-                
+                msg.respond(new Message("Ich kenne nur den einen Feed „" + feed.getTitle() + " ("
+                        + feed.getUrl() + ")“."));
             } else {
                 String response = "Ich kenne die folgenden Feeds: ";
                 

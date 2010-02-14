@@ -1,7 +1,13 @@
 package erki.xpeter.parsers.rss;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
+import java.net.Socket;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.Set;
 import java.util.TreeMap;
@@ -73,8 +79,6 @@ public class UpdateThread extends Thread {
                 try {
                     RSSParser.parseXmlFile(new URL(url), handler, false);
                     RSSChannel channel = handler.getRSSChannel();
-                    feed.setTitle(channel.getTitle());
-                    feed.setDescription(channel.getDescription());
                     
                     for (RSSItem item : (Iterable<RSSItem>) channel.getItems()) {
                         
@@ -84,11 +88,13 @@ public class UpdateThread extends Thread {
                             
                             if (feed.isVerbose()) {
                                 bot.broadcast(new Message("[" + feed.getTitle() + "] "
-                                        + item.getTitle() + "\n" + item.getDescription() + "\n("
-                                        + item.getLink() + ")"));
+                                        + item.getTitle() + "\n" + item.getDescription() + " ("
+                                        + getTinyUrl(item.getLink()) + ")"));
                             } else {
-                                bot.broadcast(new Message("[" + feed.getTitle() + "] "
-                                        + item.getTitle() + " (" + item.getLink() + ")"));
+                                bot
+                                        .broadcast(new Message("[" + feed.getTitle() + "] "
+                                                + item.getTitle() + " ("
+                                                + getTinyUrl(item.getLink()) + ")"));
                             }
                         }
                     }
@@ -116,6 +122,52 @@ public class UpdateThread extends Thread {
                 Thread.sleep(200000);
             } catch (InterruptedException e) {
             }
+        }
+    }
+    
+    /**
+     * Tries to make urls tiny using tinyurl.com.
+     * 
+     * @param url
+     *        The long ugly url.
+     * @return A tiny url or the long url if something about tinyurl.com failed.
+     */
+    private static String getTinyUrl(String url) {
+        
+        try {
+            Socket socket = new Socket("tinyurl.com", 80);
+            socket.setSoTimeout(5000);
+            OutputStreamWriter socketOut = new OutputStreamWriter(socket.getOutputStream(), "UTF-8");
+            BufferedReader socketIn = new BufferedReader(new InputStreamReader(socket
+                    .getInputStream(), "UTF-8"));
+            socketOut.write("GET api-create.php?url=" + url + " HTTP/1.0\r\n");
+            socketOut.write("Host: tinyurl.com\r\n\r\n");
+            socketOut.flush();
+            String line;
+            boolean header = true;
+            
+            while ((line = socketIn.readLine()) != null) {
+                Log.finest("Received line from server: " + line);
+                
+                if (header) {
+                    
+                    if (line.equals("")) {
+                        header = false;
+                    }
+                    
+                    continue;
+                } else {
+                    return line;
+                }
+            }
+            
+            return url;
+        } catch (UnknownHostException e) {
+            Log.error(e);
+            return url;
+        } catch (IOException e) {
+            Log.error(e);
+            return url;
         }
     }
     

@@ -22,7 +22,7 @@ public class FeedData implements Serializable {
     
     private final LinkedList<String> knownItems;
     
-    private String title, description;
+    private String title;
     
     private boolean verbose = false;
     
@@ -31,23 +31,20 @@ public class FeedData implements Serializable {
      * 
      * @param title
      *        The title of this feed. Must not be {@code null}!
-     * @param description
-     *        The description of this feed. Must not be {@code null}!
      * @param url
      *        The url of this feed. Must not be {@code null}!
      * @param knownItems
      *        The items that are initially marked as already known. Must not be {@code null} (give
      *        an empty list if no items shall be marked as already known initially)!
      */
-    public FeedData(String title, String description, String url, Collection<String> knownItems) {
+    public FeedData(String title, String url, Collection<String> knownItems) {
         
-        if (title == null || description == null || url == null || knownItems == null) {
+        if (title == null || url == null || knownItems == null) {
             throw new NullPointerException();
         }
         
         this.url = url;
         this.title = title;
-        this.description = description;
         this.knownItems = new LinkedList<String>(knownItems);
     }
     
@@ -77,25 +74,6 @@ public class FeedData implements Serializable {
      */
     public void setTitle(String title) {
         this.title = title;
-    }
-    
-    /**
-     * Access the description of this feed.
-     * 
-     * @return The description.
-     */
-    public String getDescription() {
-        return description;
-    }
-    
-    /**
-     * Change the description of this feed.
-     * 
-     * @param description
-     *        The new description.
-     */
-    public void setDescription(String description) {
-        this.description = description;
     }
     
     /**
