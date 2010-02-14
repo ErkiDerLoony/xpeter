@@ -39,8 +39,8 @@ import erki.xpeter.con.irc.IrcConnection;
 import erki.xpeter.con.xmpp.XmppConnection;
 import erki.xpeter.parsers.Parser;
 import erki.xpeter.util.BotApi;
-import erki.xpeter.util.ParserFinder;
 import erki.xpeter.util.Keys;
+import erki.xpeter.util.ParserFinder;
 
 /**
  * This class parses the command line or a config file if present. It then initializes the correct
