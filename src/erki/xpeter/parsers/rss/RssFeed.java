@@ -206,8 +206,9 @@ public class RssFeed implements Parser, Observer<TextMessage> {
             String identifier = text.replaceAll(match, "$4");
             Log.debug("Recognized feed identifier: “" + identifier + "”.");
             LinkedList<String> matches = new LinkedList<String>();
+            String[] feedArray = feeds.keySet().toArray(new String[0]);
             
-            for (String url : feeds.keySet()) {
+            for (String url : feedArray) {
                 FeedData feed = feeds.get(url);
                 
                 if (feed.getTitle().contains(identifier)
