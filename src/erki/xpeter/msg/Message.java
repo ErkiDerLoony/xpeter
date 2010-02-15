@@ -1,5 +1,5 @@
 /*
- * © Copyright 2008–2009 by Edgar Kalkowski (eMail@edgar-kalkowski.de)
+ * © Copyright 2008–2010 by Edgar Kalkowski <eMail@edgar-kalkowski.de>
  * 
  * This file is part of the chatbot xpeter.
  * 
