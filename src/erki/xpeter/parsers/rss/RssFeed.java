@@ -159,8 +159,8 @@ public class RssFeed implements Parser, Observer<TextMessage> {
                 msg.respond(new Message("Ich kenne leider gar keinen Feed. :("));
             } else if (feeds.size() == 1) {
                 FeedData feed = feeds.get(feeds.keySet().iterator().next());
-                msg.respond(new Message("Ich kenne nur den einen Feed „" + feed.getTitle() + " ("
-                        + feed.getUrl() + ")“."));
+                msg.respond(new Message("Ich kenne nur den einen Feed " + feed.getTitle() + " ("
+                        + feed.getUrl() + ")."));
             } else {
                 String response = "Ich kenne die folgenden Feeds: ";
                 
@@ -205,12 +205,26 @@ public class RssFeed implements Parser, Observer<TextMessage> {
             if (matches.isEmpty()) {
                 msg.respond(new Message("Ich konnte leider keinen passenden Feed finden. :("));
             } else if (matches.size() == 1) {
-                msg.respond(new Message("Ok. Ab sofort werden die Details des Feeds „"
-                        + matches.get(0) + "“ angezeigt."));
+                
+                if (mode.equals("on") || mode.equals("an")) {
+                    msg.respond(new Message("Ok. Ab sofort werden die Details des Feeds "
+                            + matches.get(0) + " angezeigt."));
+                } else {
+                    msg.respond(new Message("Ok. Ab sofort werden die Details des Feeds "
+                            + matches.get(0) + " nicht mehr angezeigt."));
+                }
+                
                 storage.add(key, feeds);
             } else {
-                msg.respond(new Message("Ok. Ab sofort werden die Details der Feeds "
-                        + BotApi.enumerate(matches) + " angezeigt."));
+                
+                if (mode.equals("an") || mode.equals("on")) {
+                    msg.respond(new Message("Ok. Ab sofort werden die Details der Feeds "
+                            + BotApi.enumerate(matches) + " angezeigt."));
+                } else {
+                    msg.respond(new Message("Ok. Ab sofort werden die Details der Feeds "
+                            + BotApi.enumerate(matches) + " nicht mehr angezeigt."));
+                }
+                
                 storage.add(key, feeds);
             }
         }
