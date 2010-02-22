@@ -118,6 +118,8 @@ public class IrcConnection extends PircBot implements Connection {
                 Log.info("Connection established. Joining " + channel + ".");
                 joinChannel(channel);
                 Log.info("Channel joined. Waiting for messages.");
+                reconnect = false;
+                pause = false;
                 
                 while (!reconnect) {
                     
