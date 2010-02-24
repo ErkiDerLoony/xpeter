@@ -120,7 +120,7 @@ public class SimpleMailbox implements Parser, Observer<TextMessage> {
         if (text
                 .matches("[fF](ue|ü)r wen (sind|hast du) ((so )?alles |im [Mm]oment)?[nN]achrichten "
                         + "gespeichert\\?")
-                || text.matches("[wW]as f(ue|ü)r [nN]achrichten (hast|kennst) "
+                || text.matches("([wW]as f(ue|ü)r|[wW]elche) [nN]achrichten (hast|kennst) "
                         + "du( gespeichert| so)?\\?")
                 || text.matches("[mM]ailbox ?[sS]tatus\\??!?\\.?")
                 || text.matches("[sS]tatus der [mM]ailbox\\??!?\\.?")) {

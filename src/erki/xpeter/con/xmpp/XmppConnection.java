@@ -172,7 +172,7 @@ public class XmppConnection implements Connection {
                     con.disconnect();
                 }
                 
-                if (pause) {
+                if (pause || !pause) {
                     Log.info("Lost connection to XMPP server. Trying to reconnect in 5 min.");
                     
                     try {
