@@ -31,7 +31,7 @@
   <target name="make" depends="sh,bat">
     <mkdir dir="${bin.dir}"/>
     <javac srcdir="${src.dir}" destdir="${bin.dir}" classpathref="classpath"
-           debuglevel="lines,vars,source" debug="true"/>
+           includeantruntime="false" debuglevel="lines,vars,source" debug="true"/>
   </target>
 
   <condition property="linux">
