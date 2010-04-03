@@ -59,7 +59,8 @@ public class BotApi {
         BufferedReader socketIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         PrintWriter socketOut = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
         Log.debug("Making request “" + query + "” to " + host + ".");
-        socketOut.write("GET " + query + " HTTP/1.0\r\nHost:" + host + "\r\n\r\n");
+        socketOut.write("GET " + query + " HTTP/1.0\r\nHost:" + host
+                + "\r\nUser-Agent: xpeter\r\n\r\n");
         socketOut.flush();
         
         String result = "", line;
