@@ -17,9 +17,18 @@
 
 package erki.xpeter.util;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Iterator;
+
+import erki.api.util.Log;
 
 /**
  * This class contains static helper methods that are convenient for many parser implementations. If
@@ -29,6 +38,41 @@ import java.util.Iterator;
  * @author Edgar Kalkowski
  */
 public class BotApi {
+    
+    /**
+     * Retrieves the raw output for a given query from a webserver.
+     * 
+     * @param host
+     *        The hostname of the webserver to query.
+     * @param query
+     *        This can either be the number of a quote to query or the special term “action/random”
+     *        to retrieve a random quote.
+     * @return the raw output of the server.
+     * @throws UnknownHostException
+     *         if the hostname can not be resolved.
+     * @throws IOException
+     *         if an error occurred writing to or reading from the socket.
+     */
+    public static String getWebsite(String host, String query) throws UnknownHostException,
+            IOException {
+        Socket socket = new Socket(host, 80);
+        BufferedReader socketIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        PrintWriter socketOut = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
+        Log.debug("Making request “" + query + "” to " + host + ".");
+        socketOut.write("GET " + query + " HTTP/1.0\r\nHost:" + host + "\r\n\r\n");
+        socketOut.flush();
+        
+        String result = "", line;
+        Log.debug("Waiting for results.");
+        
+        while ((line = socketIn.readLine()) != null) {
+            result += line;
+        }
+        
+        Log.debug("Results received.");
+        socket.close();
+        return result;
+    }
     
     /**
      * Create a string representation of a number. If the number is less or equal than 12 the number
