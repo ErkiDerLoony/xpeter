@@ -95,11 +95,9 @@ public class Wikipedia implements Parser, Observer<TextMessage> {
         text = text.replaceAll("</b>", "");
         text = text.replaceAll("<a href=.*?>", "");
         text = text.replaceAll("</a>", "");
+        text = text.replaceAll("<span .*?>", "");
+        text = text.replaceAll("</span>", "");
         text = text.replaceAll("&#160;", " ");
-        text = text.replaceAll("", "");
-        text = text.replaceAll("", "");
-        text = text.replaceAll("", "");
-        text = text.replaceAll("", "");
         return text;
     }
 }
