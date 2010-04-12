@@ -137,6 +137,7 @@ public class ErkiTalkConnection implements Connection {
                 socketOut.println("PONG");
                 socketOut.println("NICK " + nick);
                 socketOut.println("LIST");
+                socketOut.flush();
                 
                 while (!reconnect) {
                     
@@ -145,6 +146,7 @@ public class ErkiTalkConnection implements Connection {
                         while (!sendQueue.isEmpty()) {
                             Message msg = sendQueue.poll();
                             socketOut.println(new MessageEncoder(msg).get());
+                            socketOut.flush();
                         }
                         
                         try {
