@@ -74,7 +74,11 @@ public class IrcConnection extends PircBot implements Connection {
     @Override
     public Collection<String> getUserList() {
         LinkedList<String> list = new LinkedList<String>();
-        list.addAll(userList);
+        
+        synchronized (userList) {
+            list.addAll(userList);
+        }
+        
         return list;
     }
     
@@ -178,7 +182,11 @@ public class IrcConnection extends PircBot implements Connection {
     @Override
     protected void onJoin(String channel, String sender, String login, String hostname) {
         super.onJoin(channel, sender, login, hostname);
-        userList.add(sender);
+        
+        synchronized (userList) {
+            userList.add(sender);
+        }
+        
         bot.process(new UserJoinedMessage(sender, this));
         Log.debug(sender + " has joined the chat.");
     }
@@ -186,8 +194,12 @@ public class IrcConnection extends PircBot implements Connection {
     @Override
     protected void onNickChange(String oldNick, String login, String hostname, String newNick) {
         super.onNickChange(oldNick, login, hostname, newNick);
-        userList.remove(oldNick);
-        userList.add(newNick);
+        
+        synchronized (userList) {
+            userList.remove(oldNick);
+            userList.add(newNick);
+        }
+        
         Log.debug(oldNick + " is now known as " + newNick + ".");
         bot.process(new NickChangeMessage(oldNick, newNick, this));
     }
@@ -195,7 +207,11 @@ public class IrcConnection extends PircBot implements Connection {
     @Override
     protected void onPart(String channel, String sender, String login, String hostname) {
         super.onPart(channel, sender, login, hostname);
-        userList.remove(sender);
+        
+        synchronized (userList) {
+            userList.remove(sender);
+        }
+        
         bot.process(new UserLeftMessage(sender, "", this));
         Log.debug(sender + " has left.");
     }
@@ -213,7 +229,12 @@ public class IrcConnection extends PircBot implements Connection {
         super.onUserList(channel, users);
         
         for (User user : users) {
-            userList.add(user.getNick());
+            
+            synchronized (userList) {
+                userList.add(user.getNick());
+            }
+            
+            bot.process(new UserJoinedMessage(user.getNick(), this));
         }
     }
     
@@ -227,6 +248,15 @@ public class IrcConnection extends PircBot implements Connection {
     @Override
     protected void onDisconnect() {
         super.onDisconnect();
+        
+        synchronized (userList) {
+            
+            for (String user : userList) {
+                bot.process(new UserLeftMessage(user, null, this));
+            }
+            
+            userList.clear();
+        }
         
         synchronized (sendQueue) {
             reconnect = true;

@@ -136,6 +136,7 @@ public class ErkiTalkConnection implements Connection {
                 Log.info("Connection established. Logging in.");
                 socketOut.println("PONG");
                 socketOut.println("NICK " + nick);
+                socketOut.println("LIST");
                 
                 while (!reconnect) {
                     
