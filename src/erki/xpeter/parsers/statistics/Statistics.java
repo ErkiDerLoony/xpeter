@@ -154,6 +154,8 @@ public class Statistics implements Parser, Observer<TextMessage> {
             }
             
         };
+        
+        saveThread.start();
     }
     
     @Override
