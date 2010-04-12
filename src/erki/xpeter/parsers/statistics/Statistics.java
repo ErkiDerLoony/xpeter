@@ -463,7 +463,7 @@ public class Statistics implements Parser, Observer<TextMessage> {
                         users.remove(users.lastKey());
                     }
                     
-                    if (result.length() > 0 && result.charAt(result.length()) - 1 == '\n') {
+                    if (result.length() > 0 && result.charAt(result.length() - 1) == '\n') {
                         result = result.substring(0, result.length() - 1);
                     }
                     
