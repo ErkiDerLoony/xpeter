@@ -17,12 +17,7 @@
 
 package erki.xpeter.parsers;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.net.Socket;
 import java.net.UnknownHostException;
 
 import erki.api.util.Log;
@@ -112,7 +107,7 @@ public class GermanBash implements Parser, Observer<TextMessage> {
         if (query != null) {
             
             try {
-                String website = getWebsite(query);
+                String website = BotApi.getWebsite("german-bash.org", query);
                 
                 if (website.contains("Ein Zitat mit dieser id existiert leider nicht.")) {
                     msg.respond(new Message("Ein Zitat mit dieser Nummer gibt es bei "
@@ -165,37 +160,5 @@ public class GermanBash implements Parser, Observer<TextMessage> {
                         3000));
             }
         }
-    }
-    
-    /**
-     * Retrieves the raw output for a given query from german-bash.org server.
-     * 
-     * @param query
-     *        This can either be the number of a quote to query or the special term “action/random”
-     *        to retrieve a random quote.
-     * @return the raw output of the server
-     * @throws UnknownHostException
-     *         if the hostname can not be resolved
-     * @throws IOException
-     *         if an error occurred writing to or reading from the socket
-     */
-    private String getWebsite(String query) throws UnknownHostException, IOException {
-        Socket socket = new Socket("german-bash.org", 80);
-        BufferedReader socketIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        PrintWriter socketOut = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
-        Log.debug("Making request “" + query + "” to german-bash.org.");
-        socketOut.write("GET " + query + " HTTP/1.0\r\nHost:german-bash.org\r\n\r\n");
-        socketOut.flush();
-        
-        String result = "", line;
-        Log.debug("Waiting for results.");
-        
-        while ((line = socketIn.readLine()) != null) {
-            result += line;
-        }
-        
-        Log.debug("Results received.");
-        socket.close();
-        return result;
     }
 }

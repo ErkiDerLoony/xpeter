@@ -118,6 +118,8 @@ public class IrcConnection extends PircBot implements Connection {
                 Log.info("Connection established. Joining " + channel + ".");
                 joinChannel(channel);
                 Log.info("Channel joined. Waiting for messages.");
+                reconnect = false;
+                pause = false;
                 
                 while (!reconnect) {
                     
@@ -125,11 +127,21 @@ public class IrcConnection extends PircBot implements Connection {
                         
                         while (!sendQueue.isEmpty()) {
                             Message msg = sendQueue.poll();
+                            Log.debug("Sending " + msg + " to the server.");
                             
                             if (msg instanceof RawMessage) {
                                 sendRawLine(msg.getText());
                             } else {
-                                sendMessage(channel, msg.getText());
+                                
+                                if (msg.getText().contains("\n")) {
+                                    
+                                    for (String line : msg.getText().split("\n")) {
+                                        sendMessage(channel, line);
+                                    }
+                                    
+                                } else {
+                                    sendMessage(channel, msg.getText());
+                                }
                             }
                         }
                     }
@@ -168,6 +180,7 @@ public class IrcConnection extends PircBot implements Connection {
         super.onJoin(channel, sender, login, hostname);
         userList.add(sender);
         bot.process(new UserJoinedMessage(sender, this));
+        Log.debug(sender + " has joined the chat.");
     }
     
     @Override
@@ -175,6 +188,7 @@ public class IrcConnection extends PircBot implements Connection {
         super.onNickChange(oldNick, login, hostname, newNick);
         userList.remove(oldNick);
         userList.add(newNick);
+        Log.debug(oldNick + " is now known as " + newNick + ".");
         bot.process(new NickChangeMessage(oldNick, newNick, this));
     }
     
@@ -183,13 +197,14 @@ public class IrcConnection extends PircBot implements Connection {
         super.onPart(channel, sender, login, hostname);
         userList.remove(sender);
         bot.process(new UserLeftMessage(sender, "", this));
+        Log.debug(sender + " has left.");
     }
     
     @Override
     protected void onMessage(String channel, String sender, String login, String hostname,
             String message) {
         super.onMessage(channel, sender, login, hostname, message);
-        Log.debug("Received from server: " + message + ".");
+        Log.info("Received from server: " + message + ".");
         bot.process(new TextMessage(sender, message, this));
     }
     

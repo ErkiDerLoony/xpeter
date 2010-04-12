@@ -20,7 +20,8 @@ package erki.xpeter.util;
 import java.util.LinkedList;
 import java.util.TreeMap;
 
-import erki.xpeter.parsers.feeds.RssFeed;
+import erki.xpeter.parsers.rss.FeedData;
+import erki.xpeter.parsers.rss.RssFeed;
 import erki.xpeter.parsers.sms.ShortMessage;
 import erki.xpeter.parsers.sms.SimpleMailbox;
 
@@ -39,8 +40,9 @@ public enum Keys {
     SHORT_MESSAGES,
 
     /**
-     * This {@link TreeMap}&lt;{@link String}, {@link LinkedList}&lt;{@link String}&gt;&gt; contains
-     * all the feed urls known to {@link RssFeed} together with all the entries already posted.
+     * This {@link TreeMap}&lt;{@link String}, {@link LinkedList}&lt;{@link FeedData}&gt;&gt;
+     * contains all the feed urls known to {@link RssFeed} together with additional information
+     * about the feeds.
      */
     RSS_FEEDS,
 }
