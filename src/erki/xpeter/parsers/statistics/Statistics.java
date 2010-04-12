@@ -68,6 +68,10 @@ public class Statistics implements Parser, Observer<TextMessage> {
             @Override
             public void inform(UserJoinedMessage message) {
                 
+                if (message.getNick().equals(message.getBotNick())) {
+                    return;
+                }
+                
                 synchronized (users) {
                     
                     if (users.keySet().contains(message.getNick())) {
@@ -88,6 +92,10 @@ public class Statistics implements Parser, Observer<TextMessage> {
             
             @Override
             public void inform(UserLeftMessage message) {
+                
+                if (message.getNick().equals(message.getBotNick())) {
+                    return;
+                }
                 
                 synchronized (users) {
                     
@@ -239,6 +247,10 @@ public class Statistics implements Parser, Observer<TextMessage> {
     
     @Override
     public void inform(TextMessage message) {
+        
+        if (message.getNick().equals(message.getBotNick())) {
+            return;
+        }
         
         synchronized (users) {
             
