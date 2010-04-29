@@ -49,8 +49,11 @@ public class Interconnector implements Parser, Observer<TextMessage> {
             
             @Override
             public void inform(UserJoinedMessage msg) {
-                bot.broadcast(new Message(msg.getShortId() + ": " + msg.getNick()
-                        + " hat den Chat betreten."), msg.getShortId());
+                
+                if (!msg.getNick().equals(msg.getBotNick())) {
+                    bot.broadcast(new Message(msg.getShortId() + ": " + msg.getNick()
+                            + " hat den Chat betreten."), msg.getShortId());
+                }
             }
         };
         

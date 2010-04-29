@@ -33,12 +33,21 @@ public class UserLeftMessage extends Message {
      * Create a new LeaveMessage.
      * 
      * @param nick
-     *        The nickname of the user that left the chat.
+     *        The nickname of the user that left the chat. Must not be {@code null}!
      * @param text
-     *        The leave message left by the leaving user.
+     *        The leave message left by the leaving user. This may either be the empty string or
+     *        {@code null} if the user did not leave a quit message.
+     * @param con
+     *        The connection instance this message is associated to. If this is {@code null} and
+     *        some parser tries to answer to this message a {@link NullPointerException} may occurr.
      */
     public UserLeftMessage(String nick, String text, Connection con) {
         super(text, con);
+        
+        if (nick == null) {
+            throw new NullPointerException();
+        }
+        
         this.nick = nick;
     }
     
