@@ -228,6 +228,15 @@ public class IrcConnection extends PircBot implements Connection {
     protected void onUserList(String channel, User[] users) {
         super.onUserList(channel, users);
         
+        synchronized (userList) {
+            
+            for (String user : userList) {
+                bot.process(new UserLeftMessage(user, "", this));
+            }
+            
+            userList.clear();
+        }
+        
         for (User user : users) {
             
             synchronized (userList) {
@@ -242,7 +251,16 @@ public class IrcConnection extends PircBot implements Connection {
     protected void onKick(String channel, String kickerNick, String kickerLogin,
             String kickerHostname, String recipientNick, String reason) {
         super.onKick(channel, kickerNick, kickerLogin, kickerHostname, recipientNick, reason);
-        quitServer();
+        
+        if (recipientNick.equals(getNick())) {
+            quitServer();
+        } else {
+            
+            synchronized (userList) {
+                bot.process(new UserLeftMessage(recipientNick, "", this));
+                userList.remove(recipientNick);
+            }
+        }
     }
     
     @Override
