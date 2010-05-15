@@ -70,6 +70,8 @@ public class XmppConnection implements Connection {
     
     private ParticipantStatusListener statusListener;
     
+    private WatchDog dog;
+    
     /**
      * Create a new XmppConnection to an XMPP server.
      * 
@@ -88,6 +90,7 @@ public class XmppConnection implements Connection {
         this.port = port;
         this.channel = channel;
         this.nick = nick;
+        dog = new WatchDog(this);
         
         // There seems to be a bug in there so better disable it.
         SASLAuthentication.unsupportSASLMechanism("DIGEST-MD5");
@@ -116,7 +119,7 @@ public class XmppConnection implements Connection {
                     System.gc();
                     
                     MultiUserChat chat = new MultiUserChat(con, channel);
-                    PacketListener packetListener = new PacketListener(this, bot);
+                    PacketListener packetListener = new PacketListener(this, bot, dog);
                     // chat.addInvitationRejectionListener(new InvitationRejectionListener());
                     chat.addMessageListener(packetListener);
                     // chat.addParticipantListener(packetListener);

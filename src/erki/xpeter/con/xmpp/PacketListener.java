@@ -33,10 +33,13 @@ public class PacketListener implements org.jivesoftware.smack.PacketListener {
     private XmppConnection con;
     
     private Bot bot;
+
+    private WatchDog dog;
     
-    public PacketListener(XmppConnection con, Bot bot) {
+    public PacketListener(XmppConnection con, Bot bot, WatchDog dog) {
         this.con = con;
         this.bot = bot;
+        this.dog = dog;
     }
     
     @Override
@@ -47,6 +50,7 @@ public class PacketListener implements org.jivesoftware.smack.PacketListener {
             String from = message.getFrom().substring(message.getFrom().lastIndexOf('/') + 1);
             TextMessage msg = new TextMessage(from, message.getBody(), con);
             Log.info("Received " + msg + ".");
+            dog.reset();
             bot.process(msg);
         } else {
             Log.info("Unknown packet received: " + packet);
