@@ -144,7 +144,7 @@ public class XmppConnection implements Connection {
                             
                             while (!sendQueue.isEmpty()) {
                                 Message msg = sendQueue.poll();
-                                Log.debug("Sending " + msg + " to the server.");
+                                Log.info("Sending " + msg + " to the server.");
                                 chat.sendMessage(msg.getText());
                             }
                             

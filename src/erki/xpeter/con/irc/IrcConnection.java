@@ -131,7 +131,7 @@ public class IrcConnection extends PircBot implements Connection {
                         
                         while (!sendQueue.isEmpty()) {
                             Message msg = sendQueue.poll();
-                            Log.debug("Sending " + msg + " to the server.");
+                            Log.info("Sending " + msg + " to the server.");
                             
                             if (msg instanceof RawMessage) {
                                 sendRawLine(msg.getText());
@@ -187,8 +187,8 @@ public class IrcConnection extends PircBot implements Connection {
             userList.add(sender);
         }
         
+        Log.info(sender + " has joined the chat.");
         bot.process(new UserJoinedMessage(sender, this));
-        Log.debug(sender + " has joined the chat.");
     }
     
     @Override
@@ -200,7 +200,7 @@ public class IrcConnection extends PircBot implements Connection {
             userList.add(newNick);
         }
         
-        Log.debug(oldNick + " is now known as " + newNick + ".");
+        Log.info(oldNick + " is now known as " + newNick + ".");
         bot.process(new NickChangeMessage(oldNick, newNick, this));
     }
     
@@ -212,8 +212,26 @@ public class IrcConnection extends PircBot implements Connection {
             userList.remove(sender);
         }
         
+        Log.info(sender + " has left.");
         bot.process(new UserLeftMessage(sender, "", this));
-        Log.debug(sender + " has left.");
+    }
+    
+    @Override
+    protected void onQuit(String sourceNick, String sourceLogin, String sourceHostname,
+            String reason) {
+        super.onQuit(sourceNick, sourceLogin, sourceHostname, reason);
+        
+        synchronized (userList) {
+            userList.remove(sourceNick);
+        }
+        
+        if (reason != null && !reason.equals("")) {
+            Log.info(sourceNick + " has left (" + reason + ").");
+        } else {
+            Log.info(sourceNick + " has left.");
+        }
+        
+        bot.process(new UserLeftMessage(sourceNick, reason, this));
     }
     
     @Override
@@ -235,15 +253,11 @@ public class IrcConnection extends PircBot implements Connection {
             }
             
             userList.clear();
-        }
-        
-        for (User user : users) {
             
-            synchronized (userList) {
+            for (User user : users) {
                 userList.add(user.getNick());
+                bot.process(new UserJoinedMessage(user.getNick(), this));
             }
-            
-            bot.process(new UserJoinedMessage(user.getNick(), this));
         }
     }
     
@@ -253,10 +267,12 @@ public class IrcConnection extends PircBot implements Connection {
         super.onKick(channel, kickerNick, kickerLogin, kickerHostname, recipientNick, reason);
         
         if (recipientNick.equals(getNick())) {
+            Log.info("I was kicked from the server. Reconnecting.");
             quitServer();
         } else {
             
             synchronized (userList) {
+                Log.info(recipientNick + " was kicked from the server.");
                 bot.process(new UserLeftMessage(recipientNick, "", this));
                 userList.remove(recipientNick);
             }
