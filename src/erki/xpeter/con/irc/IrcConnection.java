@@ -259,6 +259,8 @@ public class IrcConnection extends PircBot implements Connection {
                 bot.process(new UserJoinedMessage(user.getNick(), this));
             }
         }
+        
+        Log.info("Currently online users: " + userList);
     }
     
     @Override
