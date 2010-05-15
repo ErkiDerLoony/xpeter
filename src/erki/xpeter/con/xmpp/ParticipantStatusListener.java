@@ -47,10 +47,13 @@ public class ParticipantStatusListener implements
     private String lastNickChangeNewNick = "";
     
     private Collection<String> userList = new LinkedList<String>();
+
+    private WatchDog dog;
     
-    public ParticipantStatusListener(XmppConnection con, Bot bot) {
+    public ParticipantStatusListener(XmppConnection con, Bot bot, WatchDog dog) {
         this.con = con;
         this.bot = bot;
+        this.dog = dog;
     }
     
     @Override
@@ -76,6 +79,7 @@ public class ParticipantStatusListener implements
     
     @Override
     public void joined(String participant) {
+        dog.reset();
         
         if (getNick(participant).equals(lastNickChangeNewNick)) {
             Log.debug("Though it looks like " + getNick(participant)
@@ -104,6 +108,7 @@ public class ParticipantStatusListener implements
     
     @Override
     public void left(String participant) {
+        dog.reset();
         Log.debug(getNick(participant) + " left the chat.");
         
         synchronized (userList) {
@@ -135,6 +140,7 @@ public class ParticipantStatusListener implements
     
     @Override
     public void nicknameChanged(String participant, String newNickname) {
+        dog.reset();
         Log.debug(getNick(participant) + " is now known as " + newNickname + ".");
         lastNickChangeNewNick = newNickname;
         

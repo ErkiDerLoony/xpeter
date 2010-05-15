@@ -123,7 +123,7 @@ public class XmppConnection implements Connection {
                     // chat.addInvitationRejectionListener(new InvitationRejectionListener());
                     chat.addMessageListener(packetListener);
                     // chat.addParticipantListener(packetListener);
-                    statusListener = new ParticipantStatusListener(this, bot);
+                    statusListener = new ParticipantStatusListener(this, bot, dog);
                     chat.addParticipantStatusListener(statusListener);
                     // chat.addPresenceInterceptor(new PresenceInterceptor());
                     // chat.addSubjectUpdatedListener(new SubjectUpdatedListener());
