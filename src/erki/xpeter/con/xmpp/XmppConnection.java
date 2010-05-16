@@ -91,6 +91,7 @@ public class XmppConnection implements Connection {
         this.channel = channel;
         this.nick = nick;
         dog = new WatchDog(this);
+        dog.start();
         
         // There seems to be a bug in there so better disable it.
         SASLAuthentication.unsupportSASLMechanism("DIGEST-MD5");
