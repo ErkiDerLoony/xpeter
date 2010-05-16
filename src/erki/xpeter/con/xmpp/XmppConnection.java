@@ -200,7 +200,7 @@ public class XmppConnection implements Connection {
         
         synchronized (sendQueue) {
             
-            if (con != null) {
+            if (con != null && con.isConnected()) {
                 con.disconnect();
             }
             
