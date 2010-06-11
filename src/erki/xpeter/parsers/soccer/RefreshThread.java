@@ -45,8 +45,10 @@ public class RefreshThread extends Thread {
             String guest = website.replaceAll(titleMatch, "$2");
             String homeG = website.replaceAll(titleMatch, "$3");
             String guestG = website.replaceAll(titleMatch, "$4");
-            prefix = home + " " + homeG + " : " + guestG + " " + guest;
+            prefix = "(" + home + " " + homeG + " : " + guestG + " " + guest + ") ";
         }
+        
+        Log.debug("Prefix is “" + prefix + "”.");
         
         while (website.contains(start)) {
             website = website.substring(website.indexOf(start) + start.length());
@@ -54,7 +56,7 @@ public class RefreshThread extends Thread {
             website = website.substring(website.indexOf("</span>") + "</span>".length());
             String text = website.substring(0, website.indexOf("</p>"));
             website = website.substring(website.indexOf("</p>") + "</p>".length());
-            result.add("(" + prefix + ") " + time + ": " + convert(text));
+            result.add(prefix + time + ": " + convert(text));
         }
         
         return result;
