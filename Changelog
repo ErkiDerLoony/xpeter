@@ -5,6 +5,8 @@ v0.5.0
 – New parser for Wikipedia.
 – Merge the old statistics parser that collects information about who was when
   online and who said how may words etc.
+– Add a parser that can follow games from the soccer world cup (gets info only
+  from sportschau.de).
 
 v0.4.0
 – Implement short message service from scratch.

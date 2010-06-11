@@ -24,6 +24,7 @@ import erki.xpeter.parsers.rss.FeedData;
 import erki.xpeter.parsers.rss.RssFeed;
 import erki.xpeter.parsers.sms.ShortMessage;
 import erki.xpeter.parsers.sms.SimpleMailbox;
+import erki.xpeter.parsers.soccer.Soccer;
 
 /**
  * This enum contains constants that can be used to store information in the persistent storage
@@ -45,4 +46,10 @@ public enum Keys {
      * about the feeds.
      */
     RSS_FEEDS,
+
+    /**
+     * This {@link LinkedList}&lt;{@link String}&gt; contains the full urls of soccer games to
+     * follow (see {@link Soccer} for details).
+     */
+    SOCCER_THREADS,
 }

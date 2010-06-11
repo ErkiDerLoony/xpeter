@@ -45,8 +45,8 @@ public class BotApi {
      * @param host
      *        The hostname of the webserver to query.
      * @param query
-     *        This can either be the number of a quote to query or the special term “action/random”
-     *        to retrieve a random quote.
+     *        This can be a query to send to the webserver (starting with a forward slash) or the
+     *        empty string if no special query shall be made.
      * @return the raw output of the server.
      * @throws UnknownHostException
      *         if the hostname can not be resolved.
