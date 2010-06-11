@@ -54,7 +54,7 @@ public class GiveOp implements Parser, Observer<TextMessage> {
         }
         
         if (addresses && text.matches("[sS]elf[oO]pp?!?!?!?\\.?")) {
-            msg.respond(new RawMessage("MODE " + msg.getShortId() + " + o " + botNick));
+            msg.respond(new RawMessage("MODE " + msg.getShortId() + " +o " + botNick));
         }
         
         if (addresses && text.matches("([gG]i(b|ve|pp?) ?[oO]pp?!?!?!?\\.?|[oO]pp?!?!?!?\\.?)")) {
