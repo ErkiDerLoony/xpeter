@@ -72,7 +72,7 @@ public class RefreshThread extends Thread {
                 String website = BotApi.getWebsite(host, query, "ISO-8859-1");
                 Log.finest(website);
                 
-                if (website.startsWith("Fehler: ")) {
+                if (website.contains("Fehler: fehlende oder ungültige Event-Art!")) {
                     Log.fine("This game (" + host + query + ") seems finished.");
                     soccerParser.finished(host, query);
                     return;

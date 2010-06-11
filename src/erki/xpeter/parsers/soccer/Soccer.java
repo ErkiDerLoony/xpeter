@@ -1,5 +1,7 @@
 package erki.xpeter.parsers.soccer;
 
+import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.TreeMap;
 
@@ -121,10 +123,30 @@ public class Soccer implements Parser, Observer<TextMessage> {
             if (threads.containsKey(url)) {
                 msg.respond(new DelayedMessage("Das tu ich doch schon!", 1500));
             } else {
-                RefreshThread thread = new RefreshThread(bot, this, getHost(url), getQuery(url));
-                threads.put(url, thread);
-                thread.start();
-                msg.respond(new DelayedMessage("Ok.", 1500));
+                
+                try {
+                    
+                    if (BotApi.getWebsite(getHost(url), getQuery(url), "ISO-8859-1").contains(
+                            "<div id=\"ardTickerTableau\">")) {
+                        RefreshThread thread = new RefreshThread(bot, this, getHost(url),
+                                getQuery(url));
+                        threads.put(url, thread);
+                        thread.start();
+                        msg.respond(new DelayedMessage("Ok.", 1500));
+                    } else {
+                        msg.respond(new DelayedMessage("Das scheint mir kein gültiger "
+                                + "sportschau.de Ticker zu sein!", 1500));
+                    }
+                    
+                } catch (UnknownHostException e) {
+                    Log.error(e);
+                    Log.info("It seems someone gave an malformed url.");
+                    msg.respond(new DelayedMessage("Unter der URL kann ich nichts finden.", 1500));
+                } catch (IOException e) {
+                    Log.error(e);
+                    Log.info("It seems someone gave an malformed url.");
+                    msg.respond(new DelayedMessage("Unter der URL kann ich nichts finden.", 1500));
+                }
             }
         }
         
