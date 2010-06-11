@@ -73,6 +73,11 @@ public class Soccer implements Parser, Observer<TextMessage> {
     @Override
     public void destroy(Bot bot) {
         bot.deregister(TextMessage.class, this);
+        store();
+        threads.clear();
+    }
+    
+    private void store() {
         
         for (RefreshThread thread : threads.values()) {
             thread.kill();
@@ -85,7 +90,6 @@ public class Soccer implements Parser, Observer<TextMessage> {
         }
         
         bot.getStorage().add(new StorageKey<LinkedList<String>>(Keys.SOCCER_THREADS), threads);
-        threads.clear();
     }
     
     /**
@@ -101,6 +105,7 @@ public class Soccer implements Parser, Observer<TextMessage> {
         
         if (threads.containsKey(host + query)) {
             threads.remove(host + query);
+            store();
         } else {
             Log.warning("No thread with id “" + host + query + "” found!");
         }
@@ -131,6 +136,7 @@ public class Soccer implements Parser, Observer<TextMessage> {
                         RefreshThread thread = new RefreshThread(bot, this, getHost(url),
                                 getQuery(url));
                         threads.put(url, thread);
+                        store();
                         thread.start();
                         msg.respond(new DelayedMessage("Ok.", 1500));
                     } else {
@@ -179,6 +185,7 @@ public class Soccer implements Parser, Observer<TextMessage> {
             if (threads.containsKey(url)) {
                 threads.get(url).kill();
                 threads.remove(url);
+                store();
                 msg.respond(new DelayedMessage("Ok.", 1500));
             } else {
                 msg.respond(new DelayedMessage("Das Spiel „" + url + "“ verfolge ich gar nicht!",
