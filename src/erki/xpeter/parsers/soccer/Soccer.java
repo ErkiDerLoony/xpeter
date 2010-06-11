@@ -20,11 +20,16 @@ public class Soccer implements Parser, Observer<TextMessage> {
     
     private TreeMap<String, RefreshThread> threads = new TreeMap<String, RefreshThread>();
     
+    private DetectorThread detectorThread;
+    
     private Bot bot;
     
     @Override
     public void init(Bot bot) {
         this.bot = bot;
+        detectorThread = new DetectorThread(this,
+                "http://www.sportschau.de/sp/layout/php/ticker/index.phtml?tid=");
+        detectorThread.start();
         bot.register(TextMessage.class, this);
         Storage<Keys> storage = bot.getStorage();
         
@@ -50,7 +55,7 @@ public class Soccer implements Parser, Observer<TextMessage> {
         }
     }
     
-    private String getHost(String url) {
+    String getHost(String url) {
         url = url.startsWith("http://") ? url.substring("http://".length()) : url;
         
         if (url.contains("/")) {
@@ -60,7 +65,7 @@ public class Soccer implements Parser, Observer<TextMessage> {
         }
     }
     
-    private String getQuery(String url) {
+    String getQuery(String url) {
         url = url.startsWith("http://") ? url.substring("http://".length()) : url;
         
         if (url.contains("/")) {
@@ -73,19 +78,21 @@ public class Soccer implements Parser, Observer<TextMessage> {
     @Override
     public void destroy(Bot bot) {
         bot.deregister(TextMessage.class, this);
-        store();
-        threads.clear();
-    }
-    
-    private void store() {
         
         for (RefreshThread thread : threads.values()) {
             thread.kill();
         }
         
+        store();
+        threads.clear();
+        detectorThread.kill();
+    }
+    
+    private void store() {
         LinkedList<String> threads = new LinkedList<String>();
+        String[] threadsArray = this.threads.keySet().toArray(new String[0]);
         
-        for (String url : this.threads.keySet()) {
+        for (String url : threadsArray) {
             threads.add(url);
         }
         
@@ -111,6 +118,13 @@ public class Soccer implements Parser, Observer<TextMessage> {
         }
     }
     
+    public void add(String url) {
+        RefreshThread thread = new RefreshThread(bot, this, getHost(url), getQuery(url));
+        threads.put(url, thread);
+        store();
+        thread.start();
+    }
+    
     @Override
     public void inform(TextMessage msg) {
         
@@ -133,11 +147,7 @@ public class Soccer implements Parser, Observer<TextMessage> {
                     
                     if (BotApi.getWebsite(getHost(url), getQuery(url), "ISO-8859-1").contains(
                             "<div id=\"ardTickerTableau\">")) {
-                        RefreshThread thread = new RefreshThread(bot, this, getHost(url),
-                                getQuery(url));
-                        threads.put(url, thread);
-                        store();
-                        thread.start();
+                        add(url);
                         msg.respond(new DelayedMessage("Ok.", 1500));
                     } else {
                         msg.respond(new DelayedMessage("Das scheint mir kein gültiger "
