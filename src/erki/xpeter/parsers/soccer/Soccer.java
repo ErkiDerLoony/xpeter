@@ -119,10 +119,13 @@ public class Soccer implements Parser, Observer<TextMessage> {
     }
     
     public void add(String url) {
-        RefreshThread thread = new RefreshThread(bot, this, getHost(url), getQuery(url));
-        threads.put(url, thread);
-        store();
-        thread.start();
+        
+        if (!threads.keySet().contains(url)) {
+            RefreshThread thread = new RefreshThread(bot, this, getHost(url), getQuery(url));
+            threads.put(url, thread);
+            store();
+            thread.start();
+        }
     }
     
     @Override
