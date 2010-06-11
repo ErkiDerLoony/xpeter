@@ -30,17 +30,17 @@ public class WmThread extends Thread {
                     break;
                 case 2:
                     bot.broadcast(new Message("Ohne Ballack, fahr’n wir zur WM! :P"));
-                    bot.broadcast(new DelayedMessage("*singfreuhust*", 3000));
+                    bot.broadcast(new DelayedMessage("*singfreuhust*", 6000));
                     break;
                 case 3:
                     bot.broadcast(new Message("Deutschland vor: Noch ein Tor!!"));
                     break;
                 case 4:
                     bot.broadcast(new Message("Fußball ist unser Leben,"));
-                    bot.broadcast(new DelayedMessage("denn König Fußball regiert die Welt!", 3000));
-                    bot.broadcast(new DelayedMessage("Wir trinken und halten zusammen,", 15000));
+                    bot.broadcast(new DelayedMessage("denn König Fußball regiert die Welt!", 15000));
+                    bot.broadcast(new DelayedMessage("Wir trinken und halten zusammen,", 25000));
                     bot.broadcast(new DelayedMessage(
-                            "bis dann ein Tor nach dem andern fällt. *sing*", 20000));
+                            "bis dann ein Tor nach dem andern fällt. *sing*", 34000));
                     break;
                 case 5:
                     bot.broadcast(new Message("Lala, lala, lalalalalalaaaaa *trööööt*"));
@@ -48,13 +48,13 @@ public class WmThread extends Thread {
                 case 6:
                     bot.broadcast(new Message(
                             "Vierundfünfzig, vierundziebzig, neunzig, zweitausendzehn …"));
-                    bot.broadcast(new DelayedMessage("Ja, da stimmen wir alle ein!", 4000));
-                    bot.broadcast(new DelayedMessage("Los, auf geht’s! *sumsumrumsing*", 7000));
+                    bot.broadcast(new DelayedMessage("Ja, da stimmen wir alle ein!", 12000));
+                    bot.broadcast(new DelayedMessage("Los, auf geht’s! *sumsumrumsing*", 26000));
                     break;
                 case 7:
                     bot.broadcast(new Message("Allee, Allee, Allee, Allee, Alleeeeee …"));
-                    bot.broadcast(new DelayedMessage("Eine Straße, viele Bäume …", 5000));
-                    bot.broadcast(new DelayedMessage("Ja, das ist eine Alleeeeee!", 10000));
+                    bot.broadcast(new DelayedMessage("Eine Straße, viele Bäume …", 10000));
+                    bot.broadcast(new DelayedMessage("Ja, das ist eine Alleeeeee!", 20000));
                     break;
                 case 8:
                     bot.broadcast(new Message(
