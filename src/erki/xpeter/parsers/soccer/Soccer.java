@@ -117,10 +117,15 @@ public class Soccer implements Parser, Observer<TextMessage> {
         if (text.matches(match)) {
             String url = text.replaceAll(match, "$2");
             Log.debug("Recognized soccer url “" + url + "”.");
-            RefreshThread thread = new RefreshThread(bot, this, getHost(url), getQuery(url));
-            threads.put(url, thread);
-            thread.start();
-            msg.respond(new DelayedMessage("Ok.", 1500));
+            
+            if (threads.containsKey(url)) {
+                msg.respond(new DelayedMessage("Das tu ich doch schon!", 1500));
+            } else {
+                RefreshThread thread = new RefreshThread(bot, this, getHost(url), getQuery(url));
+                threads.put(url, thread);
+                thread.start();
+                msg.respond(new DelayedMessage("Ok.", 1500));
+            }
         }
         
         match = "([Ww]elchen [sS]pielen folgst|([Ww]elche|[wW]as f(ue|ü)r) [Ss]piele verfolgst) "
