@@ -53,7 +53,7 @@ public class Statistics implements Parser, Observer<TextMessage> {
     
     private Observer<NickChangeMessage> nickChangeObserver;
     
-    private boolean killed = false;
+    private boolean killed = false, warned = false;
     
     private Thread saveThread;
     
@@ -232,16 +232,25 @@ public class Statistics implements Parser, Observer<TextMessage> {
             ObjectOutputStream objectOut = new ObjectOutputStream(new FileOutputStream(STAT_FILE));
             objectOut.writeObject(users);
             objectOut.close();
-            // Only use debug here as otherwise the log is flooded by this line
-            // because this method is called every some minutes in case the bot
-            // crashes or is terminated.
-            Log.debug("Statistical information stored to " + STAT_FILE + ".");
         } catch (FileNotFoundException e) {
-            Log.error(e);
-            Log.warning("Could not store statistical information to " + STAT_FILE + ".");
+            
+            if (!warned) {
+                warned = true;
+                Log.error(e);
+                Log.warning("Could not store statistical information to " + STAT_FILE + ".");
+                Log.info("This was a one time warning. I will not try to store the statistics "
+                        + "again in the future.");
+            }
+            
         } catch (IOException e) {
-            Log.error(e);
-            Log.warning("Could not store statistical information to " + STAT_FILE + ".");
+            
+            if (!warned) {
+                warned = true;
+                Log.error(e);
+                Log.warning("Could not store statistical information to " + STAT_FILE + ".");
+                Log.info("This was a one time warning. I will not try to store the statistics "
+                        + "again in the future.");
+            }
         }
     }
     
