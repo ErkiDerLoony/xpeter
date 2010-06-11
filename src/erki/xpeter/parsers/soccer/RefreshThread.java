@@ -93,6 +93,7 @@ public class RefreshThread extends Thread {
                             if (i > 2) {
                                 break;
                             } else {
+                                Log.fine("Sending “" + element + "”.");
                                 bot.broadcast(new Message(element));
                             }
                             
