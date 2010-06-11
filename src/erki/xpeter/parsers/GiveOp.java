@@ -25,7 +25,7 @@ import erki.xpeter.msg.TextMessage;
 import erki.xpeter.util.BotApi;
 
 /**
- * This enables the bot to give users operator status on irc.
+ * This enables the bot to give itself and certain users operator status on irc.
  * 
  * @author Edgar Kalkowski <eMail@edgar-kalkowski.de>
  */
@@ -51,6 +51,10 @@ public class GiveOp implements Parser, Observer<TextMessage> {
         if (BotApi.addresses(text, botNick)) {
             addresses = true;
             text = BotApi.trimNick(text, botNick);
+        }
+        
+        if (addresses && text.matches("[sS]elf[oO]pp?!?!?!?\\.?")) {
+            msg.respond(new RawMessage("MODE " + msg.getShortId() + " + o " + botNick));
         }
         
         if (addresses && text.matches("([gG]i(b|ve|pp?) ?[oO]pp?!?!?!?\\.?|[oO]pp?!?!?!?\\.?)")) {
