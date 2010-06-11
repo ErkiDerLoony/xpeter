@@ -47,17 +47,21 @@ public class BotApi {
      * @param query
      *        This can be a query to send to the webserver (starting with a forward slash) or the
      *        empty string if no special query shall be made.
+     * @param charset
+     *        The character set used to send and receive data from the server.
      * @return the raw output of the server.
      * @throws UnknownHostException
      *         if the hostname can not be resolved.
      * @throws IOException
      *         if an error occurred writing to or reading from the socket.
      */
-    public static String getWebsite(String host, String query) throws UnknownHostException,
-            IOException {
+    public static String getWebsite(String host, String query, String charset)
+            throws UnknownHostException, IOException {
         Socket socket = new Socket(host, 80);
-        BufferedReader socketIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        PrintWriter socketOut = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
+        BufferedReader socketIn = new BufferedReader(new InputStreamReader(socket.getInputStream(),
+                charset));
+        PrintWriter socketOut = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(),
+                charset));
         Log.debug("Making request “" + query + "” to " + host + ".");
         socketOut.write("GET " + query + " HTTP/1.0\r\nHost:" + host
                 + "\r\nUser-Agent: xpeter\r\n\r\n");

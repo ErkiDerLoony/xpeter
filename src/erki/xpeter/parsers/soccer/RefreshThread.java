@@ -29,7 +29,8 @@ public class RefreshThread extends Thread {
     }
     
     private String convert(String text) {
-        text.replaceAll("<br ?/>", "");
+        text.replaceAll("<br />", "");
+        text.replaceAll("<br/>", "");
         text.replaceAll("<img src=.*?/>", "");
         return text.trim();
     }
@@ -57,7 +58,7 @@ public class RefreshThread extends Thread {
         while (!killed) {
             
             try {
-                String website = BotApi.getWebsite(host, query);
+                String website = BotApi.getWebsite(host, query, "ISO-8859-1");
                 Log.finest(website);
                 
                 if (website.startsWith("Fehler: ")) {

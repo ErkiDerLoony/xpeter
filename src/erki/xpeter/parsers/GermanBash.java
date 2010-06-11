@@ -107,7 +107,7 @@ public class GermanBash implements Parser, Observer<TextMessage> {
         if (query != null) {
             
             try {
-                String website = BotApi.getWebsite("german-bash.org", query);
+                String website = BotApi.getWebsite("german-bash.org", query, "UTF-8");
                 
                 if (website.contains("Ein Zitat mit dieser id existiert leider nicht.")) {
                     msg.respond(new Message("Ein Zitat mit dieser Nummer gibt es bei "
