@@ -28,16 +28,16 @@ public class RefreshThread extends Thread {
         this.query = query;
     }
     
-    private String convert(String text) {
+    private static String convert(String text) {
         text = text.replaceAll("<br ?/>", "");
         text = text.replaceAll("<img src=.*?/>", "");
         return text.trim();
     }
     
-    private LinkedList<String> getElements(String website) {
+    private static LinkedList<String> getElements(String website) {
         LinkedList<String> result = new LinkedList<String>();
         String start = "<span class=\"ardTTUhr\">";
-        String titleMatch = "<title>(.*?) : (.*?)  ([0-9]*) : ([0-9]*) .*</title>";
+        String titleMatch = "[\\w\\W]*?<title>(.*?) : (.*?)  ([0-9]*) : ([0-9]*) .*</title>[\\w\\W]*";
         String prefix = "";
         
         if (website.matches(titleMatch)) {
