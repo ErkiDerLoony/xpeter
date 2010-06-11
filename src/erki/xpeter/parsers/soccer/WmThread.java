@@ -20,7 +20,7 @@ public class WmThread extends Thread {
         
         while (!killed) {
             
-            switch ((int) (Math.random() * 10)) {
+            switch ((int) (Math.random() * 11)) {
                 case 0:
                     bot.broadcast(new Message("Olé, olé!"));
                     bot.broadcast(new DelayedMessage("Wir fahr’n in Puff nach Bazelona.", 5000));
@@ -37,7 +37,9 @@ public class WmThread extends Thread {
                     break;
                 case 4:
                     bot.broadcast(new Message("Fußball ist unser Leben,"));
-                    bot.broadcast(new DelayedMessage("denn König Fußball regiert die Welt!", 15000));
+                    bot
+                            .broadcast(new DelayedMessage("denn König Fußball regiert die Welt!",
+                                    15000));
                     bot.broadcast(new DelayedMessage("Wir trinken und halten zusammen,", 25000));
                     bot.broadcast(new DelayedMessage(
                             "bis dann ein Tor nach dem andern fällt. *sing*", 34000));
@@ -64,7 +66,8 @@ public class WmThread extends Thread {
                     bot.broadcast(new Message("Schlaaaand, schlaaaaaaaand!"));
                     break;
                 default:
-                    bot.broadcast(new Message("Olé, olé!"));
+                    bot.broadcast(new Message("Alle Spiele (von mir ;)) kommentiert: /join "
+                            + "wm@conference.jabber.exados.com!"));
             }
             
             synchronized (this) {
