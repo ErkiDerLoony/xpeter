@@ -29,15 +29,24 @@ public class RefreshThread extends Thread {
     }
     
     private String convert(String text) {
-        text.replaceAll("<br />", "");
-        text.replaceAll("<br/>", "");
-        text.replaceAll("<img src=.*?/>", "");
+        text = text.replaceAll("<br ?/>", "");
+        text = text.replaceAll("<img src=.*?/>", "");
         return text.trim();
     }
     
     private LinkedList<String> getElements(String website) {
         LinkedList<String> result = new LinkedList<String>();
         String start = "<span class=\"ardTTUhr\">";
+        String titleMatch = "<title>(.*?) : (.*?)  ([0-9]*) : ([0-9]*) .*</title>";
+        String prefix = "";
+        
+        if (website.matches(titleMatch)) {
+            String home = website.replaceAll(titleMatch, "$1");
+            String guest = website.replaceAll(titleMatch, "$2");
+            String homeG = website.replaceAll(titleMatch, "$3");
+            String guestG = website.replaceAll(titleMatch, "$4");
+            prefix = home + " " + homeG + " : " + guestG + " " + guest;
+        }
         
         while (website.contains(start)) {
             website = website.substring(website.indexOf(start) + start.length());
@@ -45,7 +54,7 @@ public class RefreshThread extends Thread {
             website = website.substring(website.indexOf("</span>") + "</span>".length());
             String text = website.substring(0, website.indexOf("</p>"));
             website = website.substring(website.indexOf("</p>") + "</p>".length());
-            result.add(time + ": " + convert(text));
+            result.add("(" + prefix + ") " + time + ": " + convert(text));
         }
         
         return result;
