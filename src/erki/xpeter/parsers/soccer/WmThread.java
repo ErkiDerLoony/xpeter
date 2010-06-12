@@ -73,7 +73,7 @@ public class WmThread extends Thread {
             synchronized (this) {
                 
                 try {
-                    wait(1200000 + (int) (Math.random() * 1200000));
+                    wait(3*60*60000 + (int) (Math.random() * 3*60*60000));
                 } catch (InterruptedException e) {
                 }
             }
