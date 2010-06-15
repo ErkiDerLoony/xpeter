@@ -29,7 +29,17 @@ public class RefreshThread extends Thread {
     }
     
     private static String convert(String text) {
-        text = text.replaceAll("<br ?/>", "");
+        text = text.trim();
+        
+        if (text.endsWith("<br />")) {
+            text = text.substring(0, text.length() - "<br />".length());
+        }
+        
+        if (text.endsWith("<br/>")) {
+            text = text.substring(0, text.length() - "<br/>".length());
+        }
+        
+        text = text.replaceAll("<br ?/>", " ");
         text = text.replaceAll("<img src=.*?/>", "");
         return text.trim();
     }
