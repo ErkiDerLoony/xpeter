@@ -148,6 +148,8 @@ public class IrcConnection extends PircBot implements Connection {
                                 }
                             }
                         }
+                        
+                        sendQueue.wait();
                     }
                 }
                 
