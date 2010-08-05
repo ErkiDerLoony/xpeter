@@ -45,4 +45,11 @@ public enum Keys {
      * about the feeds.
      */
     RSS_FEEDS,
+
+    /**
+     * @deprecated Will be removed in a future version. If any storage contains something under this
+     *             key it should be dropped or stored under another key!
+     */
+    @Deprecated
+    SOCCER_THREADS
 }

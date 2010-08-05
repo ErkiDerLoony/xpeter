@@ -41,6 +41,7 @@ import erki.xpeter.parsers.Parser;
 import erki.xpeter.util.BotApi;
 import erki.xpeter.util.Keys;
 import erki.xpeter.util.ParserFinder;
+import erki.xpeter.util.StorageKey;
 
 /**
  * This class parses the command line or a config file if present. It then initializes the correct
@@ -228,9 +229,7 @@ public class xpeter {
         if (logfile != null) {
             
             try {
-                Log
-                        .setHandler(new PrintStream(new FileOutputStream(logfile, false), true,
-                                "UTF-8"));
+                Log.setHandler(new PrintStream(new FileOutputStream(logfile, false), true, "UTF-8"));
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
                 System.err.println("FATAL: Could not open logfile " + logfile + "!");
@@ -296,6 +295,16 @@ public class xpeter {
         }
         
         Storage<Keys> storage = new JavaObjectStorage<Keys>(storageFile);
+        
+        // Remove deprecated entries.
+        @SuppressWarnings("deprecation")
+        StorageKey<LinkedList<String>> oldKey = new StorageKey<LinkedList<String>>(
+                Keys.SOCCER_THREADS);
+        
+        if (storage.contains(oldKey)) {
+            storage.remove(oldKey);
+        }
+        
         Bot bot = new Bot(chosenParsers, storage);
         
         for (Con con : cons) {
