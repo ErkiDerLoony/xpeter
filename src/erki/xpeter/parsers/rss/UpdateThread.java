@@ -91,10 +91,8 @@ public class UpdateThread extends Thread {
                                         + item.getTitle() + "\n" + item.getDescription() + " ("
                                         + getTinyUrl(item.getLink()) + ")"));
                             } else {
-                                bot
-                                        .broadcast(new Message("[" + feed.getTitle() + "] "
-                                                + item.getTitle() + " ("
-                                                + getTinyUrl(item.getLink()) + ")"));
+                                bot.broadcast(new Message("[" + feed.getTitle() + "] "
+                                        + item.getTitle() + " (" + getTinyUrl(item.getLink()) + ")"));
                             }
                         }
                     }
@@ -109,12 +107,8 @@ public class UpdateThread extends Thread {
                     feed.cleanup(items);
                 } catch (RSSException e) {
                     Log.error(e);
-                    bot.broadcast(new Message("There is something wrong with this rss here …"));
                 } catch (MalformedURLException e) {
                     Log.error(e);
-                    bot
-                            .broadcast(new Message("There is something wrong with the url " + url
-                                    + "!"));
                 }
             }
             
@@ -138,8 +132,8 @@ public class UpdateThread extends Thread {
             Socket socket = new Socket("tinyurl.com", 80);
             socket.setSoTimeout(5000);
             OutputStreamWriter socketOut = new OutputStreamWriter(socket.getOutputStream(), "UTF-8");
-            BufferedReader socketIn = new BufferedReader(new InputStreamReader(socket
-                    .getInputStream(), "UTF-8"));
+            BufferedReader socketIn = new BufferedReader(new InputStreamReader(
+                    socket.getInputStream(), "UTF-8"));
             socketOut.write("GET api-create.php?url=" + url + " HTTP/1.0\r\n");
             socketOut.write("Host: tinyurl.com\r\n\r\n");
             socketOut.flush();
