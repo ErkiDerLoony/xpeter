@@ -280,7 +280,7 @@ public class Bot {
      * The unchecked casts here are safe because the types are actually forced to be correct when
      * registering observers (see #register).
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void process(Message msg) {
         
         synchronized (parserMapping) {

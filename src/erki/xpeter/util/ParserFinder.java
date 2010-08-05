@@ -71,7 +71,7 @@ public class ParserFinder {
         }
     }
     
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("rawtypes")
     private static boolean isImplementing(Class<?> clazz, String intorface) {
         
         for (Class c : clazz.getInterfaces()) {
@@ -89,8 +89,8 @@ public class ParserFinder {
      * 
      * @param folder
      *        The folder to look at.
-     * @return A list containing the class objects of all classes found the implement the {@code
-     *         Parser} interface.
+     * @return A list containing the class objects of all classes found the implement the
+     *         {@code Parser} interface.
      */
     @SuppressWarnings("unchecked")
     public static TreeSet<Class<? extends Parser>> findParsers(File folder) {
