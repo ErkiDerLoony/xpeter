@@ -168,6 +168,7 @@ public class Statistics implements Parser, Observer<TextMessage> {
     
     @Override
     public void destroy(Bot bot) {
+        killed = true;
         saveThread.interrupt();
         bot.deregister(TextMessage.class, this);
         bot.deregister(UserJoinedMessage.class, userJoinedObserver);

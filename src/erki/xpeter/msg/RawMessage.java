@@ -17,6 +17,8 @@
 
 package erki.xpeter.msg;
 
+import erki.xpeter.con.Connection;
+
 /**
  * This class wraps a raw line of text that shall be sent to the server as is.
  * 
@@ -25,12 +27,25 @@ package erki.xpeter.msg;
 public class RawMessage extends Message {
     
     /**
-     * Create a new RawMessage.
+     * Create a new RawMessage as a response that shall be sent to the server.
      * 
      * @param text
      *        The text to send to the server (unchainged).
      */
     public RawMessage(String text) {
         super(text);
+    }
+    
+    /**
+     * Create a new RawMessage that contains raw text received from the server.
+     * 
+     * @param text
+     *        The text that was received.
+     * @param connection
+     *        The connection the text was received over (necessary for any responses of the bot to
+     *        this message).
+     */
+    public RawMessage(String text, Connection connection) {
+        super(text, connection);
     }
 }

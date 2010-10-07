@@ -237,6 +237,13 @@ public class IrcConnection extends PircBot implements Connection {
     }
     
     @Override
+    protected void onServerResponse(int code, String response) {
+        super.onServerResponse(code, response);
+        Log.info("Received server response with code " + code + ": " + response);
+        bot.process(new RawMessage(code + ": " + response, this));
+    }
+    
+    @Override
     protected void onMessage(String channel, String sender, String login, String hostname,
             String message) {
         super.onMessage(channel, sender, login, hostname, message);
