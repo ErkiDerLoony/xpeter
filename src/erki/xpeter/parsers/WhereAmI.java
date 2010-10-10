@@ -54,7 +54,7 @@ public class WhereAmI implements Parser, Observer<TextMessage> {
             addressed = true;
         }
         
-        String match = "([iI]ch bin|←|<-) (.*)";
+        String match = "([iI]ch bin|←|<-|[bB]in) (.*)";
         
         if (text.matches(match)) {
             String location = text.replaceAll(match, "$2");
