@@ -7,6 +7,11 @@ v0.5.0
   online and who said how may words etc.
 – Add a parser that can follow games from the soccer world cup (gets info only
   from sportschau.de).
+– A new parser that remembers where people are if he tell the bot or go afk.
+– A new parser that triggers reconnects if the bot is the only one in an irc
+  channel and has no operator status.
+– A new parser that reads text from a file and thus allows remote control of
+  the bot.
 
 v0.4.0
 – Implement short message service from scratch.
