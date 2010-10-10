@@ -20,6 +20,7 @@ package erki.xpeter.util;
 import java.util.LinkedList;
 import java.util.TreeMap;
 
+import erki.xpeter.parsers.WhereAmI;
 import erki.xpeter.parsers.rss.FeedData;
 import erki.xpeter.parsers.rss.RssFeed;
 import erki.xpeter.parsers.sms.ShortMessage;
@@ -45,6 +46,12 @@ public enum Keys {
      * about the feeds.
      */
     RSS_FEEDS,
+
+    /**
+     * This {@link TreeMap}&lt;{@link String}, {@link String}&gt; contains the known whereabouts of
+     * chat participants (used by {@link WhereAmI}).
+     */
+    WHEREABOUTS,
 
     /**
      * @deprecated Will be removed in a future version. If any storage contains something under this
