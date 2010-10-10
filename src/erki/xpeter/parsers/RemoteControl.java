@@ -24,25 +24,27 @@ import erki.xpeter.msg.Message;
  */
 public class RemoteControl implements Parser {
     
+    private static final File FILE = PathUtil.getRessource("remote");
+    
     private Thread thread;
     
     private boolean killed = false;
     
     @Override
     public void init(final Bot bot) {
+        FILE.deleteOnExit();
         
         thread = new Thread() {
             
             public void run() {
                 
                 while (!killed) {
-                    File file = PathUtil.getRessource("remote");
                     
-                    if (file.isFile()) {
+                    if (FILE.isFile()) {
                         
                         try {
                             BufferedReader fileIn = new BufferedReader(new InputStreamReader(
-                                    new FileInputStream(file)));
+                                    new FileInputStream(FILE)));
                             String line;
                             
                             while ((line = fileIn.readLine()) != null) {
@@ -52,6 +54,8 @@ public class RemoteControl implements Parser {
                                 }
                             }
                             
+                            fileIn.close();
+                            createFile();
                         } catch (FileNotFoundException e) {
                             Log.error(e);
                             Log.warning("Remote control file could not be found!");
@@ -63,16 +67,7 @@ public class RemoteControl implements Parser {
                         }
                         
                     } else {
-                        
-                        try {
-                            PrintWriter fileOut = new PrintWriter(file);
-                            fileOut.println("# Each line in this file that does not start with a "
-                                    + "# is broadcast by the bot.");
-                            fileOut.close();
-                        } catch (FileNotFoundException e) {
-                            Log.error(e);
-                            Log.warning("Remote control file could not be created!");
-                        }
+                        createFile();
                     }
                     
                     try {
@@ -84,6 +79,19 @@ public class RemoteControl implements Parser {
         };
         
         thread.start();
+    }
+    
+    private void createFile() {
+        
+        try {
+            PrintWriter fileOut = new PrintWriter(FILE);
+            fileOut.println("# Each line in this file that does not start with a "
+                    + "# is broadcast by the bot.");
+            fileOut.close();
+        } catch (FileNotFoundException e) {
+            Log.error(e);
+            Log.warning("Remote control file could not be created!");
+        }
     }
     
     @Override
