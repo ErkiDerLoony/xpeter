@@ -25,6 +25,11 @@ public class WhereAmI implements Parser, Observer<TextMessage> {
     @Override
     public void init(Bot bot) {
         storage = bot.getStorage();
+        
+        if (storage.contains(new StorageKey<TreeMap<String, String>>(Keys.WHEREABOUTS))) {
+            whereabouts = storage.get(new StorageKey<TreeMap<String, String>>(Keys.WHEREABOUTS));
+        }
+        
         bot.register(TextMessage.class, this);
     }
     
@@ -65,14 +70,34 @@ public class WhereAmI implements Parser, Observer<TextMessage> {
             return;
         }
         
-        match = "(.*?) ist (.*)";
+        match = "[wW]o ist (.*?)\\?";
         
         if (text.matches(match)) {
             String name = text.replaceAll(match, "$1");
-            String location = text.replaceAll(match, "$2");
-            whereabouts.put(name, location);
-            storage.add(new StorageKey<TreeMap<String, String>>(Keys.WHEREABOUTS), whereabouts);
-            msg.respond(new DelayedMessage("Ich weiß Bescheid.", 2000));
+            
+            if (whereabouts.containsKey(name)) {
+                String location = whereabouts.get(name);
+                msg.respond(new DelayedMessage(name + " ist " + location, 3000));
+            } else {
+                msg.respond(new DelayedMessage(
+                        "Ich weiß leider nicht, wo " + name + " gerade ist.", 3000));
+            }
+            
+            return;
+        }
+        
+        match = "[wW]o bin ich\\??";
+        
+        if (text.matches(match)) {
+            
+            if (whereabouts.containsKey(msg.getNick())) {
+                msg.respond(new DelayedMessage(msg.getNick() + ": Du bist "
+                        + whereabouts.get(msg.getNick()), 3000));
+            } else {
+                msg.respond(new DelayedMessage("Das weiß ich auch nicht.", 3000));
+            }
+            
+            return;
         }
         
         match = "[vV]ergiss wo ich bin\\.?!?";
@@ -86,6 +111,8 @@ public class WhereAmI implements Parser, Observer<TextMessage> {
             } else {
                 msg.respond(new DelayedMessage("Ich weiß gar nicht, wo du bist.", 3000));
             }
+            
+            return;
         }
         
         match = "[Vv]ergiss wo (.*?) ist\\.?!?";
@@ -100,20 +127,18 @@ public class WhereAmI implements Parser, Observer<TextMessage> {
             } else {
                 msg.respond(new DelayedMessage("Ich weiß gar nicht, wo " + name + " ist.", 3000));
             }
+            
+            return;
         }
         
-        match = "[wW]o ist (.*)\\??";
+        match = "(.*?) ist (.*)";
         
         if (text.matches(match)) {
-            String name = match.replaceAll(match, "$2");
-            
-            if (whereabouts.containsKey(name)) {
-                String location = whereabouts.get(name);
-                msg.respond(new DelayedMessage(name + " ist " + location, 3000));
-            } else {
-                msg.respond(new DelayedMessage(
-                        "Ich weiß leider nicht, wo " + name + " gerade ist.", 3000));
-            }
+            String name = text.replaceAll(match, "$1");
+            String location = text.replaceAll(match, "$2");
+            whereabouts.put(name, location);
+            storage.add(new StorageKey<TreeMap<String, String>>(Keys.WHEREABOUTS), whereabouts);
+            msg.respond(new DelayedMessage("Ich weiß Bescheid.", 2000));
         }
     }
 }
