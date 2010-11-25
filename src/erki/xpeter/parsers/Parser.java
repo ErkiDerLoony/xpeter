@@ -55,4 +55,5 @@ public interface Parser {
      *        The instance of {@link Bot} this parser object belongs to.
      */
     public void destroy(Bot bot);
+    
 }

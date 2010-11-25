@@ -34,6 +34,13 @@ public class RemoteControl implements Parser {
     public void init(final Bot bot) {
         FILE.deleteOnExit();
         
+        /*
+         * This re-creates the special file on startup and thus discards any accumulated text that
+         * was written there when the bot was not running. This prevents message flooding on
+         * startup.
+         */
+        createFile();
+        
         thread = new Thread() {
             
             public void run() {

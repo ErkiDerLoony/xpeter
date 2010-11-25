@@ -159,7 +159,7 @@ public class LastFm implements Parser, Observer<TextMessage> {
             }
         }
         
-        match = "[wW]as h(oe|ö)re ich( gerade)?\\??";
+        match = "[wW]as h(oe|ö)re ich( ge?rade)?\\??";
         
         if (text.matches(match)) {
             
