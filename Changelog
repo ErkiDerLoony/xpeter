@@ -12,6 +12,8 @@ v0.5.0
   channel and has no operator status.
 – A new parser that reads text from a file and thus allows remote control of
   the bot.
+– Add the SuperParser that allows for a distinct help system (only used in
+  HelpParser itself so far).
 
 v0.4.0
 – Implement short message service from scratch.
