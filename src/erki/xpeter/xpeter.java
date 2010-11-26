@@ -26,13 +26,12 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.util.LinkedList;
-import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.logging.Level;
 
 import erki.api.storage.JavaObjectStorage;
 import erki.api.storage.Storage;
 import erki.api.util.CommandLineParser;
+import erki.api.util.Level;
 import erki.api.util.Log;
 import erki.xpeter.con.erkitalk.ErkiTalkConnection;
 import erki.xpeter.con.irc.IrcConnection;
@@ -110,14 +109,14 @@ public class xpeter {
      *        The command line arguments.
      */
     public static void main(String[] arguments) {
-        TreeMap<String, String> args = CommandLineParser.parse(arguments);
+        CommandLineParser args = new CommandLineParser(arguments);
         
-        if (args.containsKey("--help") || args.containsKey("-h")) {
+        if (args.contains("h", "help")) {
             printHelp();
             return;
         }
         
-        if (args.containsKey("--list")) {
+        if (args.contains("l", "list")) {
             System.out.println("The following parsers are available:");
             
             for (Class<? extends Parser> parser : ParserFinder.findParsers(new File(".")
@@ -128,7 +127,7 @@ public class xpeter {
             return;
         }
         
-        if (args.containsKey("--version") || args.containsKey("-v")) {
+        if (args.contains("version") || args.contains("v")) {
             System.out.println("This is xpeter v" + VERSION + ".");
             return;
         }
@@ -138,19 +137,12 @@ public class xpeter {
         LinkedList<Class<? extends Parser>> chosenParsers = new LinkedList<Class<? extends Parser>>();
         LinkedList<Con> cons = new LinkedList<Con>();
         
-        if (args.containsKey("-s")) {
-            storageFile = args.get("-s");
-            args.remove("-s");
+        if (args.contains("s", "storage")) {
+            storageFile = args.pop("s", "storage");
         }
         
-        if (args.containsKey("--storage")) {
-            storageFile = args.get("--storage");
-            args.remove("--storage");
-        }
-        
-        if (args.containsKey("--config")) {
-            configFile = args.get("--config");
-            args.remove("--config");
+        if (args.contains("config")) {
+            configFile = args.pop("config");
         }
         
         if (new File(configFile).exists()) {
@@ -195,34 +187,21 @@ public class xpeter {
             }
         }
         
-        if (args.containsKey("--debug")) {
-            Log.setLevel(Level.FINE);
-            args.remove("--debug");
+        if (args.contains("debug")) {
+            args.pop("debug");
+            Log.setLevel(Level.DEBUG);
         }
         
-        if (args.containsKey("-n")) {
-            nick = args.get("-n");
-            args.remove("-n");
+        if (args.contains("n", "name", "nick")) {
+            nick = args.pop("n", "name", "nick");
         }
         
-        if (args.containsKey("--name")) {
-            nick = args.get("--name");
-            args.remove("--name");
+        if (args.contains("parsers")) {
+            parsers = args.pop("parsers");
         }
         
-        if (args.containsKey("--nick")) {
-            nick = args.get("--nick");
-            args.remove("--nick");
-        }
-        
-        if (args.containsKey("--parsers")) {
-            parsers = args.get("--parsers");
-            args.remove("--parsers");
-        }
-        
-        if (args.containsKey("--logfile")) {
-            logfile = args.get("--logfile");
-            args.remove("--logfile");
+        if (args.contains("logfile")) {
+            logfile = args.pop("logfile");
         }
         
         // Redirect log from stdout to specified logfile.
@@ -242,19 +221,8 @@ public class xpeter {
             }
         }
         
-        if (args.containsKey("-c")) {
-            parseCon(cons, args.get("-c"));
-            args.remove("-c");
-        }
-        
-        if (args.containsKey("--con")) {
-            parseCon(cons, args.get("--con"));
-            args.remove("--con");
-        }
-        
-        if (args.containsKey("--connection")) {
-            parseCon(cons, args.get("--connection"));
-            args.remove("--connection");
+        if (args.contains("c", "con", "connection")) {
+            parseCon(cons, args.pop("c", "con", "connection"));
         }
         
         Log.info("This is xpeter v" + VERSION + ".");

@@ -59,32 +59,6 @@ public class ParserLoader implements Parser, Observer<TextMessage> {
         
         text = BotApi.trimNick(text, msg.getBotNick());
         
-        if (text.matches("[wW]elche [pP]arser gibt es\\.?\\??")
-                || text.matches("[wW]as f(ü|ue)r [Pp]arser gibt es\\.?\\??")
-                || text.matches("([Ww]elche|[wW]as f(ü|ue)r) [pP]arser "
-                        + "(kennst|hast) [Dd]u\\.?\\??")
-                || text.matches("[lL]ist [pP]arsers?!?\\.?")) {
-            String response = "Ich kenne folgende Parser: ";
-            TreeSet<Class<? extends Parser>> loadedParsers = bot.getParsers();
-            TreeSet<Class<? extends Parser>> foundParsers = ParserFinder.findParsers(BotApi
-                    .getParserDir());
-            Log.debug("Loaded: " + loadedParsers.toString());
-            Log.debug("Found: " + foundParsers.toString());
-            
-            for (Class<? extends Parser> foundParser : foundParsers) {
-                
-                if (loadedParsers.contains(foundParser)) {
-                    response += foundParser.getSimpleName() + " (*), ";
-                } else {
-                    response += foundParser.getSimpleName() + ", ";
-                }
-            }
-            
-            msg
-                    .respond(new DelayedMessage(response.substring(0, response.length() - 2) + ".",
-                            2000));
-        }
-        
         if (text.matches("([wW]elche|[wW]as f(ü|ue)r) [pP]arser sind geladen\\.?\\??")) {
             String response = "Momentan sind die Parser ";
             TreeSet<Class<? extends Parser>> loaded = bot.getParsers();
@@ -94,9 +68,9 @@ public class ParserLoader implements Parser, Observer<TextMessage> {
                 
                 for (int i = 0; i < loadedParsers.length; i++) {
                     
-                    if (i < loadedParsers.length - 1) {
+                    if (i < loadedParsers.length - 2) {
                         response += loadedParsers[i].getSimpleName() + ", ";
-                    } else if (i == loadedParsers.length - 1) {
+                    } else if (i == loadedParsers.length - 2) {
                         response += loadedParsers[i].getSimpleName() + " und ";
                     } else {
                         response += loadedParsers[i].getSimpleName() + " geladen.";

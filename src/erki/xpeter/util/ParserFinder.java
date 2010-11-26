@@ -42,7 +42,6 @@ public class ParserFinder {
     private static final String PACKAGE = "erki.xpeter.parsers";
     
     private ParserFinder() {
-        
     }
     
     @SuppressWarnings("unchecked")
@@ -79,6 +78,10 @@ public class ParserFinder {
             if (c.getCanonicalName().equals(intorface)) {
                 return true;
             }
+        }
+        
+        if (clazz.getSuperclass() != null) {
+            return isImplementing(clazz.getSuperclass(), intorface);
         }
         
         return false;

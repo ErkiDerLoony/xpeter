@@ -41,7 +41,7 @@ import erki.xpeter.util.Keys;
  * 
  * @author Edgar Kalkowski
  */
-public class Bot {
+public class Bot implements BotInterface {
     
     private Collection<Connection> cons = new LinkedList<Connection>();
     
@@ -70,13 +70,7 @@ public class Bot {
         }
     }
     
-    /**
-     * Add new parsers to this bot. There can only be one instance of every parser class active at
-     * one time.
-     * 
-     * @param clazz
-     *        The class object describing the new parser.
-     */
+    @Override
     public void add(Class<? extends Parser> clazz) {
         Log.debug("Loading parser " + clazz.getSimpleName() + ".");
         
@@ -114,12 +108,7 @@ public class Bot {
         }
     }
     
-    /**
-     * Access the set of parsers currently loaded by this bot. The returned set only contains the
-     * class names of the active parsers thus no modification can do any harm.
-     * 
-     * @return The active set of parsers.
-     */
+    @Override
     public TreeSet<Class<? extends Parser>> getParsers() {
         TreeSet<Class<? extends Parser>> parsers = new TreeSet<Class<? extends Parser>>(
                 new Comparator<Class<? extends Parser>>() {
@@ -137,14 +126,7 @@ public class Bot {
         return parsers;
     }
     
-    /**
-     * Remove parsers from this bot. The corresponding {@link Parser#destroy(Bot)} method is called
-     * in which the parser itself must deregister all its listeners and finish all threads it may
-     * have started.
-     * 
-     * @param clazz
-     *        A class object describing the parser to remove.
-     */
+    @Override
     public void remove(Class<? extends Parser> clazz) {
         Parser[] pArray = parsers.toArray(new Parser[0]);
         
@@ -158,12 +140,7 @@ public class Bot {
         }
     }
     
-    /**
-     * Access the storage facility of this bot. Parsers can use it to persistently store
-     * information.
-     * 
-     * @return A persistent storage facility.
-     */
+    @Override
     public Storage<Keys> getStorage() {
         return storage;
     }
@@ -183,22 +160,12 @@ public class Bot {
         }
     }
     
-    /**
-     * Access all connections of this bot. The returned instances of Connection are no copies! So
-     * don’t mess with them! ;)
-     * 
-     * @return A Collection of all Connections of this bot.
-     */
+    @Override
     public Collection<Connection> getConnections() {
         return cons;
     }
     
-    /**
-     * Broadcast a message to all connections currently available to this bot.
-     * 
-     * @param msg
-     *        The message to broadcast.
-     */
+    @Override
     public void broadcast(Message msg) {
         
         synchronized (cons) {
@@ -209,15 +176,7 @@ public class Bot {
         }
     }
     
-    /**
-     * Broadcast a message to all connection currently available to this bot with the exception of
-     * one connection.
-     * 
-     * @param msg
-     *        The message to broadcast.
-     * @param shortId
-     *        The short identifier of the connection that will not receive {@code msg}.
-     */
+    @Override
     public void broadcast(Message msg, String shortId) {
         
         synchronized (cons) {
@@ -258,6 +217,19 @@ public class Bot {
         }
     }
     
+    /**
+     * Deregister a previously registered parser for a certain type of message. If the given parser
+     * instance was not previously registered for that message type nothing happens.
+     * 
+     * @param <MessageType>
+     *        The type of message the given parser was notified about.
+     * @param messageType
+     *        The class of the message type the given parser was notified about (needed for
+     *        implementation issues).
+     * @param observer
+     *        The observer role of the parser that shall no longer be notified about messages of the
+     *        given type.
+     */
     public <MessageType extends Message> void deregister(Class<MessageType> messageType,
             Observer<MessageType> observer) {
         
