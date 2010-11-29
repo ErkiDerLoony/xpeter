@@ -206,7 +206,8 @@ public class Bot implements BotInterface {
             Observer<MessageType> observer) {
         
         synchronized (parserMapping) {
-            Log.debug("Registered new listener for " + messageType.getSimpleName() + "s.");
+            Log.debug("Registered new listener for " + messageType.getSimpleName() + "s: "
+                    + observer.getClass().getSimpleName());
             
             if (!parserMapping.containsKey(messageType.getCanonicalName())) {
                 parserMapping.put(messageType.getCanonicalName(),

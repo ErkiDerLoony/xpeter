@@ -24,7 +24,7 @@ public class TopLines extends Action<TextMessage> {
      *        The users this bot has gathered statistical information about.
      */
     public TopLines(TreeMap<String, User> users) {
-        super(TextMessage.class, false);
+        super(TextMessage.class, true);
         this.users = users;
     }
     
@@ -46,7 +46,7 @@ public class TopLines extends Action<TextMessage> {
             count = Integer.parseInt(args[0]);
             TreeMap<Long, TreeSet<User>> users = new TreeMap<Long, TreeSet<User>>();
             
-            synchronized (users) {
+            synchronized (this.users) {
                 
                 for (String user : this.users.keySet()) {
                     

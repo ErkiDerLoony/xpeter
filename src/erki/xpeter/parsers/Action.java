@@ -119,7 +119,7 @@ public abstract class Action<T extends Message> implements Observer<T> {
         String nick = message.getBotNick();
         
         if (mustAddress && !BotApi.addresses(text, nick)) {
-            Log.debug("The bot is not addressed as required.");
+            Log.debug(getClass().getSimpleName() + ": The bot is not addressed as required.");
             return;
         }
         
@@ -128,7 +128,7 @@ public abstract class Action<T extends Message> implements Observer<T> {
         }
         
         if (getRegex() == null) {
-            Log.warning("This action is defective!");
+            Log.warning(getClass().getSimpleName() + ": This action is defective!");
             return;
         }
         
@@ -144,7 +144,7 @@ public abstract class Action<T extends Message> implements Observer<T> {
             
             execute(groups, message);
         } else {
-            Log.debug("This action does not match.");
+            Log.debug(getClass().getSimpleName() + ": This action does not match.");
         }
     }
 }

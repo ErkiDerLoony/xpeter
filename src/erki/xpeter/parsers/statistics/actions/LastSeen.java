@@ -51,7 +51,7 @@ public class LastSeen extends Action<TextMessage> {
                 if (lastOnline == null) {
                     message.respond(new Message(args[1] + " ist gerade online!"));
                 } else {
-                    message.respond(new Message(args[1] + " war zuletzt am "
+                    message.respond(new Message(args[1] + " war zuletzt "
                             + Statistics.formatDate(lastOnline) + " um "
                             + Statistics.formatTime(lastOnline) + " online."));
                 }

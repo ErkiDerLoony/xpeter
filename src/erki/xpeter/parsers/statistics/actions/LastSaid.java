@@ -53,7 +53,7 @@ public class LastSaid extends Action<TextMessage> {
                     String text = history.get(history.lastKey());
                     String day = Statistics.formatDate(date);
                     String time = Statistics.formatTime(date);
-                    message.respond(new DelayedMessage(args[0] + " hat am " + day + " um " + time
+                    message.respond(new DelayedMessage(args[0] + " hat " + day + " um " + time
                             + " gesagt: " + text, 3000));
                 } else {
                     message.respond(new DelayedMessage(args[0] + " hat bisher noch nichts gesagt.",
@@ -61,8 +61,7 @@ public class LastSaid extends Action<TextMessage> {
                 }
                 
             } else {
-                message.respond(new DelayedMessage("Ich weiß leider nicht, was " + args[0]
-                        + " zuletzt gesagt hat.", 3000));
+                message.respond(new DelayedMessage("Das weiß ich leider nicht.", 3000));
             }
         }
     }

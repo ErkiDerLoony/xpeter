@@ -44,8 +44,13 @@ public class WhereAmI implements Parser, Observer<TextMessage> {
         String nick = msg.getBotNick();
         boolean addressed = false;
         
-        if (text.equals("afk") || text.equals("AFK")) {
+        if (text.equals("afk")) {
             whereabouts.put(msg.getNick(), "afk.");
+            storage.add(new StorageKey<TreeMap<String, String>>(Keys.WHEREABOUTS), whereabouts);
+        }
+        
+        if (text.equals("re")) {
+            whereabouts.remove(msg.getNick());
             storage.add(new StorageKey<TreeMap<String, String>>(Keys.WHEREABOUTS), whereabouts);
         }
         
@@ -129,16 +134,6 @@ public class WhereAmI implements Parser, Observer<TextMessage> {
             }
             
             return;
-        }
-        
-        match = "(.*?) ist (.*)";
-        
-        if (text.matches(match)) {
-            String name = text.replaceAll(match, "$1");
-            String location = text.replaceAll(match, "$2");
-            whereabouts.put(name, location);
-            storage.add(new StorageKey<TreeMap<String, String>>(Keys.WHEREABOUTS), whereabouts);
-            msg.respond(new DelayedMessage("Ich weiß Bescheid.", 2000));
         }
     }
 }

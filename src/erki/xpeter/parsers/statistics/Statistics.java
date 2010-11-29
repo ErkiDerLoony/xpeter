@@ -19,6 +19,7 @@ package erki.xpeter.parsers.statistics;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TreeMap;
 
 import erki.api.storage.Storage;
@@ -58,7 +59,7 @@ public class Statistics extends SuperParser implements Observer<TextMessage> {
     
     private Storage<Keys> storage;
     
-    private TreeMap<String, User> users = new TreeMap<String, User>();
+    private TreeMap<String, User> users;
     
     private Observer<UserJoinedMessage> userJoinedObserver;
     
@@ -68,6 +69,11 @@ public class Statistics extends SuperParser implements Observer<TextMessage> {
     
     @Override
     public void createActions() {
+        
+        if (users == null) {
+            users = new TreeMap<String, User>();
+        }
+        
         actions.add(new History(users));
         actions.add(new LastSaid(users));
         actions.add(new LastSeen(users));
@@ -231,14 +237,81 @@ public class Statistics extends SuperParser implements Observer<TextMessage> {
      * @return The given date formatted like “DD.MM.YYYY”.
      */
     public static String formatDate(Date date) {
-        String result = "";
+        String result = "am ";
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         int day = calendar.get(Calendar.DAY_OF_MONTH);
         int month = calendar.get(Calendar.MONTH) + 1;
         result += day < 10 ? "0" + day + "." : day + ".";
-        result += month < 10 ? "0" + month + "." : month;
+        result += month < 10 ? "0" + month + "." : month + ".";
+        
+        if (today(calendar)) {
+            return "heute";
+        }
+        
+        if (yesterday(calendar)) {
+            return "gestern";
+        }
+        
+        if (daybeforeyesterday(calendar)) {
+            return "vorgestern";
+        }
+        
+        if (weekday(calendar)) {
+            return "letzten "
+                    + calendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, Locale.GERMAN);
+        }
+        
         return result + calendar.get(Calendar.YEAR);
+    }
+    
+    private static boolean today(Calendar calendar) {
+        Calendar today = Calendar.getInstance();
+        
+        if (calendar.get(Calendar.YEAR) == today.get(Calendar.YEAR)
+                && calendar.get(Calendar.DAY_OF_YEAR) == today.get(Calendar.DAY_OF_YEAR)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    private static boolean yesterday(Calendar calendar) {
+        Calendar yesterday = Calendar.getInstance();
+        yesterday.add(Calendar.DAY_OF_YEAR, -1);
+        
+        if (calendar.get(Calendar.DAY_OF_YEAR) == yesterday.get(Calendar.DAY_OF_YEAR)
+                && calendar.get(Calendar.YEAR) == yesterday.get(Calendar.YEAR)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    private static boolean daybeforeyesterday(Calendar calendar) {
+        Calendar bound = Calendar.getInstance();
+        bound.add(Calendar.DAY_OF_YEAR, -2);
+        
+        if (calendar.get(Calendar.DAY_OF_YEAR) == bound.get(Calendar.DAY_OF_YEAR)
+                && calendar.get(Calendar.YEAR) == bound.get(Calendar.YEAR)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    private static boolean weekday(Calendar calendar) {
+        Calendar bound = Calendar.getInstance();
+        bound.add(Calendar.DAY_OF_YEAR, -5);
+        
+        Calendar now = Calendar.getInstance();
+        now.setTimeInMillis(System.currentTimeMillis());
+        
+        if (calendar.after(bound) && calendar.before(now)) {
+            return true;
+        } else {
+            return false;
+        }
     }
     
     /**
@@ -257,7 +330,7 @@ public class Statistics extends SuperParser implements Observer<TextMessage> {
         int sec = calendar.get(Calendar.SECOND);
         result += hour < 10 ? "0" + hour + ":" : hour + ":";
         result += min < 10 ? "0" + min + ":" : min + ":";
-        result += sec < 10 ? "0" + sec + ":" : sec;
+        result += sec < 10 ? "0" + sec : sec;
         return result;
     }
     

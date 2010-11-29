@@ -1,6 +1,7 @@
 package erki.xpeter.parsers.statistics.actions;
 
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.TreeMap;
 
 import erki.xpeter.msg.DelayedMessage;
@@ -31,8 +32,8 @@ public class History extends Action<TextMessage> {
     
     @Override
     public String getRegex() {
-        return "[wW]as waren die ([23456789]|10) ([dD]inge|[sS]achen|[zZ]eilen), die (.*?) "
-                + "gesagt hat\\??";
+        return "[wW]as waren die( letzten)? ([23456789]|10)( letzten)? "
+                + "([dD]inge|[sS]achen|[zZ]eilen),? die (.*?) (zuletzt )?gesagt hat\\??";
     }
     
     @Override
@@ -43,7 +44,7 @@ public class History extends Action<TextMessage> {
     @Override
     public void execute(String[] args, TextMessage message) {
         String number = args[0];
-        String nick = args[2];
+        String nick = args[3];
         
         synchronized (users) {
             
@@ -54,10 +55,11 @@ public class History extends Action<TextMessage> {
                 try {
                     int n = Integer.parseInt(number);
                     int counter = 0;
+                    LinkedList<String> lines = new LinkedList<String>();
                     
                     for (long key : history.descendingKeySet()) {
-                        response += "[" + Statistics.formatDate(new Date(key)) + " "
-                                + Statistics.formatTime(new Date(key)) + "] " + history.get(key);
+                        lines.addFirst("[" + Statistics.formatDate(new Date(key)) + ", "
+                                + Statistics.formatTime(new Date(key)) + "] " + history.get(key));
                         counter++;
                         
                         if (counter >= n) {
@@ -65,6 +67,11 @@ public class History extends Action<TextMessage> {
                         }
                     }
                     
+                    for (String line : lines) {
+                        response += line + "\n";
+                    }
+                    
+                    response = response.substring(0, response.length() - 1);
                     message.respond(new DelayedMessage(response, 2222));
                 } catch (NumberFormatException e) {
                     message.respond(new DelayedMessage("Ich habe leider deine Zahl (" + number
