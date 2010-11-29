@@ -45,6 +45,10 @@ public abstract class SuperParser implements Parser {
         return actions;
     }
     
+    /**
+     * Registeres all actions of this parser with the bot. If you override this method make sure to
+     * call {@code super.init(Bot)} or register all actions yourself.
+     */
     @Override
     public void init(Bot bot) {
         
@@ -53,6 +57,10 @@ public abstract class SuperParser implements Parser {
         }
     }
     
+    /**
+     * Deregisters all actions of this parser from the bot. If you override this method make sure to
+     * call {@code super.deregister(Bot)} or deregister all the actions yourself.
+     */
     @Override
     public void destroy(Bot bot) {
         

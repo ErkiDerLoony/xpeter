@@ -17,35 +17,48 @@
 
 package erki.xpeter.parsers.statistics;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
+import erki.api.storage.Storage;
 import erki.api.util.Log;
 import erki.api.util.Observer;
 import erki.xpeter.Bot;
-import erki.xpeter.msg.Message;
 import erki.xpeter.msg.NickChangeMessage;
 import erki.xpeter.msg.TextMessage;
 import erki.xpeter.msg.UserJoinedMessage;
 import erki.xpeter.msg.UserLeftMessage;
-import erki.xpeter.parsers.Parser;
-import erki.xpeter.util.BotApi;
+import erki.xpeter.parsers.SuperParser;
+import erki.xpeter.parsers.statistics.actions.History;
+import erki.xpeter.parsers.statistics.actions.LastSaid;
+import erki.xpeter.parsers.statistics.actions.LastSeen;
+import erki.xpeter.parsers.statistics.actions.TopLines;
+import erki.xpeter.parsers.statistics.actions.TopQuotient;
+import erki.xpeter.parsers.statistics.actions.TopUptime;
+import erki.xpeter.parsers.statistics.actions.TopWords;
+import erki.xpeter.parsers.statistics.actions.UserLines;
+import erki.xpeter.parsers.statistics.actions.UserQuotient;
+import erki.xpeter.parsers.statistics.actions.UserUptime;
+import erki.xpeter.parsers.statistics.actions.UserWords;
+import erki.xpeter.parsers.statistics.actions.Who;
+import erki.xpeter.util.Keys;
+import erki.xpeter.util.StorageKey;
 
-public class Statistics implements Parser, Observer<TextMessage> {
+/**
+ * This parser gathers statistical information about the participants of the chats the bot has
+ * joined and provides a way for the users to query them.
+ * 
+ * @author Edgar Kalkowski <eMail@edgar-kalkowski.de>
+ */
+public class Statistics extends SuperParser implements Observer<TextMessage> {
     
-    private static final String STAT_FILE = "config" + System.getProperty("file.separator")
-            + "stats";
+    private static final StorageKey<TreeMap<String, User>> storageKey = new StorageKey<TreeMap<String, User>>(
+            Keys.STATISTICS);
     
-    private TreeMap<String, User> users;
+    private Storage<Keys> storage;
+    
+    private TreeMap<String, User> users = new TreeMap<String, User>();
     
     private Observer<UserJoinedMessage> userJoinedObserver;
     
@@ -53,13 +66,39 @@ public class Statistics implements Parser, Observer<TextMessage> {
     
     private Observer<NickChangeMessage> nickChangeObserver;
     
-    private boolean killed = false, warned = false;
+    @Override
+    public void createActions() {
+        actions.add(new History(users));
+        actions.add(new LastSaid(users));
+        actions.add(new LastSeen(users));
+        actions.add(new TopLines(users));
+        actions.add(new TopQuotient(users));
+        actions.add(new TopUptime(users));
+        actions.add(new TopWords(users));
+        actions.add(new UserLines(users));
+        actions.add(new UserQuotient(users));
+        actions.add(new UserUptime(users));
+        actions.add(new UserWords(users));
+        actions.add(new Who(users));
+    }
     
-    private Thread saveThread;
+    @Override
+    public String getDescription() {
+        return "Dieser Parser sammelt statistische Informationen.";
+    }
     
     @Override
     public void init(Bot bot) {
-        loadStats();
+        storage = bot.getStorage();
+        
+        if (storage.contains(storageKey)) {
+            users.putAll(storage.get(storageKey));
+        }
+        
+        // First initialize all actions.
+        super.init(bot);
+        
+        // Secondly add some parsers that are not exposed to the user.
         bot.register(TextMessage.class, this);
         
         // Start a new session for a joining user.
@@ -140,127 +179,19 @@ public class Statistics implements Parser, Observer<TextMessage> {
         };
         
         bot.register(NickChangeMessage.class, nickChangeObserver);
-        
-        // Start thread that saves the statistical information to the STAT_FILE
-        // from time to time in case the bot crashes or is terminated.
-        saveThread = new Thread() {
-            
-            @Override
-            public void run() {
-                super.run();
-                
-                while (!killed) {
-                    
-                    try {
-                        Thread.sleep(300000);
-                    } catch (InterruptedException e) {
-                    }
-                    
-                    // checkUserList();
-                    saveStats();
-                }
-            }
-            
-        };
-        
-        saveThread.start();
     }
     
     @Override
     public void destroy(Bot bot) {
-        killed = true;
-        saveThread.interrupt();
+        super.destroy(bot);
         bot.deregister(TextMessage.class, this);
         bot.deregister(UserJoinedMessage.class, userJoinedObserver);
         bot.deregister(UserLeftMessage.class, userLeftObserver);
         bot.deregister(NickChangeMessage.class, nickChangeObserver);
     }
     
-    // TODO: Perhaps this can be done some other way with the new framework, too?
-    
-    /*
-     * private void checkUserList() { Collection<String> userList = bot.getUserList();
-     * 
-     * synchronized (users) {
-     * 
-     * for (String user : userList) {
-     * 
-     * if (users.containsKey(user)) { users.get(user).startSession(); } else { users.put(user, new
-     * User(user)); } }
-     * 
-     * for (String user : users.keySet()) {
-     * 
-     * if (!userList.contains(user)) { users.get(user).closeSession(); } } } }
-     */
-
-    @SuppressWarnings("unchecked")
-    private void loadStats() {
-        
-        try {
-            ObjectInputStream objectIn = new ObjectInputStream(new FileInputStream(STAT_FILE));
-            users = (TreeMap<String, User>) objectIn.readObject();
-            objectIn.close();
-            Log.info("Loaded statistical information from " + STAT_FILE + ".");
-            Log.debug("Statistical information: " + users);
-        } catch (FileNotFoundException e) {
-            Log.info("Could not find any stored statistical information.");
-            users = new TreeMap<String, User>();
-        } catch (IOException e) {
-            Log.error(e);
-            Log.warning("Could not load file containing statistical information!");
-            users = new TreeMap<String, User>();
-        } catch (ClassNotFoundException e) {
-            Log.error(e);
-            Log.warning("Could not load statistical information!");
-            users = new TreeMap<String, User>();
-        }
-    }
-    
-    private void saveStats() {
-        TreeMap<String, User> users = new TreeMap<String, User>();
-        
-        synchronized (this.users) {
-            
-            // Close the sessions of all users before saving.
-            for (String user : this.users.keySet()) {
-                User clone = (User) this.users.get(user).clone();
-                clone.closeSession();
-                users.put(user, clone);
-            }
-        }
-        
-        try {
-            ObjectOutputStream objectOut = new ObjectOutputStream(new FileOutputStream(STAT_FILE));
-            objectOut.writeObject(users);
-            objectOut.close();
-        } catch (FileNotFoundException e) {
-            
-            if (!warned) {
-                warned = true;
-                Log.error(e);
-                Log.warning("Could not store statistical information to " + STAT_FILE + ".");
-                Log.info("This was a one time warning. I will not try to store the statistics "
-                        + "again in the future.");
-            }
-            
-        } catch (IOException e) {
-            
-            if (!warned) {
-                warned = true;
-                Log.error(e);
-                Log.warning("Could not store statistical information to " + STAT_FILE + ".");
-                Log.info("This was a one time warning. I will not try to store the statistics "
-                        + "again in the future.");
-            }
-        }
-    }
-    
     @Override
     public void inform(TextMessage message) {
-        
-        if (message.getNick().equals(message.getBotNick())) {
-            return;
-        }
         
         synchronized (users) {
             
@@ -276,408 +207,30 @@ public class Statistics implements Parser, Observer<TextMessage> {
             // Count statistics for the user who said something.
             users.get(message.getNick()).addLine(message.getText());
             
-            String text = message.getText();
+            TreeMap<String, User> users = new TreeMap<String, User>();
             
-            if (BotApi.addresses(text, message.getBotNick())) {
-                text = BotApi.trimNick(text, message.getBotNick());
-            } else {
-                return;
-            }
-            
-            String topLines = "[tT]op ?(1?\\d) ?([lL]ines|[zZ]eilen)?[!\\.\\?]?";
-            
-            if (text.matches(topLines)) {
-                int count;
+            synchronized (this.users) {
                 
-                try {
-                    count = Integer.parseInt(text.replaceAll(topLines, "$1"));
-                    TreeMap<Long, TreeSet<User>> users = new TreeMap<Long, TreeSet<User>>();
-                    
-                    for (String user : this.users.keySet()) {
-                        
-                        if (this.users.get(user).getLineCount() > 0) {
-                            
-                            if (users.containsKey(this.users.get(user).getLineCount())) {
-                                users.get(this.users.get(user).getLineCount()).add(
-                                        this.users.get(user));
-                            } else {
-                                TreeSet<User> list = new TreeSet<User>();
-                                list.add(this.users.get(user));
-                                users.put(this.users.get(user).getLineCount(), list);
-                            }
-                        }
-                    }
-                    
-                    int size = users.size();
-                    String result = "";
-                    
-                    for (int i = 0; i < count && !users.isEmpty(); i++) {
-                        User[] list = users.get(users.lastKey()).toArray(new User[0]);
-                        String number = "", line = "";
-                        
-                        if ((i + 1) < 10 && count > 9 && size > 9) {
-                            number += "0" + (i + 1);
-                        } else {
-                            number += (i + 1);
-                        }
-                        
-                        for (int j = 0; j < list.length; j++) {
-                            
-                            if (j < list.length - 2) {
-                                line += list[j].getName() + ", ";
-                            } else if (j < list.length - 1) {
-                                line += list[j].getName() + " und ";
-                            } else {
-                                line += list[j].getName();
-                            }
-                        }
-                        
-                        if (list[0].getLineCount() == 1) {
-                            result += number + ". " + line + " mit einer Zeile.\n";
-                        } else {
-                            result += number + ". " + line + " mit " + users.lastKey()
-                                    + " Zeilen.\n";
-                        }
-                        
-                        users.remove(users.lastKey());
-                    }
-                    
-                    // Be failsafe here.
-                    if (result.length() > 0 && result.charAt(result.length() - 1) == '\n') {
-                        result = result.substring(0, result.length() - 1);
-                    }
-                    
-                    message.respond(new Message(result));
-                } catch (NumberFormatException e) {
-                    message.respond(new Message("Ich habe deine Zahl für die Zeilen ("
-                            + text.replaceAll(topLines, "$1") + ") nicht " + "verstanden."));
+                // Close the sessions of all users before saving.
+                for (String user : this.users.keySet()) {
+                    User clone = (User) this.users.get(user).clone();
+                    clone.closeSession();
+                    users.put(user, clone);
                 }
             }
             
-            String topWords = "[tT]op ?(1?\\d) ?([wW]ords|[wW](ö|oe)rter)[!\\.\\?]?";
-            
-            if (text.matches(topWords)) {
-                int count;
-                
-                try {
-                    count = Integer.parseInt(text.replaceAll(topWords, "$1"));
-                    TreeMap<Long, TreeSet<User>> users = new TreeMap<Long, TreeSet<User>>();
-                    
-                    for (String user : this.users.keySet()) {
-                        
-                        if (this.users.get(user).getWordCount() > 0) {
-                            
-                            if (users.containsKey(this.users.get(user).getWordCount())) {
-                                TreeSet<User> list = users.get(this.users.get(user).getWordCount());
-                                list.add(this.users.get(user));
-                            } else {
-                                TreeSet<User> list = new TreeSet<User>();
-                                list.add(this.users.get(user));
-                                users.put(this.users.get(user).getWordCount(), list);
-                            }
-                        }
-                    }
-                    
-                    int size = users.size();
-                    String result = "";
-                    
-                    for (int i = 0; i < count && !users.isEmpty(); i++) {
-                        User[] list = users.get(users.lastKey()).toArray(new User[0]);
-                        String number = "", line = "";
-                        
-                        if ((i + 1) < 10 && count > 9 && size > 9) {
-                            number += "0" + (i + 1);
-                        } else {
-                            number += (i + 1);
-                        }
-                        
-                        for (int j = 0; j < list.length; j++) {
-                            
-                            if (j < list.length - 2) {
-                                line += list[j].getName() + ", ";
-                            } else if (j < list.length - 1) {
-                                line += list[j].getName() + " und ";
-                            } else {
-                                line += list[j].getName();
-                            }
-                        }
-                        
-                        if (list[0].getWordCount() == 1) {
-                            result += number + ". " + line + " mit einem Wort.\n";
-                            
-                        } else {
-                            result += number + ". " + line + " mit " + users.lastKey()
-                                    + " Wörtern.\n";
-                        }
-                        
-                        users.remove(users.lastKey());
-                    }
-                    
-                    // Be failsafe here.
-                    if (result.length() > 0 && result.charAt(result.length() - 1) == '\n') {
-                        result = result.substring(0, result.length() - 1);
-                    }
-                    
-                    message.respond(new Message(result));
-                } catch (NumberFormatException e) {
-                    message.respond(new Message("Ich habe deine Zahl für die Wörter ("
-                            + text.replaceAll(topLines, "$1") + ") nicht " + "verstanden."));
-                }
-            }
-            
-            String topQuotient = "[tT]op ?(1?\\d) ?"
-                    + "([qQ]uotient|[wW](ö|oe)rter pro [zZ]eile|[pP]ro|"
-                    + "[wW][pP][Zz])[!\\.\\?]?";
-            
-            if (text.matches(topQuotient)) {
-                int count;
-                
-                try {
-                    count = Integer.parseInt(text.replaceAll(topQuotient, "$1"));
-                    TreeMap<Double, TreeSet<User>> users = new TreeMap<Double, TreeSet<User>>();
-                    
-                    for (String user : this.users.keySet()) {
-                        
-                        if (this.users.get(user).getLineCount() > 0) {
-                            
-                            if (users.containsKey(this.users.get(user).getWordCount()
-                                    / (double) this.users.get(user).getLineCount())) {
-                                TreeSet<User> list = users.get(this.users.get(user).getWordCount()
-                                        / (double) this.users.get(user).getLineCount());
-                                list.add(this.users.get(user));
-                            } else {
-                                TreeSet<User> list = new TreeSet<User>();
-                                list.add(this.users.get(user));
-                                users.put(this.users.get(user).getWordCount()
-                                        / (double) this.users.get(user).getLineCount(), list);
-                            }
-                        }
-                    }
-                    
-                    int size = users.size();
-                    String result = "";
-                    
-                    for (int i = 0; i < count && !users.isEmpty(); i++) {
-                        User[] list = users.get(users.lastKey()).toArray(new User[0]);
-                        String number = "", line = "";
-                        
-                        if ((i + 1) < 10 && count > 9 && size > 9) {
-                            number += "0" + (i + 1);
-                        } else {
-                            number += (i + 1);
-                        }
-                        
-                        NumberFormat nf = NumberFormat.getNumberInstance();
-                        nf.setMinimumFractionDigits(1);
-                        nf.setMaximumFractionDigits(3);
-                        
-                        for (int j = 0; j < list.length; j++) {
-                            
-                            if (j < list.length - 2) {
-                                line += list[j].getName() + ", ";
-                            } else if (j < list.length - 1) {
-                                line += list[j].getName() + " und ";
-                            } else {
-                                line += list[j].getName();
-                            }
-                        }
-                        
-                        result += number + ". " + line + " mit " + nf.format(users.lastKey())
-                                + " Wörtern pro Zeile.\n";
-                        users.remove(users.lastKey());
-                    }
-                    
-                    if (result.length() > 0 && result.charAt(result.length() - 1) == '\n') {
-                        result = result.substring(0, result.length() - 1);
-                    }
-                    
-                    message.respond(new Message(result));
-                } catch (NumberFormatException e) {
-                    message.respond(new Message("Ich habe deine Zahl ("
-                            + text.replaceAll(topLines, "$1") + ") nicht " + "verstanden."));
-                }
-            }
-            
-            String topUptime = "[tT]op ?(1?\\d) ?([Uu]ptime|[zZ]eit online|[oO]nline ?[Zz]eit)"
-                    + "[!\\.\\?]?";
-            
-            if (text.matches(topUptime)) {
-                int count;
-                
-                try {
-                    count = Integer.parseInt(text.replaceAll(topUptime, "$1"));
-                    TreeMap<Long, TreeSet<User>> users = new TreeMap<Long, TreeSet<User>>();
-                    
-                    for (String user : this.users.keySet()) {
-                        
-                        if (users.containsKey(this.users.get(user).getUptime())) {
-                            TreeSet<User> list = users.get(this.users.get(user).getUptime());
-                            list.add(this.users.get(user));
-                        } else {
-                            TreeSet<User> list = new TreeSet<User>();
-                            list.add(this.users.get(user));
-                            users.put(this.users.get(user).getUptime(), list);
-                        }
-                    }
-                    
-                    int size = users.size();
-                    String result = "";
-                    
-                    for (int i = 0; i < count && !users.isEmpty(); i++) {
-                        User[] list = users.get(users.lastKey()).toArray(new User[0]);
-                        String number = "", line = "";
-                        
-                        if ((i + 1) < 10 && count > 9 && size > 9) {
-                            number += "0" + (i + 1);
-                        } else {
-                            number += (i + 1);
-                        }
-                        
-                        for (int j = 0; j < list.length; j++) {
-                            
-                            if (j < list.length - 2) {
-                                line += list[j].getName() + ", ";
-                            } else if (j < list.length - 1) {
-                                line += list[j].getName() + " und ";
-                            } else {
-                                line += list[j].getName();
-                            }
-                        }
-                        
-                        result += number + ". " + line + " mit " + getTime(users.lastKey()) + ".\n";
-                        users.remove(users.lastKey());
-                    }
-                    
-                    if (result.length() > 0 && result.charAt(result.length() - 1) == '\n') {
-                        result = result.substring(0, result.length() - 1);
-                    }
-                    
-                    message.respond(new Message(result));
-                } catch (NumberFormatException e) {
-                    message.respond(new Message("Ich habe deine Zahl ("
-                            + text.replaceAll(topLines, "$1") + ") nicht " + "verstanden."));
-                }
-            }
-            
-            String userLines = "[wW]ie ?viele [zZ]eilen hat (.*?) (bisher|schon|bisher schon)? "
-                    + "(gesagt|geschrieben)\\?";
-            
-            if (text.matches(userLines)) {
-                String name = text.replaceAll(userLines, "$1");
-                
-                if (users.containsKey(name)) {
-                    User user = users.get(name);
-                    
-                    if (user.getLineCount() == 1) {
-                        message.respond(new Message(name + " hat schon eine Zeile geschrieben."));
-                    } else {
-                        message.respond(new Message(name + " hat schon " + user.getLineCount()
-                                + " Zeilen geschrieben."));
-                    }
-                    
-                } else {
-                    message.respond(new Message("Das weiß ich nicht."));
-                }
-            }
-            
-            String userWords = "[wW]ie ?viele "
-                    + "[wW](ö|oe)rter hat (.*?) (bisher|schon|bisher schon)? "
-                    + "(gesagt|geschrieben)\\?";
-            
-            if (text.matches(userWords)) {
-                String name = text.replaceAll(userWords, "$2");
-                
-                if (users.containsKey(name)) {
-                    User user = users.get(name);
-                    
-                    if (user.getWordCount() == 1) {
-                        message.respond(new Message(name + " hat schon ein Wort geschrieben."));
-                    } else {
-                        message.respond(new Message(name + " hat schon " + user.getWordCount()
-                                + " Wörter geschrieben."));
-                    }
-                    
-                } else {
-                    message.respond(new Message("Das weiß ich nicht."));
-                }
-            }
-            
-            String userQuotient = "[Ww]ie ?viele [wW](ö|oe)rter pro [zZ]eile hat "
-                    + "(.*?) (bisher|schon|bisher schon| im ([Dd]urch)?"
-                    + "[sS]chnitt)? (gesagt|geschrieben)\\?";
-            
-            if (text.matches(userQuotient)) {
-                String name = text.replaceAll(userQuotient, "$2");
-                
-                if (users.containsKey(name)) {
-                    User user = users.get(name);
-                    NumberFormat nf = NumberFormat.getNumberInstance();
-                    nf.setMinimumFractionDigits(3);
-                    nf.setMaximumFractionDigits(3);
-                    message.respond(new Message(name + " hat im Schnitt "
-                            + nf.format(user.getWordCount() / (double) user.getLineCount())
-                            + " Wörter pro Zeile geschrieben."));
-                } else {
-                    message.respond(new Message("Das weiß ich nicht."));
-                }
-            }
-            
-            String who = "((Ü|ü|ue|Ue)ber wen|[vV]on wem) (hast|f(ü|ue)hrst) [dD]u (alles )?"
-                    + "(eine [sS]tatistik|statistische ([iI]nfo(rmationen|s)|[dD]aten))\\?";
-            
-            if (text.matches(who)) {
-                
-                if (users.keySet().isEmpty()) {
-                    message.respond(new Message("Momentan habe ich zu "
-                            + "niemandem statistische Informationen."));
-                } else if (users.keySet().size() == 1) {
-                    message.respond(new Message("Momentan habe ich nur zu " + users.firstKey()
-                            + " statistische Informationen."));
-                } else {
-                    message.respond(new Message("Ich sammle momentan statistische Daten über "
-                            + BotApi.enumerate(users.keySet()) + "."));
-                }
-            }
-            
-            String howLongOnline = "[wW]ie lange (war|ist) (.*?) (schon )?"
-                    + "(online|hier|da)( gewesen)?\\?";
-            
-            if (text.matches(howLongOnline)) {
-                String name = text.replaceAll(howLongOnline, "$2");
-                
-                if (users.containsKey(name)) {
-                    User user = users.get(name);
-                    message.respond(new Message(name + " war schon " + getTime(user.getUptime())
-                            + " online."));
-                } else {
-                    message.respond(new Message("Das weiß ich nicht."));
-                }
-            }
-            
-            String whenOnline = "[wW]ann (war|ist) (.*?) (zuletzt|"
-                    + "zum letzten [mM]al) (online|da|hier)( gewesen)?\\?";
-            
-            if (text.matches(whenOnline)) {
-                String name = text.replaceAll(whenOnline, "$2");
-                
-                if (users.containsKey(name)) {
-                    Date lastOnline = users.get(name).getLastOnline();
-                    
-                    if (lastOnline == null) {
-                        message.respond(new Message(name + " ist gerade online!"));
-                    } else {
-                        message.respond(new Message(name + " war zuletzt am " + getDate(lastOnline)
-                                + " um " + getTime(lastOnline) + " online."));
-                    }
-                    
-                } else {
-                    message.respond(new Message("Das weiß ich nicht."));
-                }
-            }
+            storage.add(storageKey, users);
         }
     }
     
-    private String getDate(Date date) {
+    /**
+     * Format an instance of {@link Date} like “DD.MM.YYYY”.
+     * 
+     * @param date
+     *        The Date instance to format.
+     * @return The given date formatted like “DD.MM.YYYY”.
+     */
+    public static String formatDate(Date date) {
         String result = "";
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
@@ -688,7 +241,14 @@ public class Statistics implements Parser, Observer<TextMessage> {
         return result + calendar.get(Calendar.YEAR);
     }
     
-    private String getTime(Date date) {
+    /**
+     * Format an instance of {@link Date} like “HH:MM:SS”.
+     * 
+     * @param date
+     *        The Date instance to format.
+     * @return The given date formatted like “HH:MM:SS”.
+     */
+    public static String formatTime(Date date) {
         String result = "";
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
@@ -701,7 +261,14 @@ public class Statistics implements Parser, Observer<TextMessage> {
         return result;
     }
     
-    private String getTime(long time) {
+    /**
+     * Format a time difference like “Dd HH:MM:SS”.
+     * 
+     * @param time
+     *        The time difference to format (given in ms).
+     * @return The given time difference formatted like “Dd HH:MM:SS”.
+     */
+    public static String formatTime(long time) {
         String result = "";
         long sec = time / 1000;
         long min = sec / 60;

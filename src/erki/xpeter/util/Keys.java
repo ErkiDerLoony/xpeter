@@ -25,6 +25,8 @@ import erki.xpeter.parsers.rss.FeedData;
 import erki.xpeter.parsers.rss.RssFeed;
 import erki.xpeter.parsers.sms.ShortMessage;
 import erki.xpeter.parsers.sms.SimpleMailbox;
+import erki.xpeter.parsers.statistics.Statistics;
+import erki.xpeter.parsers.statistics.User;
 
 /**
  * This enum contains constants that can be used to store information in the persistent storage
@@ -52,6 +54,12 @@ public enum Keys {
      * chat participants (used by {@link WhereAmI}).
      */
     WHEREABOUTS,
+
+    /**
+     * This {@link TreeMap}&lt;{@link String}, {@link User}&gt; contains statistical information
+     * about the participants of chats. See the {@link Statistics} parser for more details.
+     */
+    STATISTICS,
 
     /**
      * @deprecated Will be removed in a future version. If any storage contains something under this

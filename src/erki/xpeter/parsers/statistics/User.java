@@ -20,6 +20,7 @@ package erki.xpeter.parsers.statistics;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.TreeMap;
 
 /**
  * A user for who statistical information is gathered.
@@ -30,11 +31,13 @@ public class User implements Serializable, Cloneable, Comparable<User> {
     
     private static final long serialVersionUID = -137888309386492171L;
     
+    private static final int HISTORY_LIMIT = 10;
+    
     private final String name;
     
-    private LinkedList<Session> sessions;
+    private LinkedList<Session> sessions = new LinkedList<Session>();
     
-    private LinkedList<String> history = new LinkedList<String>();
+    private TreeMap<Long, String> history = new TreeMap<Long, String>();
     
     /**
      * Create a new {@code User}. Automatically creates and starts a first {@link Session} for this
@@ -45,7 +48,6 @@ public class User implements Serializable, Cloneable, Comparable<User> {
      */
     public User(String name) {
         this.name = name;
-        sessions = new LinkedList<Session>();
         sessions.add(new Session());
     }
     
@@ -71,6 +73,29 @@ public class User implements Serializable, Cloneable, Comparable<User> {
      */
     public void addLine(String line) {
         getSession().addLine(line);
+        
+        synchronized (history) {
+            
+            history.put(System.currentTimeMillis(), line);
+            
+            while (history.size() > HISTORY_LIMIT) {
+                history.remove(history.firstKey());
+            }
+        }
+    }
+    
+    /**
+     * Access the history of this user. The returned object is a copy of this users actual history
+     * so you don’t have to worry about synchronized access or removing entries etc.
+     * 
+     * @return This users’s chat history.
+     */
+    @SuppressWarnings("unchecked")
+    public TreeMap<Long, String> getHistory() {
+        
+        synchronized (history) {
+            return (TreeMap<Long, String>) history.clone();
+        }
     }
     
     /** @return The number of words this user said during all recorded sessions. */
@@ -175,7 +200,7 @@ public class User implements Serializable, Cloneable, Comparable<User> {
                 clone.sessions.add((Session) s.clone());
             }
             
-            clone.history = (LinkedList<String>) history.clone();
+            clone.history = (TreeMap<Long, String>) history.clone();
             
         } catch (CloneNotSupportedException e) {
             // This is not possible as this class implements the Cloneable
