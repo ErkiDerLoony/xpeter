@@ -39,10 +39,13 @@ public class HelpParserAction extends Action<TextMessage> {
         TreeSet<Class<? extends Parser>> foundParsers = ParserFinder.findParsers(BotApi
                 .getParserDir());
         TreeSet<Class<? extends Parser>> loadedParsers = getBot().getParsers();
+        String suggestion = null;
+        boolean found = false;
         
         for (Class<? extends Parser> parser : foundParsers) {
             
             if (parser.getSimpleName().equals(args[0])) {
+                found = true;
                 String description = null;
                 
                 try {
@@ -81,6 +84,18 @@ public class HelpParserAction extends Action<TextMessage> {
                 }
                 
                 message.respond(new DelayedMessage(description, 2500));
+            } else if (parser.getSimpleName().toLowerCase().equals(args[0].toLowerCase())) {
+                suggestion = parser.getSimpleName();
+            }
+        }
+        
+        if (!found) {
+            message.respond(new DelayedMessage("Ein Parser mit dem Namen „" + args[0]
+                    + "“ konnte leider nicht gefunden werden.", 1500));
+            
+            if (suggestion != null) {
+                message.respond(new DelayedMessage("Meintest du vielleicht den Parser „"
+                        + suggestion + "“?", 2500));
             }
         }
     }
