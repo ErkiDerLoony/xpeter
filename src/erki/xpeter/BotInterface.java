@@ -1,7 +1,7 @@
 package erki.xpeter;
 
 import java.util.Collection;
-import java.util.TreeSet;
+import java.util.Set;
 
 import erki.api.storage.Storage;
 import erki.xpeter.con.Connection;
@@ -29,12 +29,11 @@ public interface BotInterface {
     public void add(Class<? extends Parser> clazz);
     
     /**
-     * Access the set of parsers currently loaded by this bot. The returned set only contains the
-     * class names of the active parsers thus no modification can do any harm.
+     * Access the set of parsers currently loaded by this bot.
      * 
-     * @return The active set of parsers.
+     * @return The set of currently loaded parsers.
      */
-    public TreeSet<Class<? extends Parser>> getParsers();
+    public Set<Parser> getParsers();
     
     /**
      * Remove parsers from this bot. The corresponding {@link Parser#destroy(Bot)} method is called

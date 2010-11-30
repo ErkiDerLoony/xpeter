@@ -3,7 +3,9 @@ package erki.xpeter.parsers;
 import java.util.LinkedList;
 import java.util.List;
 
+import erki.api.storage.Storage;
 import erki.xpeter.Bot;
+import erki.xpeter.BotInterface;
 import erki.xpeter.msg.Message;
 
 /**
@@ -14,19 +16,17 @@ import erki.xpeter.msg.Message;
  */
 public abstract class SuperParser implements Parser {
     
-    protected List<Action<? extends Message>> actions;
-    
-    /** Create a new SuperParser and create all the actions. */
-    public SuperParser() {
-        actions = new LinkedList<Action<? extends Message>>();
-        createActions();
-    }
+    protected List<Action<? extends Message>> actions = new LinkedList<Action<? extends Message>>();
     
     /**
      * This method is called by the constructor to create all the actions this parser shall consist
      * of. Here you can add the actions you want this parser to have to {@link #actions}.
+     * 
+     * @param bot
+     *        The bot instance this parser belongs to and which may be useful to some parsers (e.g.
+     *        to obtain the bot’s {@link Storage}).
      */
-    public abstract void createActions();
+    public abstract void createActions(BotInterface bot);
     
     /**
      * Get a human readable description of what this parser does.
@@ -51,6 +51,7 @@ public abstract class SuperParser implements Parser {
      */
     @Override
     public void init(Bot bot) {
+        createActions(bot);
         
         for (Action<? extends Message> action : actions) {
             action.register(bot);

@@ -1,5 +1,7 @@
 package erki.xpeter.parsers.help;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.TreeSet;
 
 import erki.api.util.Log;
@@ -37,7 +39,13 @@ public class HelpAction extends Action<TextMessage> {
     @Override
     public void execute(String[] args, TextMessage msg) {
         String response = "Ich kenne folgende Parser: ";
-        TreeSet<Class<? extends Parser>> loadedParsers = getBot().getParsers();
+        Set<Parser> loadedParsers = getBot().getParsers();
+        HashSet<Class<? extends Parser>> loadedClasses = new HashSet<Class<? extends Parser>>();
+        
+        for (Parser p : loadedParsers) {
+            loadedClasses.add(p.getClass());
+        }
+        
         TreeSet<Class<? extends Parser>> foundParsers = ParserFinder.findParsers(BotApi
                 .getParserDir());
         Log.debug("Loaded: " + loadedParsers.toString());
@@ -45,7 +53,7 @@ public class HelpAction extends Action<TextMessage> {
         
         for (Class<? extends Parser> foundParser : foundParsers) {
             
-            if (loadedParsers.contains(foundParser)) {
+            if (loadedClasses.contains(foundParser)) {
                 response += foundParser.getSimpleName() + " (*), ";
             } else {
                 response += foundParser.getSimpleName() + ", ";
@@ -53,7 +61,7 @@ public class HelpAction extends Action<TextMessage> {
         }
         
         response = response.substring(0, response.length() - 2) + ".\n";
-        response += "Um mehr über den Parser <parser> zu erfahren, sende „hilfe <parser>“!";
+        response += "Um mehr über den Parser <parser> zu erfahren, sende z.B. „hilfe <parser>“!";
         msg.respond(new DelayedMessage(response, 2000));
     }
 }

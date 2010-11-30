@@ -1,5 +1,6 @@
 package erki.xpeter.parsers.help;
 
+import erki.xpeter.BotInterface;
 import erki.xpeter.parsers.SuperParser;
 
 /**
@@ -10,7 +11,7 @@ import erki.xpeter.parsers.SuperParser;
 public class Help extends SuperParser {
     
     @Override
-    public void createActions() {
+    public void createActions(BotInterface bot) {
         actions.add(new HelpAction());
         actions.add(new HelpParserAction());
     }

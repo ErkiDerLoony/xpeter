@@ -26,6 +26,7 @@ import erki.api.storage.Storage;
 import erki.api.util.Log;
 import erki.api.util.Observer;
 import erki.xpeter.Bot;
+import erki.xpeter.BotInterface;
 import erki.xpeter.msg.NickChangeMessage;
 import erki.xpeter.msg.TextMessage;
 import erki.xpeter.msg.UserJoinedMessage;
@@ -68,9 +69,12 @@ public class Statistics extends SuperParser implements Observer<TextMessage> {
     private Observer<NickChangeMessage> nickChangeObserver;
     
     @Override
-    public void createActions() {
+    public void createActions(BotInterface bot) {
+        storage = bot.getStorage();
         
-        if (users == null) {
+        if (storage.contains(storageKey)) {
+            users = storage.get(storageKey);
+        } else {
             users = new TreeMap<String, User>();
         }
         
@@ -95,12 +99,6 @@ public class Statistics extends SuperParser implements Observer<TextMessage> {
     
     @Override
     public void init(Bot bot) {
-        storage = bot.getStorage();
-        
-        if (storage.contains(storageKey)) {
-            users.putAll(storage.get(storageKey));
-        }
-        
         // First initialize all actions.
         super.init(bot);
         

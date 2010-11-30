@@ -17,6 +17,7 @@
 
 package erki.xpeter.parsers;
 
+import java.util.Set;
 import java.util.TreeSet;
 
 import erki.api.util.Log;
@@ -48,7 +49,6 @@ public class ParserLoader implements Parser, Observer<TextMessage> {
         bot.deregister(TextMessage.class, this);
     }
     
-    @SuppressWarnings("unchecked")
     @Override
     public void inform(TextMessage msg) {
         String text = msg.getText();
@@ -61,26 +61,26 @@ public class ParserLoader implements Parser, Observer<TextMessage> {
         
         if (text.matches("([wW]elche|[wW]as f(ü|ue)r) [pP]arser sind geladen\\.?\\??")) {
             String response = "Momentan sind die Parser ";
-            TreeSet<Class<? extends Parser>> loaded = bot.getParsers();
-            Class<? extends Parser>[] loadedParsers = loaded.toArray(new Class[0]);
+            Set<Parser> loaded = bot.getParsers();
+            Parser[] loadedParsers = loaded.toArray(new Parser[0]);
             
             if (loadedParsers.length > 1) {
                 
                 for (int i = 0; i < loadedParsers.length; i++) {
                     
                     if (i < loadedParsers.length - 2) {
-                        response += loadedParsers[i].getSimpleName() + ", ";
+                        response += loadedParsers[i].getClass().getSimpleName() + ", ";
                     } else if (i == loadedParsers.length - 2) {
-                        response += loadedParsers[i].getSimpleName() + " und ";
+                        response += loadedParsers[i].getClass().getSimpleName() + " und ";
                     } else {
-                        response += loadedParsers[i].getSimpleName() + " geladen.";
+                        response += loadedParsers[i].getClass().getSimpleName() + " geladen.";
                     }
                 }
                 
                 msg.respond(new DelayedMessage(response, 3000));
             } else if (loadedParsers.length == 1) {
                 msg.respond(new DelayedMessage("Im Moment ist nur der Parser "
-                        + loadedParsers[0].getSimpleName() + " geladen.", 1500));
+                        + loadedParsers[0].getClass().getSimpleName() + " geladen.", 1500));
             } else {
                 msg.respond(new DelayedMessage(
                         "Hm, es scheint so, als ob kein einiger Parser geladen wäre.", 3500));
@@ -142,19 +142,17 @@ public class ParserLoader implements Parser, Observer<TextMessage> {
             Log.debug("Recognized match for parser " + parser + ".");
             
             if (parser.equals("ParserLoader")) {
-                msg
-                        .respond(new DelayedMessage("Der ParserLoader kann nicht entfernt werden!",
-                                2000));
+                msg.respond(new DelayedMessage("Der ParserLoader kann nicht entfernt werden!", 2000));
             } else {
-                TreeSet<Class<? extends Parser>> parsers = bot.getParsers();
+                Set<Parser> parsers = bot.getParsers();
                 boolean removed = false;
                 
-                for (Class<? extends Parser> clazz : parsers) {
-                    Log.debug("Checking " + clazz.getSimpleName() + " against " + parser);
+                for (Parser p : parsers) {
+                    Log.debug("Checking " + p.getClass().getSimpleName() + " against " + parser);
                     
-                    if (clazz.getSimpleName().equals(parser)) {
+                    if (p.getClass().getSimpleName().equals(parser)) {
                         Log.debug("Match!");
-                        bot.remove(clazz);
+                        bot.remove(p.getClass());
                         removed = true;
                     }
                 }

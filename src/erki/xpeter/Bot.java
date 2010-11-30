@@ -94,14 +94,17 @@ public class Bot implements BotInterface {
             parser.init(this);
             parsers.add(parser);
         } catch (InstantiationException e) {
+            Log.error(e);
             Log.warning("Parser " + clazz.getSimpleName() + " could not be loaded ("
                     + e.getClass().getSimpleName() + ")!");
             Log.info("Trying to continue without this parser.");
         } catch (IllegalAccessException e) {
+            Log.error(e);
             Log.warning("You are not allowed to instanciate the parser class "
                     + clazz.getCanonicalName() + ". Please check your security settings!");
             Log.info("Trying to continue without this parser.");
         } catch (Throwable e) {
+            Log.error(e);
             Log.warning("Could not initialize the parser " + clazz.getSimpleName() + " ("
                     + e.getClass().getSimpleName() + ").");
             Log.info("Trying to continue without this one.");
@@ -109,20 +112,7 @@ public class Bot implements BotInterface {
     }
     
     @Override
-    public TreeSet<Class<? extends Parser>> getParsers() {
-        TreeSet<Class<? extends Parser>> parsers = new TreeSet<Class<? extends Parser>>(
-                new Comparator<Class<? extends Parser>>() {
-                    
-                    @Override
-                    public int compare(Class<? extends Parser> o1, Class<? extends Parser> o2) {
-                        return o1.getCanonicalName().compareTo(o2.getCanonicalName());
-                    }
-                });
-        
-        for (Parser p : this.parsers) {
-            parsers.add(p.getClass());
-        }
-        
+    public Set<Parser> getParsers() {
         return parsers;
     }
     
