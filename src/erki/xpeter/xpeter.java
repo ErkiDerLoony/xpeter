@@ -52,7 +52,7 @@ import erki.xpeter.util.StorageKey;
 public class xpeter {
     
     /** The version of xpeter. To be used wherever needed. */
-    public static final String VERSION = "0.5.0";
+    public static final String VERSION = "0.4.0";
     
     /** Prints the "--help" message to stdout. */
     private static void printHelp() {
@@ -97,7 +97,7 @@ public class xpeter {
         System.out.println("however that command line options supersede (and thus replace)");
         System.out.println("options specified in the config file!");
         System.out.println();
-        System.out.println("© 2008–2009 by Edgar Kalkowski <eMail@edgar-kalkowski.de>");
+        System.out.println("© 2008–2011 by Edgar Kalkowski <eMail@edgar-kalkowski.de>");
     }
     
     /**
@@ -109,6 +109,11 @@ public class xpeter {
      *        The command line arguments.
      */
     public static void main(String[] arguments) {
+        
+        // Adjust log format.
+        Log.setFormat("[%D.%n.%y %H:%M:%S.%m, %T, %c.%f(%l)] %L: %t");
+        
+        // Parse command line options.
         CommandLineParser args = new CommandLineParser(arguments);
         
         if (args.contains("h", "help")) {
@@ -225,7 +230,7 @@ public class xpeter {
             parseCon(cons, args.pop("c", "con", "connection"));
         }
         
-        Log.info("This is xpeter v" + VERSION + ".");
+        Log.info("This is xpeter version " + VERSION + ".");
         
         TreeSet<Class<? extends Parser>> foundParsers = ParserFinder.findParsers(BotApi
                 .getParserDir());
