@@ -111,7 +111,7 @@ public class xpeter {
     public static void main(String[] arguments) {
         
         // Adjust log format.
-        Log.setFormat("[%D.%n.%y %H:%M:%S.%m, %T, %c.%f(%l)] %L: %t");
+        Log.setFormat("[%D.%n.%y %H:%M:%S.%m, [%i], %c.%f(%l)] %L: %t");
         
         // Parse command line options.
         CommandLineParser args = new CommandLineParser(arguments);
@@ -190,6 +190,11 @@ public class xpeter {
                 System.err.println("The config file could not be read.");
                 System.err.println("Perhaps we can continue with command line params only?");
             }
+        }
+        
+        if (args.contains("color", "colour")) {
+            args.pop("color", "colour");
+            Log.setColourUsed(true);
         }
         
         if (args.contains("debug")) {

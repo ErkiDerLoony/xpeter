@@ -2,11 +2,11 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/smack-3.1.0.jar" sourcepath="lib/smack-3.1.0-src.jar"/>
-	<classpathentry kind="lib" path="lib/smackx-3.1.0.jar" sourcepath="lib/smackx-3.1.0-src.jar"/>
 	<classpathentry kind="lib" path="lib/last.fm-bindings-7.3.jar" sourcepath="lib/last.fm-bindings-7.3-src.jar"/>
 	<classpathentry kind="lib" path="lib/pircbot-1.5.0.jar"/>
 	<classpathentry kind="lib" path="lib/rsslib4j-0.2.jar"/>
 	<classpathentry kind="lib" path="lib/ErkiAPI-0.4.0.jar"/>
+	<classpathentry kind="lib" path="lib/smack-3.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/smackx-3.2.1.jar" sourcepath="lib/smack-3.2.1-source"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
