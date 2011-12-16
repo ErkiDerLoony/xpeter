@@ -1,4 +1,4 @@
-xpeter.sh
-bin
-.botrc
-.storage
+/bin
+/.botrc
+/.storage
+/xpeter-*.jar
