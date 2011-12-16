@@ -1,5 +1,5 @@
 /*
- * © Copyright 2008–2010 by Edgar Kalkowski <eMail@edgar-kalkowski.de>
+ * © Copyright 2008–2011 by Edgar Kalkowski <eMail@edgar-kalkowski.de>
  * 
  * This file is part of the chatbot xpeter.
  * 
@@ -105,14 +105,14 @@ public class XmppConnection implements Connection {
             ConnectionListener connectionListener = null;
             
             try {
-                Log.info("Connecting to " + channel + "@" + host + ":" + port + ".");
+                Log.info("Connecting to the channel " + channel + " on " + host + ":" + port + ".");
                 ConnectionConfiguration config = new ConnectionConfiguration(host, port);
                 con = new XMPPConnection(config);
                 con.connect();
                 
                 if (con.isConnected()) {
-                    Log.info("Connection established. Logging in.");
                     load();
+                    Log.info("Connection established. Logging in as " + loginName + ".");
                     con.login(loginName, password, "Daheim");
                     // Get the password out of memory asap.
                     loginName = null;
@@ -162,6 +162,8 @@ public class XmppConnection implements Connection {
                 
             } catch (XMPPException e) {
                 Log.error(e);
+            } catch (Throwable t) {
+                Log.error(t);
             } finally {
                 
                 if (con != null) {
@@ -214,10 +216,13 @@ public class XmppConnection implements Connection {
             String line;
             
             while ((line = fileIn.readLine()) != null) {
+                Log.fineDebug("Read a line from the file.");
                 
                 if (line.toUpperCase().startsWith("USER=")) {
+                    Log.fineDebug("It was the login name.");
                     loginName = line.substring("USER=".length());
                 } else if (line.toUpperCase().startsWith("PASSWORD=")) {
+                    Log.fineDebug("It was the password.");
                     password = line.substring("PASSWORD=".length());
                 }
             }

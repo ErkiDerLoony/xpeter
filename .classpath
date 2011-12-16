@@ -6,7 +6,7 @@
 	<classpathentry kind="lib" path="lib/pircbot-1.5.0.jar"/>
 	<classpathentry kind="lib" path="lib/rsslib4j-0.2.jar"/>
 	<classpathentry kind="lib" path="lib/ErkiAPI-0.4.0.jar"/>
-	<classpathentry kind="lib" path="lib/smack-3.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/smack-3.2.1.jar" sourcepath="lib/smack-3.2.1-source"/>
 	<classpathentry kind="lib" path="lib/smackx-3.2.1.jar" sourcepath="lib/smack-3.2.1-source"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
