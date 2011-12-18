@@ -251,9 +251,7 @@ public class Greetings implements Parser, Observer<TextMessage> {
                 this.cu.add(newCu);
                 saveGreetings();
                 Log.info("Neue Verabschiedung „" + newCu + "“ hinzugefügt.");
-                msg
-                        .respond(new Message("Ich habe die neue Verabschiedung „" + newCu
-                                + "“ gelernt!"));
+                msg.respond(new Message("Ich habe die neue Verabschiedung „" + newCu + "“ gelernt!"));
             } else {
                 msg.respond(new Message("Diese Verabschiedung kenne ich schon."));
             }
@@ -314,9 +312,7 @@ public class Greetings implements Parser, Observer<TextMessage> {
         if (addresses && text.matches(listHello)) {
             
             if (this.hello.size() > 1) {
-                msg
-                        .respond(new Message("Ich kenne die Begrüßungen "
-                                + BotApi.enumerate(this.hello)));
+                msg.respond(new Message("Ich kenne die Begrüßungen " + BotApi.enumerate(this.hello)));
             } else if (this.hello.size() == 1) {
                 msg.respond(new Message("Ich kenne lediglich die Begrüßung " + this.hello.get(0)
                         + "."));
@@ -461,17 +457,5 @@ public class Greetings implements Parser, Observer<TextMessage> {
         }
         
         return result.substring(0, result.length() - 1) + ")";
-    }
-    
-    public static void main(String[] args) {
-        String nick = "xpeter";
-        String greeting = "(" + nick + "[:,;]?[ ]?(Hallo|Hi)[\\.,!?]?|(Hallo|Hi)[:,;]? " + nick
-                + "[\\.,!?]?)";
-        System.out.println("Hallo xpeter. -> " + "Hallo xpeter.".matches(greeting));
-        System.out.println("Hallo xpeter! -> " + "Hallo xpeter!".matches(greeting));
-        System.out.println("Hallo xpeter -> " + "Hallo xpeter".matches(greeting));
-        System.out.println("xpeter: Hallo. -> " + "xpeter: Hallo.".matches(greeting));
-        System.out.println("xpeter: Hallo! -> " + "xpeter: Hallo!".matches(greeting));
-        System.out.println("xpeter: Hallo -> " + "xpeter: Hallo".matches(greeting));
     }
 }
