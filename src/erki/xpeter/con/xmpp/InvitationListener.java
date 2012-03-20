@@ -17,7 +17,7 @@
 
 package erki.xpeter.con.xmpp;
 
-import org.jivesoftware.smack.XMPPConnection;
+import org.jivesoftware.smack.Connection;
 import org.jivesoftware.smack.packet.Message;
 
 import erki.api.util.Log;
@@ -31,7 +31,7 @@ import erki.api.util.Log;
 public class InvitationListener implements org.jivesoftware.smackx.muc.InvitationListener {
     
     @Override
-    public void invitationReceived(XMPPConnection conn, String room, String inviter, String reason,
+    public void invitationReceived(Connection conn, String room, String inviter, String reason,
             String password, Message message) {
         Log.debug("I was invited by " + inviter + " to join the chat room “" + room + "”.");
     }

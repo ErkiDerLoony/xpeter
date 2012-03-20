@@ -141,7 +141,7 @@ public class UpdateThread extends Thread {
             boolean header = true;
             
             while ((line = socketIn.readLine()) != null) {
-                Log.finest("Received line from server: " + line);
+                Log.finestDebug("Received line from server: " + line);
                 
                 if (header) {
                     

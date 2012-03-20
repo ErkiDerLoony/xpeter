@@ -111,7 +111,7 @@ public class xpeter {
     public static void main(String[] arguments) {
         
         // Adjust log format.
-        Log.setFormat("[%D.%n.%y %H:%M:%S.%m, <%i>, %c.%f(%l)] %L: %t");
+        Log.setFormat("[%D.%n.%y %H:%M:%S.%m, [%i], %c.%f(%l)] %L: %t");
         
         // Parse command line options.
         CommandLineParser args = new CommandLineParser(arguments);
@@ -192,9 +192,42 @@ public class xpeter {
             }
         }
         
+        if (args.contains("color", "colour")) {
+            args.pop("color", "colour");
+            Log.setColourUsed(true);
+        }
+        
         if (args.contains("debug")) {
-            args.pop("debug");
-            Log.setLevel(Level.DEBUG);
+            String level = args.pop("debug");
+            
+            if (level == null) {
+                Log.setLevel(Level.DEBUG);
+                Log.debug("Debug output activated.");
+            } else {
+                
+                try {
+                    int lvl = Integer.parseInt(level);
+                    
+                    if (lvl <= 0) {
+                        Log.setLevel(Level.DEBUG);
+                        Log.debug("Debug output of level DEBUG activated.");
+                    } else if (lvl == 1) {
+                        Log.setLevel(Level.FINE_DEBUG);
+                        Log.fineDebug("Debug output of level FINE_DEBUG activated.");
+                    } else if (lvl == 2) {
+                        Log.setLevel(Level.FINER_DEBUG);
+                        Log.finerDebug("Debug output of level FINER_DEBUG activated.");
+                    } else {
+                        Log.setLevel(Level.FINEST_DEBUG);
+                        Log.finestDebug("Debug output of level FINEST_DEBUG activated.");
+                    }
+                    
+                } catch (NumberFormatException e) {
+                    Log.warning("Could not parse debug level: " + level);
+                    Log.setLevel(Level.DEBUG);
+                    Log.debug("Debug output activated.");
+                }
+            }
         }
         
         if (args.contains("n", "name", "nick")) {
