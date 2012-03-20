@@ -105,7 +105,7 @@ public class XmppConnection implements Connection {
             ConnectionListener connectionListener = null;
             
             try {
-                Log.info("Connecting to " + channel + "@" + host + ":" + port + ".");
+                Log.info("Connecting to channel “" + channel + "” on " + host + ":" + port + ".");
                 ConnectionConfiguration config = new ConnectionConfiguration(host, port);
                 con = new XMPPConnection(config);
                 con.connect();
