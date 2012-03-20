@@ -6,7 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.RandomAccessFile;
 
 import erki.api.util.Log;
 import erki.api.util.PathUtil;
@@ -32,22 +32,15 @@ public class RemoteControl implements Parser {
     
     @Override
     public void init(final Bot bot) {
-        FILE.deleteOnExit();
-        
-        /*
-         * This re-creates the special file on startup and thus discards any accumulated text that
-         * was written there when the bot was not running. This prevents message flooding on
-         * startup.
-         */
-        createFile();
         
         thread = new Thread() {
             
             public void run() {
                 
                 while (!killed) {
+                    Log.debug("Checking if content file " + FILE + " exists.");
                     
-                    if (FILE.isFile()) {
+                    if (FILE.isFile() && FILE.canWrite()) {
                         
                         try {
                             BufferedReader fileIn = new BufferedReader(new InputStreamReader(
@@ -62,23 +55,18 @@ public class RemoteControl implements Parser {
                             }
                             
                             fileIn.close();
-                            createFile();
+                            new RandomAccessFile(FILE, "rws").setLength(0);
                         } catch (FileNotFoundException e) {
                             Log.error(e);
                             Log.warning("Remote control file could not be found!");
-                            Log.warning("This should not happen, because the existence of said "
-                                    + "file is checked before!");
                         } catch (IOException e) {
                             Log.error(e);
                             Log.warning("Remote control file could not be read!");
                         }
-                        
-                    } else {
-                        createFile();
                     }
                     
                     try {
-                        Thread.sleep(60000);
+                        Thread.sleep(6000);
                     } catch (InterruptedException e) {
                     }
                 }
@@ -86,19 +74,6 @@ public class RemoteControl implements Parser {
         };
         
         thread.start();
-    }
-    
-    private void createFile() {
-        
-        try {
-            PrintWriter fileOut = new PrintWriter(FILE);
-            fileOut.println("# Each line in this file that does not start with a "
-                    + "# is broadcast by the bot.");
-            fileOut.close();
-        } catch (FileNotFoundException e) {
-            Log.error(e);
-            Log.warning("Remote control file could not be created!");
-        }
     }
     
     @Override
