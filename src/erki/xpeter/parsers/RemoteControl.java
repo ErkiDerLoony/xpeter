@@ -55,7 +55,9 @@ public class RemoteControl implements Parser {
                             }
                             
                             fileIn.close();
-                            new RandomAccessFile(FILE, "rws").setLength(0);
+                            RandomAccessFile f = new RandomAccessFile(FILE, "rws");
+			    f.setLength(0);
+			    f.close();
                         } catch (FileNotFoundException e) {
                             Log.error(e);
                             Log.warning("Remote control file could not be found!");
@@ -66,7 +68,7 @@ public class RemoteControl implements Parser {
                     }
                     
                     try {
-                        Thread.sleep(6000);
+                        Thread.sleep(60000);
                     } catch (InterruptedException e) {
                     }
                 }

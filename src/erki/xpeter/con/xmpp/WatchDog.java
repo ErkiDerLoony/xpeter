@@ -10,7 +10,7 @@ package erki.xpeter.con.xmpp;
  */
 public class WatchDog extends Thread {
     
-    private static final int TIMEOUT = 30 * 60000;
+    private static final int TIMEOUT = 24 * 60 * 60 * 1000;
     
     private XmppConnection con;
     
