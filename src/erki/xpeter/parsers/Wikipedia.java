@@ -63,7 +63,9 @@ public class Wikipedia implements Parser, Observer<TextMessage> {
             Log.info("Making query to wikipedia.");
             
             try {
-                String result = BotApi.getWebsite("de.wikipedia.org", "/wiki/" + query, "UTF-8");
+                String result = BotApi.getWebsite("de.wikipedia.org",
+                        "/w/api.php?action=query&prop=excerpts&exlength=175&titles=" + query,
+                        "UTF-8");
                 msg.respond(new Message(parse(result)));
             } catch (UnknownHostException e) {
                 Log.error(e);

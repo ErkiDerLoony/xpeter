@@ -114,6 +114,7 @@ public abstract class Action<T extends Message> implements Observer<T> {
         return mustAddress;
     }
     
+    @Override
     public void inform(T message) {
         String text = message.getText();
         String nick = message.getBotNick();
