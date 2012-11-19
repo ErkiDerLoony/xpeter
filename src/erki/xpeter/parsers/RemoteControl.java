@@ -35,6 +35,7 @@ public class RemoteControl implements Parser {
         
         thread = new Thread() {
             
+            @Override
             public void run() {
                 
                 while (!killed) {
@@ -44,7 +45,7 @@ public class RemoteControl implements Parser {
                         
                         try {
                             BufferedReader fileIn = new BufferedReader(new InputStreamReader(
-                                    new FileInputStream(FILE)));
+                                    new FileInputStream(FILE), "UTF-8"));
                             String line;
                             
                             while ((line = fileIn.readLine()) != null) {
@@ -56,8 +57,8 @@ public class RemoteControl implements Parser {
                             
                             fileIn.close();
                             RandomAccessFile f = new RandomAccessFile(FILE, "rws");
-			    f.setLength(0);
-			    f.close();
+                            f.setLength(0);
+                            f.close();
                         } catch (FileNotFoundException e) {
                             Log.error(e);
                             Log.warning("Remote control file could not be found!");
@@ -70,6 +71,7 @@ public class RemoteControl implements Parser {
                     try {
                         Thread.sleep(60000);
                     } catch (InterruptedException e) {
+                        throw new Error("This thread should not be interrupted!", e);
                     }
                 }
             }
