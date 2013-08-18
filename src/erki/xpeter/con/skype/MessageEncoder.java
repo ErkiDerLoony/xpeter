@@ -15,7 +15,7 @@
  * not, see <http://www.gnu.org/licenses/>.
  */
 
-package erki.xpeter.con.erkitalk;
+package erki.xpeter.con.skype;
 
 import erki.api.util.Log;
 import erki.xpeter.msg.Message;
