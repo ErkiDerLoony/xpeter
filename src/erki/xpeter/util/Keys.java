@@ -17,6 +17,7 @@
 
 package erki.xpeter.util;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.TreeMap;
 
@@ -41,26 +42,32 @@ public enum Keys {
      * contains the short messages stored by {@link SimpleMailbox}.
      */
     SHORT_MESSAGES,
-
+    
     /**
      * This {@link TreeMap}&lt;{@link String}, {@link LinkedList}&lt;{@link FeedData}&gt;&gt;
      * contains all the feed urls known to {@link RssFeed} together with additional information
      * about the feeds.
      */
     RSS_FEEDS,
-
+    
     /**
      * This {@link TreeMap}&lt;{@link String}, {@link String}&gt; contains the known whereabouts of
      * chat participants (used by {@link WhereAmI}).
      */
     WHEREABOUTS,
-
+    
     /**
      * This {@link TreeMap}&lt;{@link String}, {@link User}&gt; contains statistical information
      * about the participants of chats. See the {@link Statistics} parser for more details.
      */
     STATISTICS,
-
+    
+    /**
+     * This {@link TreeMap}&lt;{@link String}, {@link HashSet}&lt;{@link String}&gt;&gt; contains
+     * personal favourite meals of people.
+     */
+    MEALS,
+    
     /**
      * @deprecated Will be removed in a future version. If any storage contains something under this
      *             key it should be dropped or stored under another key!

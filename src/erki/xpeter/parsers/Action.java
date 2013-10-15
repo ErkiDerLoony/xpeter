@@ -70,7 +70,8 @@ public abstract class Action<T extends Message> implements Observer<T> {
     /**
      * If the text of a message (of the correct message type) matches this regular expression this
      * action is triggered. The regular expression may contain pairs of parentheses (“(” and “)”).
-     * The text between these parentheses is given as an argument to {@link #execute(String[])}.
+     * The text between these parentheses is given as an argument to
+     * {@link #execute(String[], Message)}.
      * 
      * @return The regular expression this action shall react upon.
      */
@@ -137,7 +138,7 @@ public abstract class Action<T extends Message> implements Observer<T> {
         Matcher matcher = pattern.matcher(text);
         
         if (matcher.matches()) {
-            String[] groups = new String[matcher.groupCount()];
+            String[] groups = new String[matcher.groupCount() - 1];
             
             for (int i = 0; i < groups.length; i++) {
                 groups[i] = matcher.group(i + 1);

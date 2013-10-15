@@ -35,6 +35,7 @@ import erki.api.util.Level;
 import erki.api.util.Log;
 import erki.xpeter.con.erkitalk.ErkiTalkConnection;
 import erki.xpeter.con.irc.IrcConnection;
+import erki.xpeter.con.skype.SkypeConnection;
 import erki.xpeter.con.xmpp.XmppConnection;
 import erki.xpeter.parsers.Parser;
 import erki.xpeter.util.BotApi;
@@ -72,7 +73,7 @@ public class xpeter {
         System.out.println("  -c, --con, --connection  Specify one or more chats to connect to.");
         System.out.println("                 the parameter of this option must be of the form");
         System.out.println("                 <protocol>://[<channel>@]<server>:<port> where");
-        System.out.println("                   – protocol is one of “erkitalk”, “irc”, “xmpp” or");
+        System.out.println("                   – protocol is one of “erkitalk”, “irc”, “xmpp”, ”skype” or");
         System.out.println("                     “jabber”,");
         System.out.println("                   – channel is the name of the channel to join,");
         System.out.println("                   – server is the hostname of the server to connect");
@@ -97,7 +98,7 @@ public class xpeter {
         System.out.println("however that command line options supersede (and thus replace)");
         System.out.println("options specified in the config file!");
         System.out.println();
-        System.out.println("© 2008–2011 by Edgar Kalkowski <eMail@edgar-kalkowski.de>");
+        System.out.println("© 2008–2013 by Edgar Kalkowski <eMail@edgar-kalkowski.de>");
     }
     
     /**
@@ -321,6 +322,9 @@ public class xpeter {
             } else if (con.protocol.equals("erki") || con.protocol.equals("erkitalk")) {
                 Log.info("Creating an ErkiTalk connection to " + con.host + ":" + con.port + ".");
                 bot.add(new ErkiTalkConnection(bot, con.host, con.port, nick));
+            } else if (con.protocol.equals("skype")) {
+                Log.info("Creating a Skype connection to " + con.host + ":" + con.port + ".");
+                bot.add(new SkypeConnection(bot, con.host, con.port, nick));
             } else if (con.protocol.equals("jabber") || con.protocol.equals("xmpp")) {
                 Log.info("Creating an XMPP connection to " + con.channel + "@" + con.host + ":"
                         + con.port + ".");
@@ -351,7 +355,7 @@ public class xpeter {
         String protocol = line.substring(0, line.indexOf(':')).toLowerCase();
         
         if (!protocol.equals("xmpp") && !protocol.equals("jabber") && !protocol.equals("irc")
-                && !protocol.equals("erkitalk") && !protocol.equals("erki")) {
+                && !protocol.equals("erkitalk") && !protocol.equals("erki") && !protocol.equals("skype")) {
             System.err.println("FATAL ERROR!");
             System.err.println("The protocol you specified (" + protocol
                     + ") is not known to this bot!");
@@ -419,7 +423,7 @@ class Con {
         this.channel = channel;
         
         if (!protocol.equals("irc") && !protocol.equals("jabber") && !protocol.equals("xmpp")
-                && !protocol.equals("erkitalk")) {
+                && !protocol.equals("erkitalk")&& !protocol.equals("skype")) {
             throw new IllegalArgumentException("Invalid protocol: " + protocol);
         }
     }
