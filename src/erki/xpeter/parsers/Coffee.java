@@ -35,7 +35,7 @@ public class Coffee implements Parser, Observer<TextMessage> {
             text = BotApi.trimNick(text, botNick);
         }
         
-        if (addresses && text.matches("([cCkK][oa]ffee")) {
+        if (addresses && text.matches("[cCkK][oa]ffee")) {
             
             double random = Math.random();
             
