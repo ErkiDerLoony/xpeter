@@ -58,7 +58,7 @@ public class XmppConnection implements Connection {
      * Queue messages if the connection is not ready at the moment. The queue is also used as a lock
      * to synchronize access to itself.
      */
-    private Queue<Message> sendQueue = new LinkedList<Message>();
+    private Queue<Message> sendQueue = new LinkedList<>();
     
     private String host, channel, nick, loginName, password;
     

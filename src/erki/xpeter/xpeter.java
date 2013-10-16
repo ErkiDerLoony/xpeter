@@ -73,7 +73,8 @@ public class xpeter {
         System.out.println("  -c, --con, --connection  Specify one or more chats to connect to.");
         System.out.println("                 the parameter of this option must be of the form");
         System.out.println("                 <protocol>://[<channel>@]<server>:<port> where");
-        System.out.println("                   – protocol is one of “erkitalk”, “irc”, “xmpp”, ”skype” or");
+        System.out
+                .println("                   – protocol is one of “erkitalk”, “irc”, “xmpp”, ”skype” or");
         System.out.println("                     “jabber”,");
         System.out.println("                   – channel is the name of the channel to join,");
         System.out.println("                   – server is the hostname of the server to connect");
@@ -140,8 +141,8 @@ public class xpeter {
         
         String nick = "xpeter", configFile = ".botrc", storageFile = ".storage";
         String parsers = null, logfile = null;
-        LinkedList<Class<? extends Parser>> chosenParsers = new LinkedList<Class<? extends Parser>>();
-        LinkedList<Con> cons = new LinkedList<Con>();
+        LinkedList<Class<? extends Parser>> chosenParsers = new LinkedList<>();
+        LinkedList<Con> cons = new LinkedList<>();
         
         if (args.contains("s", "storage")) {
             storageFile = args.pop("s", "storage");
@@ -153,8 +154,7 @@ public class xpeter {
         
         if (new File(configFile).exists()) {
             
-            try {
-                BufferedReader fileIn = new BufferedReader(new FileReader(configFile));
+            try (final BufferedReader fileIn = new BufferedReader(new FileReader(configFile))) {
                 String line;
                 
                 while ((line = fileIn.readLine()) != null) {
@@ -301,12 +301,11 @@ public class xpeter {
             System.exit(17);
         }
         
-        Storage<Keys> storage = new JavaObjectStorage<Keys>(storageFile);
+        Storage<Keys> storage = new JavaObjectStorage<>(storageFile);
         
         // Remove deprecated entries.
         @SuppressWarnings("deprecation")
-        StorageKey<LinkedList<String>> oldKey = new StorageKey<LinkedList<String>>(
-                Keys.SOCCER_THREADS);
+        StorageKey<LinkedList<String>> oldKey = new StorageKey<>(Keys.SOCCER_THREADS);
         
         if (storage.contains(oldKey)) {
             storage.remove(oldKey);
@@ -355,7 +354,8 @@ public class xpeter {
         String protocol = line.substring(0, line.indexOf(':')).toLowerCase();
         
         if (!protocol.equals("xmpp") && !protocol.equals("jabber") && !protocol.equals("irc")
-                && !protocol.equals("erkitalk") && !protocol.equals("erki") && !protocol.equals("skype")) {
+                && !protocol.equals("erkitalk") && !protocol.equals("erki")
+                && !protocol.equals("skype")) {
             System.err.println("FATAL ERROR!");
             System.err.println("The protocol you specified (" + protocol
                     + ") is not known to this bot!");
@@ -423,7 +423,7 @@ class Con {
         this.channel = channel;
         
         if (!protocol.equals("irc") && !protocol.equals("jabber") && !protocol.equals("xmpp")
-                && !protocol.equals("erkitalk")&& !protocol.equals("skype")) {
+                && !protocol.equals("erkitalk") && !protocol.equals("skype")) {
             throw new IllegalArgumentException("Invalid protocol: " + protocol);
         }
     }

@@ -12,12 +12,11 @@ public class Mensa extends SuperParser {
     
     @Override
     public void createActions(final BotInterface bot) {
-        actions.add(new AddFavourite(bot.getStorage()));
+        this.actions.add(new AddFavourite(bot.getStorage()));
     }
     
     @Override
     public String getDescription() {
-        return "Find out what is served at the Mensa of University of Kassel and remind users of "
-                + "feeding time.";
+        return "Merke, was Leute gerne essen und erinnere alle daran, essen zu gehen.";
     }
 }

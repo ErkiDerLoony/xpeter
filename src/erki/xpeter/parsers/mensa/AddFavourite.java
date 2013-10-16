@@ -17,7 +17,11 @@ public class AddFavourite extends Action<TextMessage> {
     
     private final Storage<Keys> storage;
     
-    /** Create a new action. */
+    /**
+     * Create a new action.
+     * 
+     * @param storage
+     */
     public AddFavourite(final Storage<Keys> storage) {
         super(TextMessage.class, true);
         this.storage = storage;

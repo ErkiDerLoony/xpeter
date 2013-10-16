@@ -40,7 +40,7 @@ public class HelpAction extends Action<TextMessage> {
     public void execute(String[] args, TextMessage msg) {
         String response = "Ich kenne folgende Parser: ";
         Set<Parser> loadedParsers = getBot().getParsers();
-        HashSet<Class<? extends Parser>> loadedClasses = new HashSet<Class<? extends Parser>>();
+        HashSet<Class<? extends Parser>> loadedClasses = new HashSet<>();
         
         for (Parser p : loadedParsers) {
             loadedClasses.add(p.getClass());

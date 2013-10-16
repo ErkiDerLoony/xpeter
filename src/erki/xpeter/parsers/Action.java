@@ -53,7 +53,7 @@ public abstract class Action<T extends Message> implements Observer<T> {
      */
     public void register(Bot bot) {
         this.bot = bot;
-        bot.register(messageType, this);
+        bot.register(this.messageType, this);
     }
     
     /**
@@ -64,7 +64,7 @@ public abstract class Action<T extends Message> implements Observer<T> {
      *        The bot this action shall be deregistered from.
      */
     public void deregister(Bot bot) {
-        bot.deregister(messageType, this);
+        bot.deregister(this.messageType, this);
     }
     
     /**
@@ -103,7 +103,7 @@ public abstract class Action<T extends Message> implements Observer<T> {
      * @return This action’s bot instance.
      */
     public BotInterface getBot() {
-        return bot;
+        return this.bot;
     }
     
     /**
@@ -112,7 +112,7 @@ public abstract class Action<T extends Message> implements Observer<T> {
      * @return {@code true} if the bot must be directly addressed, {@code false} otherwise.
      */
     public boolean mustAddress() {
-        return mustAddress;
+        return this.mustAddress;
     }
     
     @Override
@@ -120,7 +120,7 @@ public abstract class Action<T extends Message> implements Observer<T> {
         String text = message.getText();
         String nick = message.getBotNick();
         
-        if (mustAddress && !BotApi.addresses(text, nick)) {
+        if (this.mustAddress && !BotApi.addresses(text, nick)) {
             Log.debug(getClass().getSimpleName() + ": The bot is not addressed as required.");
             return;
         }
@@ -138,7 +138,7 @@ public abstract class Action<T extends Message> implements Observer<T> {
         Matcher matcher = pattern.matcher(text);
         
         if (matcher.matches()) {
-            String[] groups = new String[matcher.groupCount() - 1];
+            String[] groups = new String[matcher.groupCount()];
             
             for (int i = 0; i < groups.length; i++) {
                 groups[i] = matcher.group(i + 1);

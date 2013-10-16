@@ -16,7 +16,7 @@ import erki.xpeter.msg.Message;
  */
 public abstract class SuperParser implements Parser {
     
-    protected List<Action<? extends Message>> actions = new LinkedList<Action<? extends Message>>();
+    protected List<Action<? extends Message>> actions = new LinkedList<>();
     
     /**
      * This method is called by the constructor to create all the actions this parser shall consist
@@ -42,7 +42,7 @@ public abstract class SuperParser implements Parser {
      *         ;)
      */
     public List<Action<? extends Message>> getActions() {
-        return actions;
+        return this.actions;
     }
     
     /**
@@ -53,7 +53,7 @@ public abstract class SuperParser implements Parser {
     public void init(Bot bot) {
         createActions(bot);
         
-        for (Action<? extends Message> action : actions) {
+        for (Action<? extends Message> action : this.actions) {
             action.register(bot);
         }
     }
@@ -65,7 +65,7 @@ public abstract class SuperParser implements Parser {
     @Override
     public void destroy(Bot bot) {
         
-        for (Action<? extends Message> action : actions) {
+        for (Action<? extends Message> action : this.actions) {
             action.deregister(bot);
         }
     }

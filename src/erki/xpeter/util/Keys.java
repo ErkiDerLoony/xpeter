@@ -68,6 +68,9 @@ public enum Keys {
      */
     MEALS,
     
+    /** This {@link String} is the currently configured nickname of Tobi. */
+    TOBIS_NICK,
+    
     /**
      * @deprecated Will be removed in a future version. If any storage contains something under this
      *             key it should be dropped or stored under another key!

@@ -80,7 +80,7 @@ public class Bot implements BotInterface {
          */
         try {
             Parser parser = clazz.newInstance();
-            Parser[] pArray = parsers.toArray(new Parser[0]);
+            Parser[] pArray = this.parsers.toArray(new Parser[0]);
             
             for (Parser p : pArray) {
                 
@@ -92,7 +92,7 @@ public class Bot implements BotInterface {
             }
             
             parser.init(this);
-            parsers.add(parser);
+            this.parsers.add(parser);
         } catch (InstantiationException e) {
             Log.error(e);
             Log.warning("Parser " + clazz.getSimpleName() + " could not be loaded ("
@@ -113,26 +113,26 @@ public class Bot implements BotInterface {
     
     @Override
     public Set<Parser> getParsers() {
-        return parsers;
+        return this.parsers;
     }
     
     @Override
     public void remove(Class<? extends Parser> clazz) {
-        Parser[] pArray = parsers.toArray(new Parser[0]);
+        Parser[] pArray = this.parsers.toArray(new Parser[0]);
         
         for (Parser p : pArray) {
             
             if (p.getClass().getCanonicalName().equals(clazz.getCanonicalName())) {
                 Log.debug("Removing parser " + p.getClass().getSimpleName() + ".");
                 p.destroy(this);
-                parsers.remove(p);
+                this.parsers.remove(p);
             }
         }
     }
     
     @Override
     public Storage<Keys> getStorage() {
-        return storage;
+        return this.storage;
     }
     
     /**
@@ -144,23 +144,23 @@ public class Bot implements BotInterface {
      */
     public void add(Connection con) {
         
-        synchronized (cons) {
-            cons.add(con);
+        synchronized (this.cons) {
+            this.cons.add(con);
             new Thread(con, con.toString()).start();
         }
     }
     
     @Override
     public Collection<Connection> getConnections() {
-        return cons;
+        return this.cons;
     }
     
     @Override
     public void broadcast(Message msg) {
         
-        synchronized (cons) {
+        synchronized (this.cons) {
             
-            for (Connection con : cons) {
+            for (Connection con : this.cons) {
                 con.send(msg);
             }
         }
@@ -169,9 +169,9 @@ public class Bot implements BotInterface {
     @Override
     public void broadcast(Message msg, String shortId) {
         
-        synchronized (cons) {
+        synchronized (this.cons) {
             
-            for (Connection con : cons) {
+            for (Connection con : this.cons) {
                 
                 if (!con.getShortId().equals(shortId)) {
                     con.send(msg);
@@ -195,16 +195,16 @@ public class Bot implements BotInterface {
     public <MessageType extends Message> void register(Class<MessageType> messageType,
             Observer<MessageType> observer) {
         
-        synchronized (parserMapping) {
+        synchronized (this.parserMapping) {
             Log.debug("Registered new listener for " + messageType.getSimpleName() + "s: "
                     + observer.getClass().getSimpleName());
             
-            if (!parserMapping.containsKey(messageType.getCanonicalName())) {
-                parserMapping.put(messageType.getCanonicalName(),
+            if (!this.parserMapping.containsKey(messageType.getCanonicalName())) {
+                this.parserMapping.put(messageType.getCanonicalName(),
                         new LinkedList<Observer<? extends Message>>());
             }
             
-            parserMapping.get(messageType.getCanonicalName()).add(observer);
+            this.parserMapping.get(messageType.getCanonicalName()).add(observer);
         }
     }
     
@@ -224,10 +224,10 @@ public class Bot implements BotInterface {
     public <MessageType extends Message> void deregister(Class<MessageType> messageType,
             Observer<MessageType> observer) {
         
-        synchronized (parserMapping) {
+        synchronized (this.parserMapping) {
             
-            if (parserMapping.containsKey(messageType.getCanonicalName())) {
-                parserMapping.get(messageType.getCanonicalName()).remove(observer);
+            if (this.parserMapping.containsKey(messageType.getCanonicalName())) {
+                this.parserMapping.get(messageType.getCanonicalName()).remove(observer);
             }
         }
     }
@@ -246,9 +246,9 @@ public class Bot implements BotInterface {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public void process(Message msg) {
         
-        synchronized (parserMapping) {
+        synchronized (this.parserMapping) {
             Log.debug("Parsing a " + msg.getClass().getSimpleName() + ".");
-            LinkedList<Observer<? extends Message>> parsers = parserMapping.get(msg.getClass()
+            LinkedList<Observer<? extends Message>> parsers = this.parserMapping.get(msg.getClass()
                     .getCanonicalName());
             
             if (parsers == null) {

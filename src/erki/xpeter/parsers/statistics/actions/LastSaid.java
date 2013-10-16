@@ -42,10 +42,10 @@ public class LastSaid extends Action<TextMessage> {
     @Override
     public void execute(String[] args, TextMessage message) {
         
-        synchronized (users) {
+        synchronized (this.users) {
             
-            if (users.containsKey(args[0])) {
-                User user = users.get(args[0]);
+            if (this.users.containsKey(args[0])) {
+                User user = this.users.get(args[0]);
                 TreeMap<Long, String> history = user.getHistory();
                 
                 if (!history.isEmpty()) {

@@ -70,26 +70,26 @@ public class Statistics extends SuperParser implements Observer<TextMessage> {
     
     @Override
     public void createActions(BotInterface bot) {
-        storage = bot.getStorage();
+        this.storage = bot.getStorage();
         
-        if (storage.contains(storageKey)) {
-            users = storage.get(storageKey);
+        if (this.storage.contains(storageKey)) {
+            this.users = this.storage.get(storageKey);
         } else {
-            users = new TreeMap<String, User>();
+            this.users = new TreeMap<String, User>();
         }
         
-        actions.add(new History(users));
-        actions.add(new LastSaid(users));
-        actions.add(new LastSeen(users));
-        actions.add(new TopLines(users));
-        actions.add(new TopQuotient(users));
-        actions.add(new TopUptime(users));
-        actions.add(new TopWords(users));
-        actions.add(new UserLines(users));
-        actions.add(new UserQuotient(users));
-        actions.add(new UserUptime(users));
-        actions.add(new UserWords(users));
-        actions.add(new Who(users));
+        this.actions.add(new History(this.users));
+        this.actions.add(new LastSaid(this.users));
+        this.actions.add(new LastSeen(this.users));
+        this.actions.add(new TopLines(this.users));
+        this.actions.add(new TopQuotient(this.users));
+        this.actions.add(new TopUptime(this.users));
+        this.actions.add(new TopWords(this.users));
+        this.actions.add(new UserLines(this.users));
+        this.actions.add(new UserQuotient(this.users));
+        this.actions.add(new UserUptime(this.users));
+        this.actions.add(new UserWords(this.users));
+        this.actions.add(new Who(this.users));
     }
     
     @Override
@@ -106,7 +106,7 @@ public class Statistics extends SuperParser implements Observer<TextMessage> {
         bot.register(TextMessage.class, this);
         
         // Start a new session for a joining user.
-        userJoinedObserver = new Observer<UserJoinedMessage>() {
+        this.userJoinedObserver = new Observer<UserJoinedMessage>() {
             
             @Override
             public void inform(UserJoinedMessage message) {
@@ -115,12 +115,12 @@ public class Statistics extends SuperParser implements Observer<TextMessage> {
                     return;
                 }
                 
-                synchronized (users) {
+                synchronized (Statistics.this.users) {
                     
-                    if (users.keySet().contains(message.getNick())) {
-                        users.get(message.getNick()).startSession();
+                    if (Statistics.this.users.keySet().contains(message.getNick())) {
+                        Statistics.this.users.get(message.getNick()).startSession();
                     } else {
-                        users.put(message.getNick(), new User(message.getNick()));
+                        Statistics.this.users.put(message.getNick(), new User(message.getNick()));
                     }
                 }
                 
@@ -128,10 +128,10 @@ public class Statistics extends SuperParser implements Observer<TextMessage> {
             }
         };
         
-        bot.register(UserJoinedMessage.class, userJoinedObserver);
+        bot.register(UserJoinedMessage.class, this.userJoinedObserver);
         
         // Close session for leaving user.
-        userLeftObserver = new Observer<UserLeftMessage>() {
+        this.userLeftObserver = new Observer<UserLeftMessage>() {
             
             @Override
             public void inform(UserLeftMessage message) {
@@ -140,10 +140,10 @@ public class Statistics extends SuperParser implements Observer<TextMessage> {
                     return;
                 }
                 
-                synchronized (users) {
+                synchronized (Statistics.this.users) {
                     
-                    if (users.keySet().contains(message.getNick())) {
-                        users.get(message.getNick()).closeSession();
+                    if (Statistics.this.users.keySet().contains(message.getNick())) {
+                        Statistics.this.users.get(message.getNick()).closeSession();
                         Log.debug("Closed statistics session for " + message.getNick() + ".");
                     } else {
                         Log.warning("User " + message.getNick()
@@ -153,28 +153,28 @@ public class Statistics extends SuperParser implements Observer<TextMessage> {
             }
         };
         
-        bot.register(UserLeftMessage.class, userLeftObserver);
+        bot.register(UserLeftMessage.class, this.userLeftObserver);
         
         // Close session for old nick and start session for new nick.
-        nickChangeObserver = new Observer<NickChangeMessage>() {
+        this.nickChangeObserver = new Observer<NickChangeMessage>() {
             
             @Override
             public void inform(NickChangeMessage message) {
                 
-                synchronized (users) {
+                synchronized (Statistics.this.users) {
                     
-                    if (users.keySet().contains(message.getOldNick())) {
-                        users.get(message.getOldNick()).closeSession();
+                    if (Statistics.this.users.keySet().contains(message.getOldNick())) {
+                        Statistics.this.users.get(message.getOldNick()).closeSession();
                         Log.debug("Closed statistics session for " + message.getOldNick() + ".");
                     } else {
                         Log.warning("User " + message.getOldNick() + " is now known as "
                                 + message.getNewNick() + " but had no active statistics session!");
                     }
                     
-                    if (users.keySet().contains(message.getNewNick())) {
-                        users.get(message.getNewNick()).startSession();
+                    if (Statistics.this.users.keySet().contains(message.getNewNick())) {
+                        Statistics.this.users.get(message.getNewNick()).startSession();
                     } else {
-                        users.put(message.getNewNick(), new User(message.getNewNick()));
+                        Statistics.this.users.put(message.getNewNick(), new User(message.getNewNick()));
                     }
                 }
                 
@@ -182,34 +182,34 @@ public class Statistics extends SuperParser implements Observer<TextMessage> {
             }
         };
         
-        bot.register(NickChangeMessage.class, nickChangeObserver);
+        bot.register(NickChangeMessage.class, this.nickChangeObserver);
     }
     
     @Override
     public void destroy(Bot bot) {
         super.destroy(bot);
         bot.deregister(TextMessage.class, this);
-        bot.deregister(UserJoinedMessage.class, userJoinedObserver);
-        bot.deregister(UserLeftMessage.class, userLeftObserver);
-        bot.deregister(NickChangeMessage.class, nickChangeObserver);
+        bot.deregister(UserJoinedMessage.class, this.userJoinedObserver);
+        bot.deregister(UserLeftMessage.class, this.userLeftObserver);
+        bot.deregister(NickChangeMessage.class, this.nickChangeObserver);
     }
     
     @Override
     public void inform(TextMessage message) {
         
-        synchronized (users) {
+        synchronized (this.users) {
             
-            if (!users.containsKey(message.getNick())) {
-                users.put(message.getNick(), new User(message.getNick()));
+            if (!this.users.containsKey(message.getNick())) {
+                this.users.put(message.getNick(), new User(message.getNick()));
                 Log.warning(message.getNick() + " said something, but "
                         + "has no active statistics session!");
             }
             
             // Make sure a session is started for the user who said something.
-            users.get(message.getNick()).startSession();
+            this.users.get(message.getNick()).startSession();
             
             // Count statistics for the user who said something.
-            users.get(message.getNick()).addLine(message.getText());
+            this.users.get(message.getNick()).addLine(message.getText());
             
             TreeMap<String, User> users = new TreeMap<String, User>();
             
@@ -223,7 +223,7 @@ public class Statistics extends SuperParser implements Observer<TextMessage> {
                 }
             }
             
-            storage.add(storageKey, users);
+            this.storage.add(storageKey, users);
         }
     }
     
