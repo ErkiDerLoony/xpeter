@@ -14,9 +14,21 @@ import erki.xpeter.util.BotApi;
  */
 public class Coffee implements Parser, Observer<TextMessage> {
     
+    private Random random;
+    
+    private static final String[] MESSAGES = new String[] {
+        "K to the A to the double F to the double E!", 
+        "C to the O to the double F to the double E!",
+        "Kay to the Ay to the Ef to the Ef to the double E?",
+        "Doppelter Espresso in den Pott Kaffee, ihr Luschen!",
+        "Nix Kaffee, T! Oder mal 'n L oder 'n M.",
+        "Mh Kaffee...",
+        "Was ist besser als ein Kaffee? Zwei Kaffee!" };
+    
     @Override
     public void init(Bot bot) {
         bot.register(TextMessage.class, this);
+        random = new Random(31337);
     }
     
     @Override
@@ -28,43 +40,21 @@ public class Coffee implements Parser, Observer<TextMessage> {
     public void inform(TextMessage msg) {
         boolean addresses = false;
         String text = msg.getText();
-        String botNick = msg.getBotNick();
         
-        if (BotApi.addresses(text, botNick)) {
-            addresses = true;
-            text = BotApi.trimNick(text, botNick);
-        }
-        
-        if (addresses && text.matches("[cCkK][oa]ffee")) {
+        if (text.matches(".*[cCkK][oa]ffee.*")) {
             
             double random = Math.random();
             
-            DelayedMessage dm = null;
-            
-            if (random < 0.25d) {
+            if (random > .7d) {
+                // respond with a 30% probability
                 
-                dm = new DelayedMessage(
-                        "K to the A to the double F to the double E!", 1500);
+                final int decider = this.random.nextInt(MESSAGES.length);
                 
-            } else if (random >= .25d && random < .5d) {
+                DelayedMessage dm = new DelayedMessage(MESSAGES[decider], 1500);
                 
-                dm = new DelayedMessage(
-                        "C to the O to the double F to the double E!", 1500);
-                
-            } else if (random >= .5d && random < .75d) {
-                
-                dm = new DelayedMessage(
-                        "Kay to the Ay to the Ef to the Ef to the double E?",
-                        1500);
-                
-            } else if (random >= .75d) {
-                
-                dm = new DelayedMessage(
-                        "Doppelter Espresso in den Pott Kaffee, ihr luschen!",
-                        1500);
+                msg.respond(dm);
             }
-            
-            msg.respond(dm);
         }
     }
 }
+
