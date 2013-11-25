@@ -1,5 +1,7 @@
 package erki.xpeter.parsers;
 
+import java.util.Random;
+
 import erki.api.util.Observer;
 import erki.xpeter.Bot;
 import erki.xpeter.msg.DelayedMessage;
