@@ -6,7 +6,6 @@ import erki.api.util.Observer;
 import erki.xpeter.Bot;
 import erki.xpeter.msg.DelayedMessage;
 import erki.xpeter.msg.TextMessage;
-import erki.xpeter.util.BotApi;
 
 /**
  * This implementation of a parser emphasizes one of the most urgent needs of
@@ -40,10 +39,11 @@ public class Coffee implements Parser, Observer<TextMessage> {
     
     @Override
     public void inform(TextMessage msg) {
-        boolean addresses = false;
+        
         String text = msg.getText();
         
-        if (text.matches(".*[cCkK][oa]ffee.*")) {
+        // don't react on your own coffee messages -.-
+        if (text.matches(".*[cCkK][oa]ffee.*") && !msg.getBotNick().equals(msg.getNick())) {
             
             double random = Math.random();
             
