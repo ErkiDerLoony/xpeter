@@ -74,6 +74,7 @@ public final class DagstuhlParser implements Parser, Observer<TextMessage> {
                 message.append(days);
                 message.append(DAYS);
                 message.append(COMMENTS[this.random.nextInt(COMMENTS.length)]);
+                this.lastReminded = now;
                 
                 msg.respond(new DelayedMessage(message.toString(), 1000));
             }
