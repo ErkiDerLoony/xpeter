@@ -46,7 +46,7 @@ public final class DagstuhlParser implements Parser, Observer<TextMessage> {
     public void init(Bot bot) {
         bot.register(TextMessage.class, this);
         this.random = new Random(31337);
-        this.lastReminded = System.currentTimeMillis();
+        this.lastReminded = 0l;
         
         final Calendar c = Calendar.getInstance();
         c.set(Calendar.DAY_OF_MONTH, 9);
