@@ -162,11 +162,14 @@ public class SimpleMailbox implements Parser, Observer<TextMessage> {
         String match = "[sS]ag( der| dem)? (.*?) mal( von mir)?[:;,] (.*)";
         
         if (text.matches(match)) {
+            
             String nick = text.replaceAll(match, "$2");
+            // special treatment for André
+            nick = (nick.matches("[aA]nderen")) ? "andre" : nick;
             String message = text.replaceAll(match, "$4");
             Log.debug("Recognized “" + message + "” to »" + nick + "«.");
             add(nick, message, msg.getNick());
-            msg.respond(new DelayedMessage("Ok, mach ich.", 2000));
+            msg.respond(new DelayedMessage(Math.random() < .5 ? "Ok, mach ich." : "Läuft.", 2000));
             return;
         }
         
@@ -174,10 +177,12 @@ public class SimpleMailbox implements Parser, Observer<TextMessage> {
         
         if (text.matches(match)) {
             String nick = text.replaceAll(match, "$2");
+            // special treatment for André
+            nick = (nick.matches("[aA]nderen")) ? "andre" : nick;
             String message = text.replaceAll(match, "$3");
             Log.debug("Recognized “" + message + "” to »" + nick + "«.");
             add(nick, message, msg.getNick());
-            msg.respond(new DelayedMessage("Ok, mach ich.", 2000));
+            msg.respond(new DelayedMessage(Math.random() < .5 ? "Ok, mach ich." : "Läuft.", 2000));
         }
     }
     
