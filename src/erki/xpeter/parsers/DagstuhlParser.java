@@ -90,6 +90,7 @@ public final class DagstuhlParser implements Parser, Observer<TextMessage> {
                 
                 msg.respond(new DelayedMessage(message.toString(), 1000));
             }
+            this.askedToSetNewDagstuhlDate =false;
         }
         if (msg.getText().matches("das nächste Mal Dagstuhl ist am \\d{1,2}\\.\\d{1,2}\\.\\d{4}")) {
         	
@@ -102,8 +103,9 @@ public final class DagstuhlParser implements Parser, Observer<TextMessage> {
         	while(matcher.find()) {
         		String group = matcher.group();
         		if(i ==0) c.set(Calendar.DAY_OF_MONTH,new Integer(group));
-        		else if( i== 1) c.set(Calendar.MONTH, new Integer(group));
+        		else if( i== 1) c.set(Calendar.MONTH, new Integer(group) -1 );
         		else if (i==2) c.set(Calendar.YEAR, new Integer(group));
+        		i++;
         	}
         	
         	//construct response message
